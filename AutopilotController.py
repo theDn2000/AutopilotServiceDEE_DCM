@@ -7,7 +7,7 @@ import dronekit
 from dronekit import connect
 
 
-local_broker_address = "127.0.0.1"
+local_broker_address = "localhost"
 local_broker_port = 1883
 LEDSequenceOn = False
 
@@ -116,7 +116,6 @@ def on_message(client, userdata, message):
         # stop the process of getting positions
         timer.cancel()
         vehicle.mode = dronekit.VehicleMode("RTL")
-
     if command == "disarmDrone":
         vehicle.armed = True
 
