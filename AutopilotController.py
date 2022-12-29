@@ -1,17 +1,9 @@
 import threading
-
 import paho.mqtt.client as mqtt
 import time
-
 import dronekit
 from dronekit import connect
 from pymavlink import mavutil
-
-
-local_broker_address = "localhost"
-local_broker_port = 1883
-led_sequence_on = False
-
 
 def arm():
     """Arms vehicle and fly to aTargetAltitude."""
@@ -67,25 +59,31 @@ def prepare_command(velocity_x, velocity_y, velocity_z):
 
 
 def send_position():
-    global client
+    global external_client
     global sending_positions
+    global sending_topic
 
     while sending_positions:
         lat = vehicle.location.global_frame.lat
         lon = vehicle.location.global_frame.lon
         position = str(lat) + "*" + str(lon)
-        print("Send new position")
-        client.publish("autopilotService/dataService/storePosition", position)
+        external_client.publish(sending_topic + "/dronePosition", position)
         time.sleep(0.25)
 
 
 def returning():
     global sending_positions
+
+    global external_client
+    global internal_client
+
     # wait until the drone is at home
     while vehicle.armed:
         time.sleep(1)
     print("At home")
     vehicle.close()
+    external_client.publish("autopilotService/droneCircus/atHome")
+    internal_client.publish("autopilotService/LEDsService/LEDsSequenceForNSeconds", 5)
     sending_positions = False
 
 
@@ -113,13 +111,17 @@ def flying():
             cmd = prepare_command(0, 0, 0)  # STOP
         if direction == "RTL":
             end = True
+def on_internal_message(client, userdata, message):
+    pass
 
-def on_message(client, userdata, message):
-    global led_sequence_on
+def on_external_message(client, userdata, message):
     global vehicle
     global direction
     global go
     global sending_positions
+    global sending_topic
+    global external_client
+    global op_mode
 
     positions = ["getDronePosition", "getHomePosition", "getDestinationPosition"]
 
@@ -128,22 +130,23 @@ def on_message(client, userdata, message):
     command = splited[2]
     sending_topic = "autopilotService/" + origin
 
-    if command == "connectPlatform":
+    if command == "connect":
         print("Autopilot service connected by " + origin)
-        client.subscribe("+/autopilotService/#")
-        connection_string = "tcp:127.0.0.1:5763"
+        external_client.subscribe(origin + "/autopilotService/#")
+        if op_mode == 'simulation':
+            connection_string = "tcp:127.0.0.1:5763"
+        else:
+            connection_string = "/dev/ttyS0"
         vehicle = connect(connection_string, wait_ready=True, baud=115200)
-        sending_positions = False
+        sending_positions = True
         y = threading.Thread(target=send_position)
         y.start()
-
-    if command == "connect":
-        client.publish("autopilotService/droneCircus/connected")
+        external_client.publish(sending_topic + "/connected")
 
     if command == "armDrone":
         arm()
         if origin == "droneCircus":
-            client.publish("autopilotService/droneCircus/armed")
+            external_client.publish("autopilotService/droneCircus/armed")
 
     if command == "takeOff":
         if origin != "droneCircus":
@@ -151,21 +154,21 @@ def on_message(client, userdata, message):
             take_off(altitude)
         else:
             take_off(5)
-            client.publish("autopilotService/droneCircus/takenOff")
+            external_client.publish("autopilotService/droneCircus/takenOff")
             w = threading.Thread(target=flying)
             w.start()
 
     if command == "getDroneHeading":
-        client.publish(sending_topic + "/droneHeading", vehicle.heading)
+        external_client.publish(sending_topic + "/droneHeading", vehicle.heading)
 
     if command == "getDroneAltitude":
-        client.publish(
+        external_client.publish(
             sending_topic + "/droneAltitude",
             vehicle.location.global_relative_frame.alt,
         )
 
     if command == "getDroneGroundSpeed":
-        client.publish(
+        external_client.publish(
             sending_topic + "/droneGroundSpeed", vehicle.groundspeed
         )
 
@@ -174,11 +177,11 @@ def on_message(client, userdata, message):
         lon = vehicle.location.global_frame.lon
         position = str(lat) + "*" + str(lon)
         if command == positions[0]:
-            client.publish(sending_topic + "/dronePosition", position)
+            external_client.publish(sending_topic + "/dronePosition", position)
         if command == positions[1]:
             client.publish(sending_topic + "/homePosition", position)
         if command == positions[2]:
-            client.publish(sending_topic + "/destinationPosition", position)
+            external_client.publish(sending_topic + "/destinationPosition", position)
 
     if command == "goToPosition":
         position_str = str(message.payload.decode("utf-8"))
@@ -208,9 +211,56 @@ def on_message(client, userdata, message):
         go = True
 
 
-client = mqtt.Client("Autopilot service")
-client.on_message = on_message
-client.connect(local_broker_address, local_broker_port)
-client.loop_start()
-print("Waiting DASH connection ....")
-client.subscribe("gate/autopilotService/connectPlatform")
+def AutoServ (connection_mode, operation_mode):
+    global op_mode
+    global external_client
+    global internal_client
+
+    print ('Connection mode: ', connection_mode)
+    print ('operation mode: ', operation_mode)
+    op_mode = operation_mode
+
+    # The internal broker is always (global or local mode) at localhost:1884
+    internal_broker_address = "localhost"
+    internal_broker_port = 1884
+
+    if connection_mode == 'global':
+        # in global mode, the external broker must be running in internet
+        # and must operate with websockets
+        # there are several options:
+        # a public broker
+        external_broker_address = "broker.hivemq.com"
+        # our broker (that requires credentials)
+        #external_broker_address = "classpip.upc.edu"
+        # a mosquitto broker running at localhost (only in simulation mode)
+        #external_broker_address = "localhost"
+
+    else:
+        # in local mode, the external broker will run always in localhost
+        # (either in production or simulation mode)
+        external_broker_address = "localhost"
+
+    # the external broker must run always in port 8000
+    external_broker_port = 8000
+
+
+    external_client = mqtt.Client("Autopilot_external", transport="websockets")
+    external_client.on_message = on_external_message
+    external_client.connect(external_broker_address, external_broker_port)
+
+
+    internal_client = mqtt.Client("Autopilot_internal")
+    internal_client.on_message = on_internal_message
+    internal_client.connect(internal_broker_address, internal_broker_port)
+
+    print("Waiting....")
+    external_client.subscribe("+/autopilotService/#")
+    internal_client.subscribe("+/autopilotService/#")
+    internal_client.loop_start()
+    external_client.loop_forever()
+
+if __name__ == '__main__':
+    import sys
+    connection_mode = sys.argv[1] # global or local
+    operation_mode = sys.argv[2] # simulation or production
+    AutoServ(connection_mode,operation_mode)
