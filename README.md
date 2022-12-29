@@ -15,13 +15,21 @@ In order to send a command to the autopilot service, a module must publish a mes
 ```
 "XXX/autopilotService/YYY"
 ```
-where XXX is the name of the module requiring the service and YYY is the name of the service that is required. Oviously, some of the commands include data that must be includes in the payload of the message to be published.   
+where XXX is the name of the module requiring the service and YYY is the name of the service that is required. Oviously, some of the commands include data that must be includes in the payload of the message to be published. 
+In some cases, after completing the service requiered the autopilot service publish a message as an answer. The topic of the answer has the format:
+```
+"autopilotService/XXX/ZZZ"
+```
+where XXX is the name of the module requiring the service and ZZZ is the answer. The message can include data in the message payload.
 
 The table bellow indicates all the commands that are accepted by the autopilot service in the current version.   
 
-Attempt | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
---- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
-Seconds | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
+Command | Description | Payload | Answer | Answer payload
+--- | --- | --- | --- |--- 
+connect | connect with the simulator or the flight controller depending on the operation mode | No | connected | No
+--- | --- | --- | --- |--- 
+armDrone | arms the drone (either simulated or real | No | armed | No 
+--- | --- | --- | --- |--- 
 
 
 The Autopilot does several things with the help of **dronekit** library. As well, it is linked to the local MQTT broker,
