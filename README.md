@@ -32,29 +32,11 @@ Command | Description | Payload | Answer | Answer payload
 *getDroneHeading* | get the heading info from  the drone | No | *droneHeading* | Heading info in json
 *getDroneAltitude* | get the drone altitude | No | *droneAltitude* | Altitute as a float
 *getDroneGroundSpeed* | get the ground speed | No | *droneGroundSpeed* | Ground speed as a float
-*getDronePosition* | get drone position | No | *dronePosition* | "latitude*\longitude" 
-*goToPosition* | go to the given position |"latitude*\longitude"  | No | No 
+*getDronePosition* | get drone position | No | *dronePosition* | "latitude\*longitude" 
+*returnToLaunch* | go to launchposition |No  | *atHome* (when arrived) | No 
+*disarmDrone* | disarm the drone |No  | No | No 
+*go* | move in certain direction |"North", "South", "East", "West", "Stop"  | No | No 
+*goToPosition* | go to the given position |"latitude\*longitude"  | No | No 
 
 
 
-The Autopilot does several things with the help of **dronekit** library. As well, it is linked to the local MQTT broker,
-which can listen/publish different messages and do several actions with them. These are examples of what the Autopilot
-is able to do:
-
-- Connect to platform (subscribe to the autopilot service to get all the messages and connect the drone)
-- Arm drone
-- Take off
-- Get drone heading
-- Get drone position
-- Get drone speed
-- Make the drone go to a certain position
-- Stop getting positions for the drone to go to
-- Disarm drone
-
-## Example and tutorials
-
-The basics of MQTT can be found here:   
-[MQTT](https://www.youtube.com/watch?v=EIxdz-2rhLs)
-
-This is a good example to start using MQTT (using a public broker):    
-[Example](https://www.youtube.com/watch?v=kuyCd53AOtg)
