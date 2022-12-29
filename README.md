@@ -26,10 +26,15 @@ The table bellow indicates all the commands that are accepted by the autopilot s
 
 Command | Description | Payload | Answer | Answer payload
 --- | --- | --- | --- |--- 
-connect | connect with the simulator or the flight controller depending on the operation mode | No | connected | No
---- | --- | --- | --- |--- 
-armDrone | arms the drone (either simulated or real | No | armed | No 
---- | --- | --- | --- |--- 
+*connect* | connect with the simulator or the flight controller depending on the operation mode | No | *connected* | No
+*armDron* | arms the drone (either simulated or real) | No | *armed* | No 
+*takeOff* | get the drone take off | No | *takenOff* | No 
+*getDroneHeading* | get the heading info from  the drone | No | *droneHeading* | Heading info in json
+*getDroneAltitude* | get the drone altitude | No | *droneAltitude* | Altitute as a float
+*getDroneGroundSpeed* | get the ground speed | No | *droneGroundSpeed* | Ground speed as a float
+*getDronePosition* | get drone position | No | *dronePosition* | "latitude*\longitude" 
+*goToPosition* | go to the given position |"latitude*\longitude"  | No | No 
+
 
 
 The Autopilot does several things with the help of **dronekit** library. As well, it is linked to the local MQTT broker,
