@@ -7,6 +7,7 @@ from pymavlink import mavutil
 
 def arm():
     """Arms vehicle and fly to aTargetAltitude. This is a test for conflict purposes."""
+    """Test 2"""
     print("Basic pre-arm checks")  # Don't try to arm until autopilot is ready
     while not vehicle.is_armable:
         print(" Waiting for vehicle to initialise...")
