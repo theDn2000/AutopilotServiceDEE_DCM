@@ -27,12 +27,12 @@ The table bellow indicates all the commands that are accepted by the autopilot s
 
 Command | Description | Payload | Answer | Answer payload
 --- | --- | --- | --- |--- 
-*connect* | connect with the simulator or the flight controller depending on the operation mode | No | NO (see Note 1) | No
+*connect* | connect with the simulator or the flight controller depending on the operation mode | No | No (see Note 1) | No
 *armDrone* | arms the drone (either simulated or real) | No | NO (see Note 2) | No 
-*takeOff* | get the drone take off to reach and altitude of 5 meters | No | NO (see Note 3)  | No 
-*returnToLaunch* | go to launch position |No  | NO (see Note 4) | No    
-*land* | the dron will land |No  | NO (see Note 5) | No     
-*disarmDrone* | disarm the drone |No  |  NO (see Note 6) | No 
+*takeOff* | get the drone take off to reach and altitude of 5 meters | No | No (see Note 3)  | No 
+*returnToLaunch* | go to launch position |No  | No (see Note 4) | No    
+*land* | the dron will land |No  | No (see Note 5) | No     
+*disarmDrone* | disarm the drone |No  |  No (see Note 6) | No 
 *go* | move in certain direction |"North", "South", "East", "West", "NorthWest", "NorthEast", "SouthWest", "SouthEast" , "Stop"  | No | No 
 *disconnect* | disconnect from the simulator or the flight controller depending on the operation mode | No | NO (see Note 1) | No
 *executeFlightPlan* | execute the flight plan received | See Note 7 | see Note 7 | see Note 7
@@ -103,7 +103,7 @@ The service must receive a json object specifying the flight plan with indicatio
 ]
 ```
 The service will execute the flight plan, changing the state accordingly (*'arming'*, *'armed'*, *'takingOff'*, and so on until *'onHearth'*).    
-When arrived to the next waypoint the service will publish this message: *'XXXX/autopilotService/waypointReached'*,, being XXXX the module requesting the service. The topic of the message is a json object containing *'lat'* and *'lon'* of the reached waypoint. If a picture wust be taken in this waypoint, the service will publish this message IN THE INTERNAL BROKER: *'XXXX/cameraService(takePicture'*. The autopilot will return to launch after the last waypoint is reached.   
+When arrived to the next waypoint the service will publish this message: *'XXXX/autopilotService/waypointReached'*,, being XXXX the module requesting the service. The topic of the message is a json object containing *'lat'* and *'lon'* of the reached waypoint. If a picture wust be taken in this waypoint, the service will publish this message IN THE INTERNAL BROKER: *'XXXX/cameraService/takePicture'*. The autopilot will return to launch after the last waypoint is reached.   
 
 
 
