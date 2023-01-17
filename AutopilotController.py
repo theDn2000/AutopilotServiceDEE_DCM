@@ -8,7 +8,7 @@ from dronekit import connect
 from pymavlink import mavutil
 
 def arm():
-    """Arms vehicle and fly to aTargetAltitude."""
+    """Arms vehicle and fly to aTargetAltitude"""
     print("Basic pre-arm checks")  # Don't try to arm until autopilot is ready
     vehicle.mode = dronekit.VehicleMode("GUIDED")
     while not vehicle.is_armable:
