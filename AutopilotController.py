@@ -1,3 +1,5 @@
+import json
+import math
 import threading
 import paho.mqtt.client as mqtt
 import time
@@ -8,18 +10,19 @@ from pymavlink import mavutil
 def arm():
     """Arms vehicle and fly to aTargetAltitude."""
     print("Basic pre-arm checks")  # Don't try to arm until autopilot is ready
+    vehicle.mode = dronekit.VehicleMode("GUIDED")
     while not vehicle.is_armable:
         print(" Waiting for vehicle to initialise...")
         time.sleep(1)
     print("Arming motors")
     # Copter should arm in GUIDED mode
-    vehicle.mode = dronekit.VehicleMode("GUIDED")
+
     vehicle.armed = True
     # Confirm vehicle armed before attempting to take off
     while not vehicle.armed:
         print(" Waiting for arming...")
         time.sleep(1)
-
+    print(" Armed")
 
 def take_off(a_target_altitude):
     vehicle.simple_takeoff(a_target_altitude)
@@ -58,33 +61,42 @@ def prepare_command(velocity_x, velocity_y, velocity_z):
     return msg
 
 
-def send_position():
+def get_telemetry_info ():
+    global state
+    telemetry_info = {
+        'lat': vehicle.location.global_frame.lat,
+        'lon': vehicle.location.global_frame.lon,
+        'heading': vehicle.heading,
+        'groundSpeed': vehicle.groundspeed,
+        'altitude': vehicle.location.global_relative_frame.alt,
+        'battery': vehicle.battery.level,
+        'state': state
+    }
+    return telemetry_info
+
+
+def send_telemetry_info():
     global external_client
-    global sending_positions
+    global sending_telemetry_info
     global sending_topic
 
-    while sending_positions:
-        lat = vehicle.location.global_frame.lat
-        lon = vehicle.location.global_frame.lon
-        position = str(lat) + "*" + str(lon)
-        external_client.publish(sending_topic + "/dronePosition", position)
+    while sending_telemetry_info:
+        external_client.publish(sending_topic + "/telemetryInfo", json.dumps(get_telemetry_info()))
         time.sleep(0.25)
 
 
 def returning():
-    global sending_positions
-
+    global sending_telemetry_info
     global external_client
     global internal_client
+    global sending_topic
+    global state
 
     # wait until the drone is at home
     while vehicle.armed:
         time.sleep(1)
-    print("At home")
-    vehicle.close()
-    external_client.publish("autopilotService/droneCircus/atHome")
+    state = 'onHearth'
     internal_client.publish("autopilotService/LEDsService/LEDsSequenceForNSeconds", 5)
-    sending_positions = False
 
 
 def flying():
@@ -107,21 +119,107 @@ def flying():
             cmd = prepare_command(0, speed, 0)  # EAST
         if direction == "West":
             cmd = prepare_command(0, -speed, 0)  # WEST
+        if direction == "NorthWest":
+            cmd = prepare_command(speed, -speed, 0)  # NORTHWEST
+        if direction == "NorthEst":
+            cmd = prepare_command(speed, speed, 0)  # NORTHEST
+        if direction == "SouthWest":
+            cmd = prepare_command(-speed, -speed, 0)  # SOUTHWEST
+        if direction == "SouthEst":
+            cmd = prepare_command(-speed, speed, 0)  # SOUTHEST
         if direction == "Stop":
             cmd = prepare_command(0, 0, 0)  # STOP
         if direction == "RTL":
             end = True
-def on_internal_message(client, userdata, message):
-    pass
 
-def on_external_message(client, userdata, message):
+
+
+def distanceInMeters(aLocation1, aLocation2):
+    """
+    Returns the ground distance in metres between two LocationGlobal objects.
+
+    This method is an approximation, and will not be accurate over large distances and close to the
+    earth's poles. It comes from the ArduPilot test code:
+    https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
+    """
+    dlat = aLocation2.lat - aLocation1.lat
+    dlong = aLocation2.lon - aLocation1.lon
+    return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
+
+def executeFlightPlan(waypoints_json):
+    global vehicle
+    global internal_client, external_client
+    global sending_topic
+    global state
+
+    altitude = 6
+    origin = sending_topic.split('/')[1]
+
+    waypoints = json.loads(waypoints_json)
+    print ('recibo waypoints ', waypoints)
+    state = 'arming'
+    arm()
+    state = 'takingOff'
+    take_off(altitude)
+    state = 'flying'
+
+    wp = waypoints[0]
+    originPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
+
+    distanceThreshold = 0.50
+    for wp in waypoints [1:]:
+
+        destinationPoint = dronekit.LocationGlobalRelative(float(wp['lat']),float(wp['lon']), altitude)
+        vehicle.simple_goto(destinationPoint)
+
+        currentLocation = vehicle.location.global_frame
+        dist = distanceInMeters (destinationPoint,currentLocation)
+
+        while dist > distanceThreshold:
+            time.sleep(0.25)
+            currentLocation = vehicle.location.global_frame
+            dist = distanceInMeters(destinationPoint, currentLocation)
+
+        waypointReached = {
+            'lat':currentLocation.lat,
+            'lon':currentLocation.lon
+        }
+        print ('llego a waypoint')
+        external_client.publish(sending_topic + "/waypointReached", json.dumps(waypointReached))
+
+        if wp['takePic']:
+            # ask to send a picture to origin
+            print ('take picture ', '*'+origin + "/cameraService/takePicture")
+            internal_client.publish(origin + "/cameraService/takePicture")
+
+    vehicle.mode = dronekit.VehicleMode("RTL")
+    state = 'returningHome'
+
+    currentLocation = vehicle.location.global_frame
+    dist = distanceInMeters(originPoint, currentLocation)
+
+    while dist > distanceThreshold:
+        time.sleep(0.25)
+        currentLocation = vehicle.location.global_frame
+        dist = distanceInMeters(originPoint, currentLocation)
+
+    state = 'landing'
+    while vehicle.armed:
+        time.sleep(1)
+    state = 'onHearth'
+    print ('en casa')
+
+
+
+def process_message(message, client):
     global vehicle
     global direction
     global go
-    global sending_positions
+    global sending_telemetry_info
     global sending_topic
-    global external_client
     global op_mode
+    global sending_topic
+    global state
 
     positions = ["getDronePosition", "getHomePosition", "getDestinationPosition"]
 
@@ -131,44 +229,63 @@ def on_external_message(client, userdata, message):
     sending_topic = "autopilotService/" + origin
 
     if command == "connect":
-        print("Autopilot service connected by " + origin)
-        external_client.subscribe(origin + "/autopilotService/#")
-        if op_mode == 'simulation':
-            connection_string = "tcp:127.0.0.1:5763"
-        else:
-            connection_string = "/dev/ttyS0"
-        vehicle = connect(connection_string, wait_ready=True, baud=115200)
-        sending_positions = True
-        y = threading.Thread(target=send_position)
-        y.start()
-        external_client.publish(sending_topic + "/connected")
+        if state == 'disconnected':
+            print("Autopilot service connected by " + origin)
+            if op_mode == 'simulation':
+                connection_string = "tcp:127.0.0.1:5763"
+            else:
+                connection_string = "/dev/ttyS0"
 
-    if command == "armDrone":
-        arm()
-        if origin == "droneCircus":
-            external_client.publish("autopilotService/droneCircus/armed")
+
+            vehicle = connect(connection_string, wait_ready=False, baud=115200)
+
+            vehicle.wait_ready(True, timeout=5000)
+
+            print ('Connected to flight controller')
+            state = 'connected'
+
+            #external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
+
+
+            sending_telemetry_info = True
+            y = threading.Thread(target=send_telemetry_info)
+            y.start()
+        else:
+            print ('Autopilot already connected')
+
+
+
+    if command == "disconnect":
+        print ('recibo disconnect')
+        vehicle.close()
+        sending_telemetry_info = False
+        state = 'disconnected'
+
 
     if command == "takeOff":
         if origin != "droneCircus":
             altitude = float(message.payload)
-            take_off(altitude)
+
         else:
-            take_off(5)
-            external_client.publish("autopilotService/droneCircus/takenOff")
-            w = threading.Thread(target=flying)
-            w.start()
+            altitude = 5
+        state = 'takingOff'
+        take_off(altitude)
+        state = 'flying'
+        w = threading.Thread(target=flying)
+        w.start()
+
 
     if command == "getDroneHeading":
-        external_client.publish(sending_topic + "/droneHeading", vehicle.heading)
+        client.publish(sending_topic + "/droneHeading", vehicle.heading)
 
     if command == "getDroneAltitude":
-        external_client.publish(
+        client.publish(
             sending_topic + "/droneAltitude",
             vehicle.location.global_relative_frame.alt,
         )
 
     if command == "getDroneGroundSpeed":
-        external_client.publish(
+        client.publish(
             sending_topic + "/droneGroundSpeed", vehicle.groundspeed
         )
 
@@ -177,11 +294,11 @@ def on_external_message(client, userdata, message):
         lon = vehicle.location.global_frame.lon
         position = str(lat) + "*" + str(lon)
         if command == positions[0]:
-            external_client.publish(sending_topic + "/dronePosition", position)
+            client.publish(sending_topic + "/dronePosition", position)
         if command == positions[1]:
             client.publish(sending_topic + "/homePosition", position)
         if command == positions[2]:
-            external_client.publish(sending_topic + "/destinationPosition", position)
+            client.publish(sending_topic + "/destinationPosition", position)
 
     if command == "goToPosition":
         position_str = str(message.payload.decode("utf-8"))
@@ -197,54 +314,89 @@ def on_external_message(client, userdata, message):
     if command == "returnToLaunch":
         # stop the process of getting positions
         vehicle.mode = dronekit.VehicleMode("RTL")
+        state = 'returningHome'
         direction = "RTL"
         go = True
         w = threading.Thread(target=returning)
         w.start()
 
+    if command == "armDrone":
+        state = 'arming'
+        arm()
+        state = 'armed'
+
     if command == "disarmDrone":
-        vehicle.armed = True
+        vehicle.armed = False
+        while vehicle.armed:
+            time.sleep(1)
+        state = 'disarmed'
+
+
+    if command == "land":
+        vehicle.mode = dronekit.VehicleMode("LAND")
+        state = 'landing'
+        while vehicle.armed:
+            time.sleep(1)
+        state = 'onHearth'
+
 
     if command == "go":
         direction = message.payload.decode("utf-8")
         print("Going ", direction)
         go = True
 
+    if command == 'executeFlightPlan':
+        waypoints_json = str(message.payload.decode("utf-8"))
+        w = threading.Thread(target=executeFlightPlan, args=[waypoints_json, ])
+        w.start()
 
-def AutoServ (connection_mode, operation_mode):
+
+
+
+def on_internal_message(client, userdata, message):
+    global internal_client
+    process_message(message, internal_client)
+
+def on_external_message(client, userdata, message):
+    global external_client
+    process_message(message, external_client)
+
+def AutoServ (connection_mode, operation_mode, external_broker, username, password):
     global op_mode
     global external_client
     global internal_client
+    global state # connected, disconnected, onHearth, arming, armed, takingOff, flying, returningHome, landing
+
+    state = 'disconnected'
 
     print ('Connection mode: ', connection_mode)
-    print ('operation mode: ', operation_mode)
+    print ('Operation mode: ', operation_mode)
     op_mode = operation_mode
 
     # The internal broker is always (global or local mode) at localhost:1884
     internal_broker_address = "localhost"
     internal_broker_port = 1884
 
-    if connection_mode == 'global':
-        # in global mode, the external broker must be running in internet
-        # and must operate with websockets
-        # there are several options:
-        # a public broker
-        external_broker_address = "broker.hivemq.com"
-        # our broker (that requires credentials)
-        #external_broker_address = "classpip.upc.edu"
-        # a mosquitto broker running at localhost (only in simulation mode)
-        #external_broker_address = "localhost"
+    if connection_mode == 'global' and operation_mode == 'simulation':
+        external_broker_address = external_broker
+    if connection_mode == 'global' and operation_mode == 'production':
+        external_broker_address = 'broker.hivemq.com'
+    if connection_mode == 'local':
+        external_broker_address = 'localhost'
 
-    else:
-        # in local mode, the external broker will run always in localhost
-        # (either in production or simulation mode)
-        external_broker_address = "localhost"
+    print ('External broker: ', external_broker_address)
+
+
 
     # the external broker must run always in port 8000
     external_broker_port = 8000
 
 
+
     external_client = mqtt.Client("Autopilot_external", transport="websockets")
+    if external_broker_address == 'classpip.upc.edu':
+        external_client.username_pw_set(username, password)
+
     external_client.on_message = on_external_message
     external_client.connect(external_broker_address, external_broker_port)
 
@@ -254,7 +406,7 @@ def AutoServ (connection_mode, operation_mode):
     internal_client.connect(internal_broker_address, internal_broker_port)
 
     print("Waiting....")
-    external_client.subscribe("+/autopilotService/#")
+    external_client.subscribe("+/autopilotService/#", 2)
     internal_client.subscribe("+/autopilotService/#")
     internal_client.loop_start()
     external_client.loop_forever()
@@ -263,4 +415,13 @@ if __name__ == '__main__':
     import sys
     connection_mode = sys.argv[1] # global or local
     operation_mode = sys.argv[2] # simulation or production
-    AutoServ(connection_mode,operation_mode)
+    username = None
+    password = None
+    if connection_mode == 'global' and operation_mode == 'simulation':
+        external_broker = sys.argv[3]
+        if external_broker == 'classpip.upc.edu':
+            username = sys.argv[4]
+            password = sys.argv[5]
+    else:
+        external_broker = None
+    AutoServ(connection_mode,operation_mode, external_broker, username, password)
