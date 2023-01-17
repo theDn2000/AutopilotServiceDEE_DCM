@@ -59,8 +59,21 @@ def prepare_command(velocity_x, velocity_y, velocity_z):
     )  # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
 
     return msg
+'''
+These are the different values for the state of the autopilot:
+    'connected' (only when connected the telemetry_info packet will be sent every 250 miliseconds)
+    'arming'
+    'armed'
+    'disarmed'
+    'takingOff'
+    'flying'
+    'returningHome'
+    'landing'
+    'onHearth'
 
-
+The autopilot can also be 'disconnected' but this state will never appear in the telemetry_info packet 
+when disconnected the service will not send any packet
+'''
 def get_telemetry_info ():
     global state
     telemetry_info = {
@@ -96,8 +109,6 @@ def returning():
     while vehicle.armed:
         time.sleep(1)
     state = 'onHearth'
-    internal_client.publish("autopilotService/LEDsService/LEDsSequenceForNSeconds", 5)
-
 
 def flying():
     global direction
@@ -156,7 +167,7 @@ def executeFlightPlan(waypoints_json):
     origin = sending_topic.split('/')[1]
 
     waypoints = json.loads(waypoints_json)
-    print ('recibo waypoints ', waypoints)
+
     state = 'arming'
     arm()
     state = 'takingOff'
@@ -184,12 +195,11 @@ def executeFlightPlan(waypoints_json):
             'lat':currentLocation.lat,
             'lon':currentLocation.lon
         }
-        print ('llego a waypoint')
+
         external_client.publish(sending_topic + "/waypointReached", json.dumps(waypointReached))
 
         if wp['takePic']:
             # ask to send a picture to origin
-            print ('take picture ', '*'+origin + "/cameraService/takePicture")
             internal_client.publish(origin + "/cameraService/takePicture")
 
     vehicle.mode = dronekit.VehicleMode("RTL")
@@ -207,7 +217,6 @@ def executeFlightPlan(waypoints_json):
     while vehicle.armed:
         time.sleep(1)
     state = 'onHearth'
-    print ('en casa')
 
 
 
@@ -220,8 +229,6 @@ def process_message(message, client):
     global op_mode
     global sending_topic
     global state
-
-    positions = ["getDronePosition", "getHomePosition", "getDestinationPosition"]
 
     splited = message.topic.split("/")
     origin = splited[0]
@@ -256,60 +263,19 @@ def process_message(message, client):
 
 
     if command == "disconnect":
-        print ('recibo disconnect')
         vehicle.close()
         sending_telemetry_info = False
         state = 'disconnected'
 
 
     if command == "takeOff":
-        if origin != "droneCircus":
-            altitude = float(message.payload)
-
-        else:
-            altitude = 5
         state = 'takingOff'
-        take_off(altitude)
+        take_off(5)
         state = 'flying'
         w = threading.Thread(target=flying)
         w.start()
 
 
-    if command == "getDroneHeading":
-        client.publish(sending_topic + "/droneHeading", vehicle.heading)
-
-    if command == "getDroneAltitude":
-        client.publish(
-            sending_topic + "/droneAltitude",
-            vehicle.location.global_relative_frame.alt,
-        )
-
-    if command == "getDroneGroundSpeed":
-        client.publish(
-            sending_topic + "/droneGroundSpeed", vehicle.groundspeed
-        )
-
-    if command in positions:
-        lat = vehicle.location.global_frame.lat
-        lon = vehicle.location.global_frame.lon
-        position = str(lat) + "*" + str(lon)
-        if command == positions[0]:
-            client.publish(sending_topic + "/dronePosition", position)
-        if command == positions[1]:
-            client.publish(sending_topic + "/homePosition", position)
-        if command == positions[2]:
-            client.publish(sending_topic + "/destinationPosition", position)
-
-    if command == "goToPosition":
-        position_str = str(message.payload.decode("utf-8"))
-        position = position_str.split("*")
-        lat = float(position[0])
-        lon = float(position[1])
-        point = dronekit.LocationGlobalRelative(lat, lon, 20)
-        vehicle.simple_goto(point)
-        # we start a procedure to get the drone position every 5 seconds
-        # and send it to the data service (to be stored there)
-        go = True
 
     if command == "returnToLaunch":
         # stop the process of getting positions
@@ -361,11 +327,11 @@ def on_external_message(client, userdata, message):
     global external_client
     process_message(message, external_client)
 
-def AutoServ (connection_mode, operation_mode, external_broker, username, password):
+def AutopilotService (connection_mode, operation_mode, external_broker, username, password):
     global op_mode
     global external_client
     global internal_client
-    global state # connected, disconnected, onHearth, arming, armed, takingOff, flying, returningHome, landing
+    global state
 
     state = 'disconnected'
 
@@ -424,4 +390,4 @@ if __name__ == '__main__':
             password = sys.argv[5]
     else:
         external_broker = None
-    AutoServ(connection_mode,operation_mode, external_broker, username, password)
+    AutopilotService(connection_mode,operation_mode, external_broker, username, password)
