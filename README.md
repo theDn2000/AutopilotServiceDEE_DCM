@@ -7,7 +7,7 @@ Dashboard or mobile applications will requiere the autopilot service to connect 
 
 ## Operation modes
 The autopilot service can be run in simulation mode. In this case, clone the repo in your computer and install de requirements. Be also sure that you have running the internal broker at "localhost:1884". To run the service you must edit the run/debug configuration in PyCharm, as shown in the image, in order to pass the required arguments to the script. At least two parameters are required: connection_mode (global or local) and operation_mode (simulation or production). In case of global communication mode, a third parameter is requiered indicating the external broker to be used. In case the external broker requieres credentials, two additional parameters must be includes (username and password). The figure shows and example where the external broker does not requires credentials.   
-![autopilotConf](https://user-images.githubusercontent.com/100842082/210065804-fd15e4d0-2974-407e-b086-c443d328eaeb.png)
+![autopilotServiceConfiguration](https://user-images.githubusercontent.com/100842082/212954201-993186db-b8aa-4e57-a997-c546af07530c.png)
    
 To run the autopilot service in production mode you will need the boot.py script that you will find in the main repo of the Drone Engineering Ecosystem. Follow the instruction that you will find in that repo.   
 
