@@ -3,11 +3,11 @@
 ## Introduction
 
 The autopilot service is an on-board module that controls the operation of the flight controller, as required by the rest of modules in the Drone Engineering Ecosystem.   
-Dashboard or mobile applications will requiere the autopilot service to connect to the flight controller to arm the drone, take-off, go to a certain position or move in a given direction, land, stop, etc. See the table bellow for a complete list of commands that can be accepted by the autopilot service in its current version.
+Dashboard or mobile applications will requiere the autopilot service to connect to the flight controller, to arm the drone, take-off, go to a certain position or move in a given direction, land, stop, etc. See the table bellow for a complete list of commands that can be accepted by the autopilot service in its current version.
 
 ## Operation modes
-The autopilot service can be run in simulation mode. In this case, clone the repo in your computer and install de requirements. Be also sure that you have running the internal broker at "localhost:1884". To run the service you must edit the run/debug configuration in PyCharm, as shown in the image, in order to pass the required arguments to the script (in the example of the figure the service in run in global and simulation modes).   
-![autopilotConf](https://user-images.githubusercontent.com/100842082/210065804-fd15e4d0-2974-407e-b086-c443d328eaeb.png)
+The autopilot service can be run in simulation mode. In this case, clone the repo in your computer and install de requirements. Be also sure that you have running the internal broker at "localhost:1884". To run the service you must edit the run/debug configuration in PyCharm, as shown in the image, in order to pass the required arguments to the script. At least two parameters are required: connection_mode (global or local) and operation_mode (simulation or production). In case of global communication mode, a third parameter is requiered indicating the external broker to be used. In case the external broker requieres credentials, two additional parameters must be includes (username and password). The figure shows and example where the external broker does not requires credentials.   
+![autopilotServiceConfiguration](https://user-images.githubusercontent.com/100842082/212955034-2a9fdd8d-e654-405e-951d-605479ba9928.png)
    
 To run the autopilot service in production mode you will need the boot.py script that you will find in the main repo of the Drone Engineering Ecosystem. Follow the instruction that you will find in that repo.   
 
@@ -27,17 +27,83 @@ The table bellow indicates all the commands that are accepted by the autopilot s
 
 Command | Description | Payload | Answer | Answer payload
 --- | --- | --- | --- |--- 
-*connect* | connect with the simulator or the flight controller depending on the operation mode | No | *connected* | No
-*armDron* | arms the drone (either simulated or real) | No | *armed* | No 
-*takeOff* | get the drone take off | No | *takenOff* | No 
-*getDroneHeading* | get the heading info from  the drone | No | *droneHeading* | Heading info in json
-*getDroneAltitude* | get the drone altitude | No | *droneAltitude* | Altitute as a float
-*getDroneGroundSpeed* | get the ground speed | No | *droneGroundSpeed* | Ground speed as a float
-*getDronePosition* | get drone position | No | *dronePosition* | "latitude\*longitude" 
-*returnToLaunch* | go to launchposition |No  | *atHome* (when arrived) | No 
-*disarmDrone* | disarm the drone |No  | No | No 
-*go* | move in certain direction |"North", "South", "East", "West", "Stop"  | No | No 
-*goToPosition* | go to the given position |"latitude\*longitude"  | No | No 
+*connect* | connect with the simulator or the flight controller depending on the operation mode | No | No (see Note 1) | No
+*armDrone* | arms the drone (either simulated or real) | No | NO (see Note 2) | No 
+*takeOff* | get the drone take off to reach and altitude of 5 meters | No | No (see Note 3)  | No 
+*returnToLaunch* | go to launch position |No  | No (see Note 4) | No    
+*land* | the dron will land |No  | No (see Note 5) | No     
+*disarmDrone* | disarm the drone |No  |  No (see Note 6) | No 
+*go* | move in certain direction |"North", "South", "East", "West", "NorthWest", "NorthEast", "SouthWest", "SouthEast" , "Stop"  | No | No 
+*disconnect* | disconnect from the simulator or the flight controller depending on the operation mode | No | NO (see Note 1) | No
+*executeFlightPlan* | execute the flight plan received | See Note 7 | see Note 7 | see Note 7
+
+
+Note 1    
+When the autopilot is connected the service will start sending telemetry_info packets every 250 miliseconds. The service will stop sending 
+telemetry_info packets as soon as a *disconnect* command is received. This is an example of telemetry_info packet:
+
+```
+{
+    'lat': 41.124567,
+    'lon': 1.9889145,
+    'heading': 270,
+    'groundSpeed': 4.27,
+    'altitude': 6.78,
+    'battery': 80,
+    'state': state
+}
+
+```
+The packet includes the state of the autopilot so that the module that receives the packet can take decisions (for instance, change color of the buttons).   
+
+These are the different values for the state:
+*'connected'*  
+*'arming'*  
+*'armed'*   
+*'disarmed'*    
+*'takingOff'*      
+*'flying'*   
+*'returningHome'*     
+*'landing'*    
+*'onHearth'*    
+
+Note 2    
+The state will change to *arming* and then to *armed* as soon as the autopilot is armed.    
+   
+   
+Note 3    
+The state will change to *takingOff* and then to *flying* as soon as the autopilot reaches 5 meters of altitude.  
+   
+Note 4    
+The state will change to *returningHome* and then to *onHearth* as soon as the autopilot in on hearth.    
+   
+Note 5    
+The state will change to *landing* and then to *onHearth* as soon as the autopilot in on hearth.    
+   
+Note 6    
+The state will change to *disarmed*.   
+
+Note 7     
+The service must receive a json object specifying the flight plan with indications whether a picture must be taken when reaching a waypoint. This is an example of such json object:    
+
+
+```
+[
+  {
+    'lat': 41.124567,
+    'lon': 1.9889145,
+    'takePic': True or False
+  },
+  {
+    'lat': 41.124567,
+    'lon': 1.9889145,
+    'takePic': True or False
+  },
+  ....
+]
+```
+The service will execute the flight plan, changing the state accordingly (*'arming'*, *'armed'*, *'takingOff'*, and so on until *'onHearth'*).    
+When arrived to the next waypoint the service will publish this message: *'XXXX/autopilotService/waypointReached'*,, being XXXX the module requesting the service. The topic of the message is a json object containing *'lat'* and *'lon'* of the reached waypoint. If a picture wust be taken in this waypoint, the service will publish this message IN THE INTERNAL BROKER: *'XXXX/cameraService/takePicture'*. The autopilot will return to launch after the last waypoint is reached.   
 
 
 
