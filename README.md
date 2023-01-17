@@ -3,7 +3,7 @@
 ## Introduction
 
 The autopilot service is an on-board module that controls the operation of the flight controller, as required by the rest of modules in the Drone Engineering Ecosystem.   
-Dashboard or mobile applications will requiere the autopilot service to connect to the flight controller to arm the drone, take-off, go to a certain position or move in a given direction, land, stop, etc. See the table bellow for a complete list of commands that can be accepted by the autopilot service in its current version.
+Dashboard or mobile applications will requiere the autopilot service to connect to the flight controller, to arm the drone, take-off, go to a certain position or move in a given direction, land, stop, etc. See the table bellow for a complete list of commands that can be accepted by the autopilot service in its current version.
 
 ## Operation modes
 The autopilot service can be run in simulation mode. In this case, clone the repo in your computer and install de requirements. Be also sure that you have running the internal broker at "localhost:1884". To run the service you must edit the run/debug configuration in PyCharm, as shown in the image, in order to pass the required arguments to the script (in the example of the figure the service in run in global and simulation modes).   
@@ -27,17 +27,42 @@ The table bellow indicates all the commands that are accepted by the autopilot s
 
 Command | Description | Payload | Answer | Answer payload
 --- | --- | --- | --- |--- 
-*connect* | connect with the simulator or the flight controller depending on the operation mode | No | *connected* | No
-*armDron* | arms the drone (either simulated or real) | No | *armed* | No 
-*takeOff* | get the drone take off | No | *takenOff* | No 
-*getDroneHeading* | get the heading info from  the drone | No | *droneHeading* | Heading info in json
-*getDroneAltitude* | get the drone altitude | No | *droneAltitude* | Altitute as a float
-*getDroneGroundSpeed* | get the ground speed | No | *droneGroundSpeed* | Ground speed as a float
-*getDronePosition* | get drone position | No | *dronePosition* | "latitude\*longitude" 
-*returnToLaunch* | go to launchposition |No  | *atHome* (when arrived) | No 
-*disarmDrone* | disarm the drone |No  | No | No 
-*go* | move in certain direction |"North", "South", "East", "West", "Stop"  | No | No 
-*goToPosition* | go to the given position |"latitude\*longitude"  | No | No 
+*connect* | connect with the simulator or the flight controller depending on the operation mode | No | NO (see Note 1) | No
+*armDron* | arms the drone (either simulated or real) | No | NO (see Note 2) | No 
+*takeOff* | get the drone take off | No | NO (see Note 2)  | No 
+*returnToLaunch* | go to launch position |No  | NO (see Note 2) | No 
+*disarmDrone* | disarm the drone |No  |  NO (see Note 2) | No 
+*go* | move in certain direction |"North", "South", "East", "West", "NorthWest", "NorthEast", "SouthWest", "SouthEast" , "Stop"  | No | No 
+
+*disconnect* | disconnect from the simulator or the flight controller depending on the operation mode | No | NO (see Note 1) | No
+
+
+Note 1    
+When the autopilot is connected the service will start sending telemetry_info packets every 250 miliseconds. This is an example of telemetry_info packet:
+
+```
+{
+    'lat': 41.124567,
+    'lon': 1.9889145,
+    'heading': 270,
+    'groundSpeed': 4.27,
+    'altitude': 6.78,
+    'battery': 80,
+    'state': state
+}
+
+```
+The packet includes the state of the autopilot so that the module that receive the packet can take decisions (for instance, change color of the buttons).   
+
+These are the different values for the state:
+*'connected'*  
+*'arming'*  
+*'armed'* 
+*'takingOff'*   
+*'flying'*   
+*'returningHome'*   
+*'landing'*
+*'onHearth'*
 
 
 
