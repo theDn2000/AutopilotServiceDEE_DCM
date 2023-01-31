@@ -258,6 +258,9 @@ def process_message(message, client):
             print ('Connected to flight controller')
             state = 'connected'
 
+            #external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
+
+
             sending_telemetry_info = True
             y = threading.Thread(target=send_telemetry_info)
             y.start()
@@ -362,6 +365,7 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     else:
         external_broker_address = 'localhost'
 
+
     print ('External broker: ', external_broker_address)
 
 
@@ -387,10 +391,8 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     external_client.subscribe("+/autopilotService/#", 2)
     internal_client.subscribe("+/autopilotService/#")
     internal_client.loop_start()
-    if operation_mode == 'simulation':
-        external_client.loop_forever()
-    else:
-        external_client.loop_start()
+    #external_client.loop_forever()
+    external_client.loop_start()
 
 if __name__ == '__main__':
     import sys
@@ -398,7 +400,7 @@ if __name__ == '__main__':
     operation_mode = sys.argv[2] # simulation or production
     username = None
     password = None
-    if connection_mode == 'global' and operation_mode == 'simulation':
+    if connection_mode == 'global':
         external_broker = sys.argv[3]
         if external_broker == 'classpip.upc.edu':
             username = sys.argv[4]
