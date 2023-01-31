@@ -25,6 +25,7 @@ def arm():
     print(" Armed")
 
 def take_off(a_target_altitude):
+    global state
     vehicle.simple_takeoff(a_target_altitude)
     while True:
         print(" Altitude: ", vehicle.location.global_relative_frame.alt)
@@ -33,6 +34,12 @@ def take_off(a_target_altitude):
             print("Reached target altitude")
             break
         time.sleep(1)
+
+    state = 'flying'
+    w = threading.Thread(target=flying)
+    w.start()
+
+
 
 
 def prepare_command(velocity_x, velocity_y, velocity_z):
@@ -251,9 +258,6 @@ def process_message(message, client):
             print ('Connected to flight controller')
             state = 'connected'
 
-            #external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
-
-
             sending_telemetry_info = True
             y = threading.Thread(target=send_telemetry_info)
             y.start()
@@ -270,9 +274,7 @@ def process_message(message, client):
 
     if command == "takeOff":
         state = 'takingOff'
-        take_off(5)
-        state = 'flying'
-        w = threading.Thread(target=flying)
+        w = threading.Thread(target=take_off, args=[5, ])
         w.start()
 
 
@@ -289,6 +291,10 @@ def process_message(message, client):
     if command == "armDrone":
         state = 'arming'
         arm()
+
+        # the vehicle will disarm automatically is takeOff does not come soon
+        # when attribute 'armed' changes run function armed_change
+        vehicle.add_attribute_listener('armed', armed_change)
         state = 'armed'
 
     if command == "disarmDrone":
@@ -316,6 +322,14 @@ def process_message(message, client):
         w = threading.Thread(target=executeFlightPlan, args=[waypoints_json, ])
         w.start()
 
+def armed_change(self, attr_name, value):
+    global vehicle
+    global state
+
+    if vehicle.armed:
+        state = 'armed'
+    else:
+        state = 'disarmed'
 
 
 
@@ -375,7 +389,10 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     external_client.subscribe("+/autopilotService/#", 2)
     internal_client.subscribe("+/autopilotService/#")
     internal_client.loop_start()
-    external_client.loop_forever()
+    if operation_mode == 'simulation':
+        external_client.loop_forever()
+    else:
+        external_client.loop_start()
 
 if __name__ == '__main__':
     import sys
@@ -390,4 +407,5 @@ if __name__ == '__main__':
             password = sys.argv[5]
     else:
         external_broker = None
+
     AutopilotService(connection_mode,operation_mode, external_broker, username, password)
