@@ -192,12 +192,14 @@ def executeFlightPlan(waypoints_json):
 
         currentLocation = vehicle.location.global_frame
         dist = distanceInMeters (destinationPoint,currentLocation)
-
+        print ('distance ', dist)
         while dist > distanceThreshold:
+            print ('distance ', dist)
+  
             time.sleep(0.25)
             currentLocation = vehicle.location.global_frame
             dist = distanceInMeters(destinationPoint, currentLocation)
-
+        print ('reached')
         waypointReached = {
             'lat':currentLocation.lat,
             'lon':currentLocation.lon
