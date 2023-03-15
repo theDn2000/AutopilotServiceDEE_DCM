@@ -4,8 +4,9 @@ import threading
 import paho.mqtt.client as mqtt
 import time
 import dronekit
-from dronekit import connect
+from dronekit import connect, Command, VehicleMode
 from pymavlink import mavutil
+
 
 def arm():
     """Arms vehicle and fly to aTargetAltitude"""
@@ -24,7 +25,7 @@ def arm():
         time.sleep(1)
     print(" Armed")
 
-def take_off(a_target_altitude):
+def take_off(a_target_altitude, manualControl):
     global state
     vehicle.simple_takeoff(a_target_altitude)
     while True:
@@ -36,10 +37,9 @@ def take_off(a_target_altitude):
         time.sleep(1)
 
     state = 'flying'
-    w = threading.Thread(target=flying)
-    w.start()
-
-
+    if manualControl:
+        w = threading.Thread(target=flying)
+        w.start()
 
 
 def prepare_command(velocity_x, velocity_y, velocity_z):
@@ -170,6 +170,8 @@ def executeFlightPlan(waypoints_json):
     global sending_topic
     global state
 
+
+
     altitude = 6
     origin = sending_topic.split('/')[1]
 
@@ -178,8 +180,9 @@ def executeFlightPlan(waypoints_json):
     state = 'arming'
     arm()
     state = 'takingOff'
-    take_off(altitude)
+    take_off(altitude, False)
     state = 'flying'
+
 
     wp = waypoints[0]
     originPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
@@ -192,10 +195,8 @@ def executeFlightPlan(waypoints_json):
 
         currentLocation = vehicle.location.global_frame
         dist = distanceInMeters (destinationPoint,currentLocation)
-        print ('distance ', dist)
+
         while dist > distanceThreshold:
-            print ('distance ', dist)
-  
             time.sleep(0.25)
             currentLocation = vehicle.location.global_frame
             dist = distanceInMeters(destinationPoint, currentLocation)
@@ -226,6 +227,58 @@ def executeFlightPlan(waypoints_json):
     while vehicle.armed:
         time.sleep(1)
     state = 'onHearth'
+
+
+def executeFlightPlan2(waypoints_json):
+    global vehicle
+    global internal_client, external_client
+    global sending_topic
+    global state
+
+
+
+    altitude = 6
+    origin = sending_topic.split('/')[1]
+
+    waypoints = json.loads(waypoints_json)
+    state = 'arming'
+    arm()
+    state = 'takingOff'
+    take_off(altitude, False)
+    state = 'flying'
+    cmds = vehicle.commands
+    cmds.clear()
+
+    #wp = waypoints[0]
+    #originPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
+    for wp in waypoints:
+        cmds.add(
+            Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0,
+                    0, 0, 0, 0, float(wp['lat']), float(wp['lon']), altitude))
+    wp = waypoints[0]
+    cmds.add(
+        Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0,
+                0, 0, 0, 0, float(wp['lat']), float(wp['lon']), altitude))
+    cmds.upload()
+
+    vehicle.commands.next = 0
+    # Set mode to AUTO to start mission
+    vehicle.mode = VehicleMode("AUTO")
+    while True:
+        nextwaypoint = vehicle.commands.next
+        print ('next ', nextwaypoint)
+        if nextwaypoint == len(waypoints):  # Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
+            print("Last waypoint reached")
+            break;
+        time.sleep(0.5)
+
+    print('Return to launch')
+    state = 'returningHome'
+    vehicle.mode = VehicleMode("RTL")
+    while vehicle.armed:
+        time.sleep(1)
+    state = 'onHearth'
+
 
 
 
@@ -279,7 +332,7 @@ def process_message(message, client):
 
     if command == "takeOff":
         state = 'takingOff'
-        w = threading.Thread(target=take_off, args=[5, ])
+        w = threading.Thread(target=take_off, args=[5,True ])
         w.start()
 
 
@@ -310,12 +363,12 @@ def process_message(message, client):
 
 
     if command == "land":
+
         vehicle.mode = dronekit.VehicleMode("LAND")
         state = 'landing'
         while vehicle.armed:
             time.sleep(1)
         state = 'onHearth'
-
 
     if command == "go":
         direction = message.payload.decode("utf-8")
@@ -324,7 +377,7 @@ def process_message(message, client):
 
     if command == 'executeFlightPlan':
         waypoints_json = str(message.payload.decode("utf-8"))
-        w = threading.Thread(target=executeFlightPlan, args=[waypoints_json, ])
+        w = threading.Thread(target=executeFlightPlan2, args=[waypoints_json, ])
         w.start()
 
 def armed_change(self, attr_name, value):
@@ -392,9 +445,11 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     print("Waiting....")
     external_client.subscribe("+/autopilotService/#", 2)
     internal_client.subscribe("+/autopilotService/#")
-    internal_client.loop_start()
-    #external_client.loop_forever()
-    external_client.loop_start()
+    if operation_mode == 'simulation':
+        external_client.loop_forever()
+    else:
+        internal_client.loop_start()
+
 
 if __name__ == '__main__':
     import sys
