@@ -448,7 +448,8 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     if operation_mode == 'simulation':
         external_client.loop_forever()
     else:
-        internal_client.loop_start()
+        external_client.loop_start()
+    internal_client.loop_start()
 
 
 if __name__ == '__main__':
