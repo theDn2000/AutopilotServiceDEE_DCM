@@ -531,6 +531,7 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
 
 
 
+
 if __name__ == '__main__':
     import sys
     connection_mode = sys.argv[1] # global or local
