@@ -1,10 +1,12 @@
 import json
 import math
+
 import threading
 import paho.mqtt.client as mqtt
 import time
 import dronekit
 from dronekit import connect, Command, VehicleMode
+from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
 
@@ -129,6 +131,7 @@ def flying():
             vehicle.send_mavlink(cmd)
             time.sleep(1)
         # a new go command has been received. Check direction
+        print ('salgo del bucle por ', direction)
         if direction == "North":
             cmd = prepare_command(speed, 0, 0)  # NORTH
         if direction == "South":
@@ -139,11 +142,11 @@ def flying():
             cmd = prepare_command(0, -speed, 0)  # WEST
         if direction == "NorthWest":
             cmd = prepare_command(speed, -speed, 0)  # NORTHWEST
-        if direction == "NorthEst":
+        if direction == "NorthEast":
             cmd = prepare_command(speed, speed, 0)  # NORTHEST
         if direction == "SouthWest":
             cmd = prepare_command(-speed, -speed, 0)  # SOUTHWEST
-        if direction == "SouthEst":
+        if direction == "SouthEast":
             cmd = prepare_command(-speed, speed, 0)  # SOUTHEST
         if direction == "Stop":
             cmd = prepare_command(0, 0, 0)  # STOP
@@ -182,7 +185,7 @@ def executeFlightPlan(waypoints_json):
     state = 'takingOff'
     take_off(altitude, False)
     state = 'flying'
-
+    #vehicle.groundspeed=3
 
     wp = waypoints[0]
     originPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
@@ -191,7 +194,7 @@ def executeFlightPlan(waypoints_json):
     for wp in waypoints [1:]:
 
         destinationPoint = dronekit.LocationGlobalRelative(float(wp['lat']),float(wp['lon']), altitude)
-        vehicle.simple_goto(destinationPoint)
+        vehicle.simple_goto(destinationPoint, groundspeed=3)
 
         currentLocation = vehicle.location.global_frame
         dist = distanceInMeters (destinationPoint,currentLocation)
@@ -279,6 +282,20 @@ def executeFlightPlan2(waypoints_json):
         time.sleep(1)
     state = 'onHearth'
 
+def set_direction(color):
+        if color == 'blueS':
+            return "North"
+        elif color == "yellow":
+            return "East"
+        elif color == 'green':
+            return "West"
+        elif color == 'pink':
+            return "South"
+        elif color == 'purple':
+            return "RTL"
+        else:
+            return "none"
+
 
 
 
@@ -296,17 +313,31 @@ def process_message(message, client):
     origin = splited[0]
     command = splited[2]
     sending_topic = "autopilotService/" + origin
+    print ('recibo ', command)
+
+    if command == "position":
+        print("Position: ", message.payload )
 
     if command == "connect":
         if state == 'disconnected':
             print("Autopilot service connected by " + origin)
+            #para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
+            # hay que ejecutar el siguiente comando desde PowerShell desde  C:\Users\USER>
+            #mavproxy - -master =COM12 - -out = udp:127.0.0.1: 14550 - -out = udp:127.0.0.1: 14551
+            # ahora el servicio puede conectarse por udp a cualquira de los dos puertos 14550 o 14551 y Mission Planner
+            # al otro
+
             if op_mode == 'simulation':
                 connection_string = "tcp:127.0.0.1:5763"
+                #connection_string = "udp:127.0.0.1:14550"
+                #connection_string = "com7"
             else:
-                connection_string = "/dev/ttyS0"
+                # connection_string = "/dev/ttyS0"
+                connection_string = "com7"
+                #connection_string = "udp:127.0.0.1:14550"
 
-
-            vehicle = connect(connection_string, wait_ready=False, baud=115200)
+            #vehicle = connect(connection_string, wait_ready=False, baud=115200)
+            vehicle = connect(connection_string, wait_ready=False, baud=57600)
 
             vehicle.wait_ready(True, timeout=5000)
 
@@ -347,6 +378,7 @@ def process_message(message, client):
         w.start()
 
     if command == "armDrone":
+        print ('arming')
         state = 'arming'
         arm()
 
@@ -377,19 +409,35 @@ def process_message(message, client):
 
     if command == 'executeFlightPlan':
         waypoints_json = str(message.payload.decode("utf-8"))
-        w = threading.Thread(target=executeFlightPlan2, args=[waypoints_json, ])
+        w = threading.Thread(target=executeFlightPlan, args=[waypoints_json, ])
         w.start()
+
+    if command == 'videoFrameWithColor':
+            # ya se está moviendo. Solo entonces hacemos caso de los colores
+            frameWithColor = json.loads(message.payload)
+            d = set_direction(frameWithColor['color'])
+            if d!= 'none':
+                direction = d
+                if direction == 'RTL':
+                    vehicle.mode = dronekit.VehicleMode("RTL")
+                    print ('cambio estado')
+                    state = 'returningHome'
+                    w = threading.Thread(target=returning)
+                    w.start()
+
+                go = True
+
 
 def armed_change(self, attr_name, value):
     global vehicle
     global state
-
+    print ('cambio a ', )
     if vehicle.armed:
         state = 'armed'
     else:
         state = 'disarmed'
 
-
+    print ('cambio a ', state)
 
 def on_internal_message(client, userdata, message):
     global internal_client
@@ -398,6 +446,12 @@ def on_internal_message(client, userdata, message):
 def on_external_message(client, userdata, message):
     global external_client
     process_message(message, external_client)
+
+def on_connect(external_client, userdata, flags, rc):
+    if rc==0:
+        print("Connection OK")
+    else:
+        print("Bad connection")
 
 def AutopilotService (connection_mode, operation_mode, external_broker, username, password):
     global op_mode
@@ -411,45 +465,71 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     print ('Operation mode: ', operation_mode)
     op_mode = operation_mode
 
-    # The internal broker is always (global or local mode) at localhost:1884
-    internal_broker_address = "localhost"
-    internal_broker_port = 1884
-
-    if connection_mode == 'global':
-        external_broker_address = external_broker
-    else:
-        external_broker_address = 'localhost'
-
-
-    print ('External broker: ', external_broker_address)
-
-
-
-    # the external broker must run always in port 8000
-    external_broker_port = 8000
-
-
-
-    external_client = mqtt.Client("Autopilot_external", transport="websockets")
-    if external_broker_address == 'classpip.upc.edu':
-        external_client.username_pw_set(username, password)
-
-    external_client.on_message = on_external_message
-    external_client.connect(external_broker_address, external_broker_port)
 
 
     internal_client = mqtt.Client("Autopilot_internal")
     internal_client.on_message = on_internal_message
-    internal_client.connect(internal_broker_address, internal_broker_port)
+    internal_client.connect("localhost", 1884)
+
+
+    external_client = mqtt.Client("Autopilot_external", transport="websockets")
+    external_client.on_message = on_external_message
+    external_client.on_connect = on_connect
+
+    if connection_mode== "global":
+        if external_broker == "hivemq":
+            external_client.connect("broker.hivemq.com", 8000)
+            print('Connected to broker.hivemq.com:8000')
+
+        elif external_broker == "hivemq_cert":
+            external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
+                           tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+            external_client.connect("broker.hivemq.com", 8884)
+            print('Connected to broker.hivemq.com:8884')
+
+        elif external_broker == "classpip_cred":
+            external_client.username_pw_set(
+                username, password
+            )
+            external_client.connect("classpip.upc.edu", 8000)
+            print('Connected to classpip.upc.edu:8000')
+
+        elif external_broker == "classpip_cert":
+            external_client.username_pw_set(
+                username, password
+            )
+            external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
+                           tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+            external_client.connect("classpip.upc.edu", 8883)
+            print('Connected to classpip.upc.edu:8883')
+        elif external_broker == "localhost":
+            external_client.connect("localhost", 8000)
+            print('Connected to localhost:8000')
+        elif external_broker == "localhost_cert":
+            print('Not implemented yet')
+
+    elif connection_mode == "local":
+        if operation_mode == "simulation":
+            external_client.connect("localhost", 8000)
+            print('Connected to localhost:8000')
+        else:
+            external_client.connect("10.10.10.1", 8000)
+            print('Connected to 10.10.10.1:8000')
+
+
 
     print("Waiting....")
     external_client.subscribe("+/autopilotService/#", 2)
+    external_client.subscribe("cameraService/+/#", 2)
     internal_client.subscribe("+/autopilotService/#")
+    internal_client.loop_start()
     if operation_mode == 'simulation':
         external_client.loop_forever()
     else:
-        external_client.loop_start()
-    internal_client.loop_start()
+        #external_client.loop_start() #when executed on board use loop_start instead of loop_forever
+        external_client.loop_forever()
+
+
 
 
 if __name__ == '__main__':
@@ -460,7 +540,7 @@ if __name__ == '__main__':
     password = None
     if connection_mode == 'global':
         external_broker = sys.argv[3]
-        if external_broker == 'classpip.upc.edu':
+        if external_broker == 'classpip_cred' or external_broker == 'classpip_cert':
             username = sys.argv[4]
             password = sys.argv[5]
     else:
