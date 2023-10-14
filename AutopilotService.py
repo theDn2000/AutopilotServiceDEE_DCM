@@ -9,6 +9,16 @@ from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
+# Import initialization functions:
+from functions.init import on_connect
+
+# Import processes functions:
+
+# Import mobility functions:
+from functions.actions.mobility import set_direction
+
+# Import calculations functions:
+from functions.actions.calculations import distanceInMeters
 
 def arm():
     """Arms vehicle and fly to aTargetAltitude"""
@@ -153,20 +163,6 @@ def flying():
         if direction == "RTL":
             end = True
 
-
-
-def distanceInMeters(aLocation1, aLocation2):
-    """
-    Returns the ground distance in metres between two LocationGlobal objects.
-
-    This method is an approximation, and will not be accurate over large distances and close to the
-    earth's poles. It comes from the ArduPilot test code:
-    https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
-    """
-    dlat = aLocation2.lat - aLocation1.lat
-    dlong = aLocation2.lon - aLocation1.lon
-    return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
-
 def executeFlightPlan(waypoints_json):
     global vehicle
     global internal_client, external_client
@@ -281,23 +277,6 @@ def executeFlightPlan2(waypoints_json):
     while vehicle.armed:
         time.sleep(1)
     state = 'onHearth'
-
-def set_direction(color):
-        if color == 'blueS':
-            return "North"
-        elif color == "yellow":
-            return "East"
-        elif color == 'green':
-            return "West"
-        elif color == 'pink':
-            return "South"
-        elif color == 'purple':
-            return "RTL"
-        else:
-            return "none"
-
-
-
 
 def process_message(message, client):
     global vehicle
@@ -446,12 +425,6 @@ def on_internal_message(client, userdata, message):
 def on_external_message(client, userdata, message):
     global external_client
     process_message(message, external_client)
-
-def on_connect(external_client, userdata, flags, rc):
-    if rc==0:
-        print("Connection OK")
-    else:
-        print("Bad connection")
 
 def AutopilotService (connection_mode, operation_mode, external_broker, username, password):
     global op_mode
