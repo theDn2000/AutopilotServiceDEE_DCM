@@ -9,6 +9,10 @@ from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
+# Import functions from the previous steps: init and processes
+from ..processes import prepare_command
+
+
 # Definition of the mobility functions that the drone is going to perform
 
 
@@ -26,3 +30,21 @@ def set_direction(color):
         return "RTL"
     else:
         return "none"
+
+# TAKE OFF: The drone takes off
+def take_off(a_target_altitude, manualControl, vehicle, state):
+    vehicle.simple_takeoff(a_target_altitude)
+    while True:
+        print(" Altitude: ", vehicle.location.global_relative_frame.alt)
+        # Break and return from function just below target altitude.
+        if vehicle.location.global_relative_frame.alt >= a_target_altitude * 0.95:
+            print("Reached target altitude")
+            break
+        time.sleep(1)
+
+    state = 'flying'
+    if manualControl:
+        w = threading.Thread(target=flying)
+        w.start()
+
+

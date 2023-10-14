@@ -10,74 +10,19 @@ from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
 # Import initialization functions:
-from functions.init import on_connect
+from functions.init import on_connect, arm
 
 # Import processes functions:
+from functions.processes import prepare_command
 
 # Import mobility functions:
-from functions.actions.mobility import set_direction
+from functions.actions.mobility import set_direction, take_off
 
 # Import calculations functions:
 from functions.actions.calculations import distanceInMeters
 
-def arm():
-    """Arms vehicle and fly to aTargetAltitude"""
-    print("Basic pre-arm checks")  # Don't try to arm until autopilot is ready
-    vehicle.mode = dronekit.VehicleMode("GUIDED")
-    while not vehicle.is_armable:
-        print(" Waiting for vehicle to initialise...")
-        time.sleep(1)
-    print("Arming motors")
-    # Copter should arm in GUIDED mode
-
-    vehicle.armed = True
-    # Confirm vehicle armed before attempting to take off
-    while not vehicle.armed:
-        print(" Waiting for arming...")
-        time.sleep(1)
-    print(" Armed")
-
-def take_off(a_target_altitude, manualControl):
-    global state
-    vehicle.simple_takeoff(a_target_altitude)
-    while True:
-        print(" Altitude: ", vehicle.location.global_relative_frame.alt)
-        # Break and return from function just below target altitude.
-        if vehicle.location.global_relative_frame.alt >= a_target_altitude * 0.95:
-            print("Reached target altitude")
-            break
-        time.sleep(1)
-
-    state = 'flying'
-    if manualControl:
-        w = threading.Thread(target=flying)
-        w.start()
 
 
-def prepare_command(velocity_x, velocity_y, velocity_z):
-    """
-    Move vehicle in direction based on specified velocity vectors.
-    """
-    msg = vehicle.message_factory.set_position_target_local_ned_encode(
-        0,  # time_boot_ms (not used)
-        0,
-        0,  # target system, target component
-        mavutil.mavlink.MAV_FRAME_LOCAL_NED,  # frame
-        0b0000111111000111,  # type_mask (only speeds enabled)
-        0,
-        0,
-        0,  # x, y, z positions (not used)
-        velocity_x,
-        velocity_y,
-        velocity_z,  # x, y, z velocity in m/s
-        0,
-        0,
-        0,  # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
-        0,
-        0,
-    )  # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
-
-    return msg
 '''
 These are the different values for the state of the autopilot:
     'connected' (only when connected the telemetry_info packet will be sent every 250 miliseconds)
@@ -130,8 +75,6 @@ def returning():
     state = 'onHearth'
 
 def flying():
-    global direction
-    global go
     speed = 1
     end = False
     cmd = prepare_command(0, 0, 0)  # stop
@@ -163,6 +106,7 @@ def flying():
         if direction == "RTL":
             end = True
 
+
 def executeFlightPlan(waypoints_json):
     global vehicle
     global internal_client, external_client
@@ -177,9 +121,9 @@ def executeFlightPlan(waypoints_json):
     waypoints = json.loads(waypoints_json)
 
     state = 'arming'
-    arm()
+    arm(vehicle)
     state = 'takingOff'
-    take_off(altitude, False)
+    take_off(altitude, False, vehicle, state)
     state = 'flying'
     #vehicle.groundspeed=3
 
@@ -241,9 +185,9 @@ def executeFlightPlan2(waypoints_json):
 
     waypoints = json.loads(waypoints_json)
     state = 'arming'
-    arm()
+    arm(vehicle)
     state = 'takingOff'
-    take_off(altitude, False)
+    take_off(altitude, False, vehicle, state)
     state = 'flying'
     cmds = vehicle.commands
     cmds.clear()
@@ -342,7 +286,7 @@ def process_message(message, client):
 
     if command == "takeOff":
         state = 'takingOff'
-        w = threading.Thread(target=take_off, args=[5,True ])
+        w = threading.Thread(target=take_off, args=[5,True, vehicle, state])
         w.start()
 
 
@@ -359,7 +303,7 @@ def process_message(message, client):
     if command == "armDrone":
         print ('arming')
         state = 'arming'
-        arm()
+        arm(vehicle)
 
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change
@@ -506,7 +450,20 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
 
 
 if __name__ == '__main__':
+
+    # Define all the global variables:
+    global state
+    global external_client
+    global sending_telemetry_info
+    global sending_topic
+    global internal_client
+    global direction
+    global go
+    global vehicle
+    global op_mode
     import sys
+
+
     connection_mode = sys.argv[1] # global or local
     operation_mode = sys.argv[2] # simulation or production
     username = None
