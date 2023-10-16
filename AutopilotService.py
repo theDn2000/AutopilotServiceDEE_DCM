@@ -13,13 +13,30 @@ from pymavlink import mavutil
 from functions.init import on_connect, arm
 
 # Import processes functions:
-from functions.processes import prepare_command
+from functions.processes import prepare_command, get_telemetry_info
 
 # Import mobility functions:
-from functions.actions.mobility import set_direction, take_off
+from functions.actions.mobility import set_direction
 
 # Import calculations functions:
 from functions.actions.calculations import distanceInMeters
+
+# Take off como depende de flying no puedo moverlo:
+def take_off(a_target_altitude, manualControl):
+    global state
+    vehicle.simple_takeoff(a_target_altitude)
+    while True:
+        print(" Altitude: ", vehicle.location.global_relative_frame.alt)
+        # Break and return from function just below target altitude.
+        if vehicle.location.global_relative_frame.alt >= a_target_altitude * 0.95:
+            print("Reached target altitude")
+            break
+        time.sleep(1)
+
+    state = 'flying'
+    if manualControl:
+        w = threading.Thread(target=flying)
+        w.start()
 
 '''
 These are the different values for the state of the autopilot:
@@ -37,28 +54,13 @@ The autopilot can also be 'disconnected' but this state will never appear in the
 when disconnected the service will not send any packet
 '''
 
-
-def get_telemetry_info():
-    global state
-    telemetry_info = {
-        'lat': vehicle.location.global_frame.lat,
-        'lon': vehicle.location.global_frame.lon,
-        'heading': vehicle.heading,
-        'groundSpeed': vehicle.groundspeed,
-        'altitude': vehicle.location.global_relative_frame.alt,
-        'battery': vehicle.battery.level,
-        'state': state
-    }
-    return telemetry_info
-
-
 def send_telemetry_info():
     global external_client
     global sending_telemetry_info
     global sending_topic
 
     while sending_telemetry_info:
-        external_client.publish(sending_topic + "/telemetryInfo", json.dumps(get_telemetry_info()))
+        external_client.publish(sending_topic + "/telemetryInfo", json.dumps(get_telemetry_info(vehicle, state)))
         time.sleep(0.25)
 
 
@@ -74,13 +76,14 @@ def returning():
         time.sleep(1)
     state = 'onHearth'
 
-
+# Flying deja de funcionar si lo muevo y lo exporto, por temas de threading y de variables globales, el movimiento deja de funcionar
 def flying():
-    global direction
     global go
+    global vehicle
+    global direction
     speed = 1
     end = False
-    cmd = prepare_command(0, 0, 0)  # stop
+    cmd = prepare_command(0, 0, 0, vehicle)  # stop
     while not end:
         go = False
         while not go:
@@ -89,23 +92,23 @@ def flying():
         # a new go command has been received. Check direction
         print('salgo del bucle por ', direction)
         if direction == "North":
-            cmd = prepare_command(speed, 0, 0)  # NORTH
+            cmd = prepare_command(speed, 0, 0, vehicle)  # NORTH
         if direction == "South":
-            cmd = prepare_command(-speed, 0, 0)  # SOUTH
+            cmd = prepare_command(-speed, 0, 0, vehicle)  # SOUTH
         if direction == "East":
-            cmd = prepare_command(0, speed, 0)  # EAST
+            cmd = prepare_command(0, speed, 0, vehicle)  # EAST
         if direction == "West":
-            cmd = prepare_command(0, -speed, 0)  # WEST
+            cmd = prepare_command(0, -speed, 0, vehicle)  # WEST
         if direction == "NorthWest":
-            cmd = prepare_command(speed, -speed, 0)  # NORTHWEST
+            cmd = prepare_command(speed, -speed, 0, vehicle)  # NORTHWEST
         if direction == "NorthEast":
-            cmd = prepare_command(speed, speed, 0)  # NORTHEST
+            cmd = prepare_command(speed, speed, 0, vehicle)  # NORTHEST
         if direction == "SouthWest":
-            cmd = prepare_command(-speed, -speed, 0)  # SOUTHWEST
+            cmd = prepare_command(-speed, -speed, 0, vehicle)  # SOUTHWEST
         if direction == "SouthEast":
-            cmd = prepare_command(-speed, speed, 0)  # SOUTHEST
+            cmd = prepare_command(-speed, speed, 0, vehicle)  # SOUTHEST
         if direction == "Stop":
-            cmd = prepare_command(0, 0, 0)  # STOP
+            cmd = prepare_command(0, 0, 0, vehicle)  # STOP
         if direction == "RTL":
             end = True
 
@@ -124,7 +127,7 @@ def executeFlightPlan(waypoints_json):
     state = 'arming'
     arm(vehicle)
     state = 'takingOff'
-    take_off(altitude, False, vehicle, state)
+    take_off(altitude, False)
     state = 'flying'
     # vehicle.groundspeed=3
 
@@ -186,7 +189,7 @@ def executeFlightPlan2(waypoints_json):
     state = 'arming'
     arm(vehicle)
     state = 'takingOff'
-    take_off(altitude, False, vehicle, state)
+    take_off(altitude, False)
     state = 'flying'
     cmds = vehicle.commands
     cmds.clear()
@@ -222,6 +225,7 @@ def executeFlightPlan2(waypoints_json):
     state = 'onHearth'
 
 
+# Todas las funciones que se ejecutan directamente desde process_message se hacen con threads, lo que implica que tengo que pasar las variables a las funciones que inicio con threads. PASO INTERMEDIO?????????
 def process_message(message, client):
     global vehicle
     global direction
@@ -282,7 +286,7 @@ def process_message(message, client):
 
     if command == "takeOff":
         state = 'takingOff'
-        w = threading.Thread(target=take_off, args=[5, True, vehicle, state])
+        w = threading.Thread(target=take_off, args=[5, True])
         w.start()
 
     if command == "returnToLaunch":

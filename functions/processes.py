@@ -37,3 +37,23 @@ def prepare_command(velocity_x, velocity_y, velocity_z, vehicle):
     )  # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
 
     return msg
+
+# GET TELEMETRY INFO: Gets the info of the vehicle
+def get_telemetry_info(vehicle, state):
+    telemetry_info = {
+        'lat': vehicle.location.global_frame.lat,
+        'lon': vehicle.location.global_frame.lon,
+        'heading': vehicle.heading,
+        'groundSpeed': vehicle.groundspeed,
+        'altitude': vehicle.location.global_relative_frame.alt,
+        'battery': vehicle.battery.level,
+        'state': state
+    }
+    return telemetry_info
+
+# SEND TELEMETRY INFO: Sends the info of the vehicle
+def send_telemetry_info(vehicle, state, external_client, sending_telemetry_info, sending_topic):
+
+    while sending_telemetry_info:
+        external_client.publish(sending_topic + "/telemetryInfo", json.dumps(get_telemetry_info(vehicle, state)))
+        time.sleep(0.25)
