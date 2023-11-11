@@ -9,6 +9,9 @@ from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
+global sending_telemetry_info
+
+
 # Definition of the functions describing processes
 
 
@@ -38,6 +41,7 @@ def prepare_command(velocity_x, velocity_y, velocity_z, vehicle):
 
     return msg
 
+
 # GET TELEMETRY INFO: Gets the info of the vehicle
 def get_telemetry_info(vehicle, state):
     telemetry_info = {
@@ -51,9 +55,9 @@ def get_telemetry_info(vehicle, state):
     }
     return telemetry_info
 
-# SEND TELEMETRY INFO: Sends the info of the vehicle
-def send_telemetry_info(vehicle, state, external_client, sending_telemetry_info, sending_topic):
 
+# SEND TELEMETRY INFO: Sends the info of the vehicle
+def send_telemetry_info(vehicle, state, external_client, sending_topic):
     while sending_telemetry_info:
         external_client.publish(sending_topic + "/telemetryInfo", json.dumps(get_telemetry_info(vehicle, state)))
         time.sleep(0.25)
