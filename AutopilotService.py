@@ -14,15 +14,14 @@ from functions.init import on_connect, arm
 
 # Import processes functions:
 import functions.processes
-from functions.processes import prepare_command, send_telemetry_info
+from functions.processes import prepare_command, send_telemetry_info, change_state, get_state, lock
 
 # Import mobility functions:
 import functions.actions.mobility
-from functions.actions.mobility import set_direction, take_off
+from functions.actions.mobility import take_off, flying
 
 # Import calculations functions:
 from functions.actions.calculations import distanceInMeters
-
 
 '''
 These are the different values for the state of the autopilot:
@@ -41,10 +40,11 @@ when disconnected the service will not send any packet
 '''
 
 def trigger_take_off():
-    take_off(5, True, vehicle, state)
+    take_off(5, True, vehicle)
+
 
 def trigger_send_telemetry_info():
-    send_telemetry_info(vehicle, state, external_client, sending_topic)
+    send_telemetry_info(vehicle, external_client, sending_topic)
 
 
 def returning():
@@ -58,6 +58,20 @@ def returning():
     while vehicle.armed:
         time.sleep(1)
     state = 'onHearth'
+
+def set_direction(color):
+    if color == 'blueS':
+        return "North"
+    elif color == "yellow":
+        return "East"
+    elif color == 'green':
+        return "West"
+    elif color == 'pink':
+        return "South"
+    elif color == 'purple':
+        return "RTL"
+    else:
+        return "none"
 
 def executeFlightPlan(waypoints_json):
     global vehicle
@@ -183,6 +197,8 @@ def process_message(message, client):
     global sending_topic
     global state
 
+
+
     splited = message.topic.split("/")
     origin = splited[0]
     command = splited[2]
@@ -217,6 +233,7 @@ def process_message(message, client):
 
             print('Connected to flight controller')
             state = 'connected'
+            functions.processes.state = 'connected'
 
             # external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
 
@@ -231,44 +248,59 @@ def process_message(message, client):
         functions.processes.sending_telemetry_info = False
         sending_telemetry_info = False
         state = 'disconnected'
+        functions.processes.state = 'disconnected'
 
     if command == "takeOff":
         state = 'takingOff'
+        functions.processes.state = 'takingOff'
         w = threading.Thread(target=trigger_take_off)
         w.start()
+        w.join()
+
+        if get_state() == "flying":
+            w = threading.Thread(target=flying)
+            w.start()
 
     if command == "returnToLaunch":
         # stop the process of getting positions
         vehicle.mode = dronekit.VehicleMode("RTL")
         state = 'returningHome'
+        functions.processes.state = 'returningHome'
         direction = "RTL"
         functions.actions.mobility.go = True
         w = threading.Thread(target=returning)
         w.start()
 
     if command == "armDrone":
-        print('arming')
-        state = 'arming'
-        arm(vehicle)
+        with lock:
+            print('arming')
+            state = 'arming'
+            functions.processes.state = 'arming'
 
-        # the vehicle will disarm automatically is takeOff does not come soon
-        # when attribute 'armed' changes run function armed_change
-        vehicle.add_attribute_listener('armed', armed_change)
-        state = 'armed'
+            arm(vehicle)
+
+            # the vehicle will disarm automatically is takeOff does not come soon
+            # when attribute 'armed' changes run function armed_change
+            vehicle.add_attribute_listener('armed', armed_change)
+            state = 'armed'
+            functions.processes.state = 'armed'
 
     if command == "disarmDrone":
         vehicle.armed = False
         while vehicle.armed:
             time.sleep(1)
         state = 'disarmed'
+        functions.processes.state = 'disarmed'
 
     if command == "land":
 
         vehicle.mode = dronekit.VehicleMode("LAND")
         state = 'landing'
+        functions.processes.state = 'landing'
         while vehicle.armed:
             time.sleep(1)
         state = 'onHearth'
+        functions.processes.state = 'onHearth'
 
     if command == "go":
         functions.actions.mobility.direction = message.payload.decode("utf-8")
@@ -290,6 +322,7 @@ def process_message(message, client):
                 vehicle.mode = dronekit.VehicleMode("RTL")
                 print('cambio estado')
                 state = 'returningHome'
+                functions.processes.state = 'returningHome'
                 w = threading.Thread(target=returning)
                 w.start()
 
