@@ -9,6 +9,12 @@ from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
+# Import functions from the function folder
+from functions_v0 import connect_v0_func
+
+# Declare global variables that will be shared with the threads:
+state = 'disconnected'
+sending_telemetry_info = False
 
 def arm():
     """Arms vehicle and fly to aTargetAltitude"""
@@ -319,41 +325,7 @@ def process_message(message, client):
         print("Position: ", message.payload )
 
     if command == "connect":
-        if state == 'disconnected':
-            print("Autopilot service connected by " + origin)
-            #para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
-            # hay que ejecutar el siguiente comando desde PowerShell desde  C:\Users\USER>
-            #mavproxy - -master =COM12 - -out = udp:127.0.0.1: 14550 - -out = udp:127.0.0.1: 14551
-            # ahora el servicio puede conectarse por udp a cualquira de los dos puertos 14550 o 14551 y Mission Planner
-            # al otro
-
-            if op_mode == 'simulation':
-                connection_string = "tcp:127.0.0.1:5763"
-                #connection_string = "udp:127.0.0.1:14550"
-                #connection_string = "com7"
-            else:
-                # connection_string = "/dev/ttyS0"
-                connection_string = "com7"
-                #connection_string = "udp:127.0.0.1:14550"
-
-            #vehicle = connect(connection_string, wait_ready=False, baud=115200)
-            vehicle = connect(connection_string, wait_ready=False, baud=57600)
-
-            vehicle.wait_ready(True, timeout=5000)
-
-            print ('Connected to flight controller')
-            state = 'connected'
-
-            #external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
-
-
-            sending_telemetry_info = True
-            y = threading.Thread(target=send_telemetry_info)
-            y.start()
-        else:
-            print ('Autopilot already connected')
-
-
+        connect_v0_func.connect_v0(origin, op_mode)
 
     if command == "disconnect":
         vehicle.close()
