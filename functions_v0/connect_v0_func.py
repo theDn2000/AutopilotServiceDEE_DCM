@@ -1,9 +1,13 @@
 import threading
 from dronekit import connect, Command, VehicleMode
-from AutopilotServiceDEE_DCM.AutopilotService import state, sending_telemetry_info, send_telemetry_info  # noqa: F401
+
+import AutopilotServiceDEE_DCM.AutopilotService
+from AutopilotServiceDEE_DCM.AutopilotService import state, sending_telemetry_info  # noqa: F401
+from AutopilotServiceDEE_DCM.functions_v0.send_telemetry_info_v0_func import send_telemetry_info
 
 
-def connect_v0(origin, op_mode):
+
+def connect_v0(origin, op_mode, external_client, internal_client, sending_topic):
     global state
     global vehicle
     global sending_telemetry_info
@@ -34,8 +38,9 @@ def connect_v0(origin, op_mode):
 
         # external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
 
-        sending_telemetry_info = True
-        y = threading.Thread(target=send_telemetry_info)
+        AutopilotServiceDEE_DCM.AutopilotService.sending_telemetry_info = True
+        y = threading.Thread(target=send_telemetry_info, args=[external_client, internal_client, sending_topic, vehicle])
         y.start()
+        y.join()
     else:
         print('Autopilot already connected')

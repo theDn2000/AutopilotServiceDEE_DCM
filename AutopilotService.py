@@ -89,28 +89,6 @@ These are the different values for the state of the autopilot:
 The autopilot can also be 'disconnected' but this state will never appear in the telemetry_info packet 
 when disconnected the service will not send any packet
 '''
-def get_telemetry_info ():
-    global state
-    telemetry_info = {
-        'lat': vehicle.location.global_frame.lat,
-        'lon': vehicle.location.global_frame.lon,
-        'heading': vehicle.heading,
-        'groundSpeed': vehicle.groundspeed,
-        'altitude': vehicle.location.global_relative_frame.alt,
-        'battery': vehicle.battery.level,
-        'state': state
-    }
-    return telemetry_info
-
-
-def send_telemetry_info():
-    global external_client
-    global sending_telemetry_info
-    global sending_topic
-
-    while sending_telemetry_info:
-        external_client.publish(sending_topic + "/telemetryInfo", json.dumps(get_telemetry_info()))
-        time.sleep(0.25)
 
 
 def returning():
@@ -325,7 +303,7 @@ def process_message(message, client):
         print("Position: ", message.payload )
 
     if command == "connect":
-        connect_v0_func.connect_v0(origin, op_mode)
+        connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
 
     if command == "disconnect":
         vehicle.close()
