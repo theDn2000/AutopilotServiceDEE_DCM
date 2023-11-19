@@ -10,10 +10,12 @@ from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
 # Import functions from the function folder
-from functions_v0 import connect_v0_func
+from functions_v0 import connect_v0_func, get_telemetry_info_v0_func, send_telemetry_info_v0_func, arm_v0_func
+from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
 
 # Declare global variables that will be shared with the threads:
 state = 'disconnected'
+vehicle = object
 sending_telemetry_info = False
 
 def arm():
@@ -303,7 +305,14 @@ def process_message(message, client):
         print("Position: ", message.payload )
 
     if command == "connect":
-        connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
+        state, vehicle = connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
+
+        # If connect is OK, initialize the telemetry data
+        print(state)
+        if state == 'connected':
+            sending_telemetry_info = True
+            y = threading.Thread(target=send_telemetry_info_v0, args=[external_client, internal_client, sending_topic])
+            y.start()
 
     if command == "disconnect":
         vehicle.close()
@@ -328,14 +337,16 @@ def process_message(message, client):
         w.start()
 
     if command == "armDrone":
-        print ('arming')
-        state = 'arming'
-        arm()
+
+        arm_v0_func.arm_v0()
+        #arm()
 
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change
-        vehicle.add_attribute_listener('armed', armed_change)
-        state = 'armed'
+
+        #DESCOMENTAR ESTO
+        #vehicle.add_attribute_listener('armed', armed_change)
+        #state = 'armed'
 
     if command == "disarmDrone":
         vehicle.armed = False

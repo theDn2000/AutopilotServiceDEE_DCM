@@ -1,19 +1,28 @@
 import json
-import threading
-import time
-import dronekit # noqa: F401
-from dronekit import connect, Command, VehicleMode # noqa: F401
-from AutopilotServiceDEE_DCM.AutopilotService import state # noqa: F401
+import math
 
-def get_telemetry_info (vehicle):
+import threading
+import paho.mqtt.client as mqtt
+import time
+import dronekit
+from dronekit import connect, Command, VehicleMode
+from paho.mqtt.client import ssl
+from pymavlink import mavutil
+import dronekit  # noqa: F401
+from dronekit import connect, Command, VehicleMode  # noqa: F401
+
+import AutopilotServiceDEE_DCM.AutopilotService
+
+def get_telemetry_info():
     global state
+    global vehicle
     telemetry_info = {
-        'lat': vehicle.location.global_frame.lat,
-        'lon': vehicle.location.global_frame.lon,
-        'heading': vehicle.heading,
-        'groundSpeed': vehicle.groundspeed,
-        'altitude': vehicle.location.global_relative_frame.alt,
-        'battery': vehicle.battery.level,
-        'state': state
+        'lat': AutopilotServiceDEE_DCM.AutopilotService.vehicle.location.global_frame.lat,
+        'lon': AutopilotServiceDEE_DCM.AutopilotService.vehicle.location.global_frame.lon,
+        'heading': AutopilotServiceDEE_DCM.AutopilotService.vehicle.heading,
+        'groundSpeed': AutopilotServiceDEE_DCM.AutopilotService.vehicle.groundspeed,
+        'altitude': AutopilotServiceDEE_DCM.AutopilotService.vehicle.location.global_relative_frame.alt,
+        'battery': AutopilotServiceDEE_DCM.AutopilotService.vehicle.battery.level,
+        'state': AutopilotServiceDEE_DCM.AutopilotService.state
     }
     return telemetry_info
