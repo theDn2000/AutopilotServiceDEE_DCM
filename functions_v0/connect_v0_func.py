@@ -4,6 +4,7 @@ from dronekit import connect, Command, VehicleMode
 import AutopilotServiceDEE_DCM.AutopilotService
 from AutopilotServiceDEE_DCM.AutopilotService import state, sending_telemetry_info, vehicle  # noqa: F401
 from AutopilotServiceDEE_DCM.functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
+from AutopilotServiceDEE_DCM.functions_v0 import variables
 
 
 
@@ -11,7 +12,7 @@ def connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
     global state
     global vehicle
     global sending_telemetry_info
-    if state == 'disconnected':
+    if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'disconnected':
         print("Autopilot service connected by " + origin)
         # para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
         # hay que ejecutar el siguiente comando desde PowerShell desde  C:\Users\USER>
@@ -38,7 +39,7 @@ def connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
         print('Connected to flight controller')
         state = 'connected'
         AutopilotServiceDEE_DCM.AutopilotService.sending_telemetry_info = True
-        AutopilotServiceDEE_DCM.AutopilotService.state = 'connected'
+        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'connected'
 
         return 'connected', vehicle
 

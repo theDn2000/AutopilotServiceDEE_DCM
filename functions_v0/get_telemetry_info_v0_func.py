@@ -16,6 +16,7 @@ import AutopilotServiceDEE_DCM.AutopilotService
 def get_telemetry_info():
     global state
     global vehicle
+    print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
     telemetry_info = {
         'lat': AutopilotServiceDEE_DCM.AutopilotService.vehicle.location.global_frame.lat,
         'lon': AutopilotServiceDEE_DCM.AutopilotService.vehicle.location.global_frame.lon,
@@ -23,6 +24,6 @@ def get_telemetry_info():
         'groundSpeed': AutopilotServiceDEE_DCM.AutopilotService.vehicle.groundspeed,
         'altitude': AutopilotServiceDEE_DCM.AutopilotService.vehicle.location.global_relative_frame.alt,
         'battery': AutopilotServiceDEE_DCM.AutopilotService.vehicle.battery.level,
-        'state': AutopilotServiceDEE_DCM.AutopilotService.state
+        'state': AutopilotServiceDEE_DCM.functions_v0.variables.state
     }
     return telemetry_info

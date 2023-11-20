@@ -9,14 +9,17 @@ from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
+import AutopilotServiceDEE_DCM.functions_v0.variables
 # Import functions from the function folder
 from functions_v0 import connect_v0_func, get_telemetry_info_v0_func, send_telemetry_info_v0_func, arm_v0_func
 from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
+from functions_v0.take_off_v0_func import take_off_v0
+from functions_v0 import variables
 
-# Declare global variables that will be shared with the threads:
-state = 'disconnected'
-vehicle = object
+# Import and init global :
 sending_telemetry_info = False
+vehicle = object
+state = 'disconnected'
 
 def arm():
     """Arms vehicle and fly to aTargetAltitude"""
@@ -308,8 +311,8 @@ def process_message(message, client):
         state, vehicle = connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
 
         # If connect is OK, initialize the telemetry data
-        print(state)
-        if state == 'connected':
+        print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
+        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected':
             sending_telemetry_info = True
             y = threading.Thread(target=send_telemetry_info_v0, args=[external_client, internal_client, sending_topic])
             y.start()
@@ -317,13 +320,21 @@ def process_message(message, client):
     if command == "disconnect":
         vehicle.close()
         sending_telemetry_info = False
-        state = 'disconnected'
+        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disconnected'
 
 
     if command == "takeOff":
-        state = 'takingOff'
-        w = threading.Thread(target=take_off, args=[5,True ])
-        w.start()
+
+        print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
+        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'armed':
+            #state = 'takingOff'
+            w = threading.Thread(target=take_off_v0, args=[5,True])
+            w.start()
+            w.join()
+
+        if state == 'flying':
+            w = threading.Thread(target=flying)
+            w.start()
 
 
 
@@ -338,8 +349,12 @@ def process_message(message, client):
 
     if command == "armDrone":
 
-        arm_v0_func.arm_v0()
+        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected':
+            arm_v0_func.arm_v0()
+            print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
         #arm()
+        else:
+            print('The vehicle is not armable as it is not connected')
 
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change
@@ -420,8 +435,6 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     global internal_client
     global state
 
-    state = 'disconnected'
-
     print ('Connection mode: ', connection_mode)
     print ('Operation mode: ', operation_mode)
     op_mode = operation_mode
@@ -494,6 +507,7 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
 
 
 if __name__ == '__main__':
+    variables.init()
     import sys
     connection_mode = sys.argv[1] # global or local
     operation_mode = sys.argv[2] # simulation or production

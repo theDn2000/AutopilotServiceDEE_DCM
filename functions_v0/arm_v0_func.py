@@ -1,8 +1,10 @@
 import threading
 import dronekit
 import time
+import importlib
 from dronekit import connect, Command, VehicleMode
 
+from AutopilotServiceDEE_DCM.functions_v0 import variables
 import AutopilotServiceDEE_DCM.AutopilotService
 
 
@@ -28,4 +30,5 @@ def arm_v0():
         time.sleep(1)
     print(" Armed")
 
-    AutopilotServiceDEE_DCM.AutopilotService.state = 'armed'
+    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'armed'
+    return
