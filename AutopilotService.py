@@ -15,6 +15,7 @@ from functions_v0 import connect_v0_func, get_telemetry_info_v0_func, send_telem
 from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
 from functions_v0.take_off_v0_func import take_off_v0
 from functions_v0.flying_v0_func import flying_v0
+from functions_v0.return_to_launch_v0_func import returning_v0
 from functions_v0 import variables
 
 # Import and init global :
@@ -248,7 +249,7 @@ def process_message(message, client):
         AutopilotServiceDEE_DCM.functions_v0.variables.state = 'returningHome'
         AutopilotServiceDEE_DCM.functions_v0.variables.direction = "RTL"
         AutopilotServiceDEE_DCM.functions_v0.variables.go = True
-        w = threading.Thread(target=returning)
+        w = threading.Thread(target=returning_v0)
         w.start()
 
     if command == "armDrone":
