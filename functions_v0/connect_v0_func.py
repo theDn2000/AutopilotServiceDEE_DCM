@@ -31,17 +31,17 @@ def connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
 
         # vehicle = connect(connection_string, wait_ready=False, baud=115200)
         # vehicle = connect(connection_string, wait_ready=False, baud=57600)
-        AutopilotServiceDEE_DCM.AutopilotService.vehicle = connect(connection_string, wait_ready=False, baud=57600)
+        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle = connect(connection_string, wait_ready=False, baud=57600)
 
-        AutopilotServiceDEE_DCM.AutopilotService.vehicle.wait_ready(True, timeout=5000)
+        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.wait_ready(True, timeout=5000)
         #vehicle.wait_ready(True, timeout=5000)
 
         print('Connected to flight controller')
         state = 'connected'
-        AutopilotServiceDEE_DCM.AutopilotService.sending_telemetry_info = True
+        AutopilotServiceDEE_DCM.functions_v0.variables.sending_telemetry_info = True
         AutopilotServiceDEE_DCM.functions_v0.variables.state = 'connected'
 
-        return 'connected', vehicle
+        # return 'connected', vehicle
 
         # external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
 

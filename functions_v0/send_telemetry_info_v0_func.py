@@ -10,6 +10,6 @@ from dronekit import connect, Command, VehicleMode
 def send_telemetry_info_v0(external_client, internal_client, sending_topic):
     global sending_telemetry_info
 
-    while AutopilotServiceDEE_DCM.AutopilotService.sending_telemetry_info:
+    while AutopilotServiceDEE_DCM.functions_v0.variables.sending_telemetry_info:
         external_client.publish(sending_topic + "/telemetryInfo", json.dumps(get_telemetry_info()))
         time.sleep(0.25)

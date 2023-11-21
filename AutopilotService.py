@@ -14,6 +14,7 @@ import AutopilotServiceDEE_DCM.functions_v0.variables
 from functions_v0 import connect_v0_func, get_telemetry_info_v0_func, send_telemetry_info_v0_func, arm_v0_func
 from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
 from functions_v0.take_off_v0_func import take_off_v0
+from functions_v0.flying_v0_func import flying_v0
 from functions_v0 import variables
 
 # Import and init global :
@@ -21,64 +22,7 @@ sending_telemetry_info = False
 vehicle = object
 state = 'disconnected'
 
-def arm():
-    """Arms vehicle and fly to aTargetAltitude"""
-    print("Basic pre-arm checks")  # Don't try to arm until autopilot is ready
-    vehicle.mode = dronekit.VehicleMode("GUIDED")
-    while not vehicle.is_armable:
-        print(" Waiting for vehicle to initialise...")
-        time.sleep(1)
-    print("Arming motors")
-    # Copter should arm in GUIDED mode
 
-    vehicle.armed = True
-    # Confirm vehicle armed before attempting to take off
-    while not vehicle.armed:
-        print(" Waiting for arming...")
-        time.sleep(1)
-    print(" Armed")
-
-def take_off(a_target_altitude, manualControl):
-    global state
-    vehicle.simple_takeoff(a_target_altitude)
-    while True:
-        print(" Altitude: ", vehicle.location.global_relative_frame.alt)
-        # Break and return from function just below target altitude.
-        if vehicle.location.global_relative_frame.alt >= a_target_altitude * 0.95:
-            print("Reached target altitude")
-            break
-        time.sleep(1)
-
-    state = 'flying'
-    if manualControl:
-        w = threading.Thread(target=flying)
-        w.start()
-
-
-def prepare_command(velocity_x, velocity_y, velocity_z):
-    """
-    Move vehicle in direction based on specified velocity vectors.
-    """
-    msg = vehicle.message_factory.set_position_target_local_ned_encode(
-        0,  # time_boot_ms (not used)
-        0,
-        0,  # target system, target component
-        mavutil.mavlink.MAV_FRAME_LOCAL_NED,  # frame
-        0b0000111111000111,  # type_mask (only speeds enabled)
-        0,
-        0,
-        0,  # x, y, z positions (not used)
-        velocity_x,
-        velocity_y,
-        velocity_z,  # x, y, z velocity in m/s
-        0,
-        0,
-        0,  # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
-        0,
-        0,
-    )  # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
-
-    return msg
 '''
 These are the different values for the state of the autopilot:
     'connected' (only when connected the telemetry_info packet will be sent every 250 miliseconds)
@@ -104,43 +48,10 @@ def returning():
     global state
 
     # wait until the drone is at home
-    while vehicle.armed:
+    while AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
         time.sleep(1)
-    state = 'onHearth'
+    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'onHearth'
 
-def flying():
-    global direction
-    global go
-    speed = 1
-    end = False
-    cmd = prepare_command(0, 0, 0)  # stop
-    while not end:
-        go = False
-        while not go:
-            vehicle.send_mavlink(cmd)
-            time.sleep(1)
-        # a new go command has been received. Check direction
-        print ('salgo del bucle por ', direction)
-        if direction == "North":
-            cmd = prepare_command(speed, 0, 0)  # NORTH
-        if direction == "South":
-            cmd = prepare_command(-speed, 0, 0)  # SOUTH
-        if direction == "East":
-            cmd = prepare_command(0, speed, 0)  # EAST
-        if direction == "West":
-            cmd = prepare_command(0, -speed, 0)  # WEST
-        if direction == "NorthWest":
-            cmd = prepare_command(speed, -speed, 0)  # NORTHWEST
-        if direction == "NorthEast":
-            cmd = prepare_command(speed, speed, 0)  # NORTHEST
-        if direction == "SouthWest":
-            cmd = prepare_command(-speed, -speed, 0)  # SOUTHWEST
-        if direction == "SouthEast":
-            cmd = prepare_command(-speed, speed, 0)  # SOUTHEST
-        if direction == "Stop":
-            cmd = prepare_command(0, 0, 0)  # STOP
-        if direction == "RTL":
-            end = True
 
 
 
@@ -154,7 +65,8 @@ def distanceInMeters(aLocation1, aLocation2):
     """
     dlat = aLocation2.lat - aLocation1.lat
     dlong = aLocation2.lon - aLocation1.lon
-    return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
+    return math.sqrt((dlat * dlat) + (dlong * dlong)) * 1.113195e5
+
 
 def executeFlightPlan(waypoints_json):
     global vehicle
@@ -162,40 +74,38 @@ def executeFlightPlan(waypoints_json):
     global sending_topic
     global state
 
-
-
     altitude = 6
     origin = sending_topic.split('/')[1]
 
     waypoints = json.loads(waypoints_json)
 
     state = 'arming'
-    arm()
+    # arm()
     state = 'takingOff'
-    take_off(altitude, False)
+    # take_off(altitude, False)
     state = 'flying'
-    #vehicle.groundspeed=3
+    # vehicle.groundspeed=3
 
     wp = waypoints[0]
     originPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
 
     distanceThreshold = 0.50
-    for wp in waypoints [1:]:
+    for wp in waypoints[1:]:
 
-        destinationPoint = dronekit.LocationGlobalRelative(float(wp['lat']),float(wp['lon']), altitude)
+        destinationPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
         vehicle.simple_goto(destinationPoint, groundspeed=3)
 
         currentLocation = vehicle.location.global_frame
-        dist = distanceInMeters (destinationPoint,currentLocation)
+        dist = distanceInMeters(destinationPoint, currentLocation)
 
         while dist > distanceThreshold:
             time.sleep(0.25)
             currentLocation = vehicle.location.global_frame
             dist = distanceInMeters(destinationPoint, currentLocation)
-        print ('reached')
+        print('reached')
         waypointReached = {
-            'lat':currentLocation.lat,
-            'lon':currentLocation.lon
+            'lat': currentLocation.lat,
+            'lon': currentLocation.lon
         }
 
         external_client.publish(sending_topic + "/waypointReached", json.dumps(waypointReached))
@@ -227,22 +137,20 @@ def executeFlightPlan2(waypoints_json):
     global sending_topic
     global state
 
-
-
     altitude = 6
     origin = sending_topic.split('/')[1]
 
     waypoints = json.loads(waypoints_json)
     state = 'arming'
-    arm()
+    # arm()
     state = 'takingOff'
-    take_off(altitude, False)
+    # take_off(altitude, False)
     state = 'flying'
     cmds = vehicle.commands
     cmds.clear()
 
-    #wp = waypoints[0]
-    #originPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
+    # wp = waypoints[0]
+    # originPoint = dronekit.LocationGlobalRelative(float(wp['lat']), float(wp['lon']), altitude)
     for wp in waypoints:
         cmds.add(
             Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0,
@@ -258,7 +166,7 @@ def executeFlightPlan2(waypoints_json):
     vehicle.mode = VehicleMode("AUTO")
     while True:
         nextwaypoint = vehicle.commands.next
-        print ('next ', nextwaypoint)
+        print('next ', nextwaypoint)
         if nextwaypoint == len(waypoints):  # Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
             print("Last waypoint reached")
             break;
@@ -271,21 +179,20 @@ def executeFlightPlan2(waypoints_json):
         time.sleep(1)
     state = 'onHearth'
 
+
 def set_direction(color):
-        if color == 'blueS':
-            return "North"
-        elif color == "yellow":
-            return "East"
-        elif color == 'green':
-            return "West"
-        elif color == 'pink':
-            return "South"
-        elif color == 'purple':
-            return "RTL"
-        else:
-            return "none"
-
-
+    if color == 'blueS':
+        return "North"
+    elif color == "yellow":
+        return "East"
+    elif color == 'green':
+        return "West"
+    elif color == 'pink':
+        return "South"
+    elif color == 'purple':
+        return "RTL"
+    else:
+        return "none"
 
 
 def process_message(message, client):
@@ -302,48 +209,45 @@ def process_message(message, client):
     origin = splited[0]
     command = splited[2]
     sending_topic = "autopilotService/" + origin
-    print ('recibo ', command)
+    print('recibo ', command)
 
     if command == "position":
-        print("Position: ", message.payload )
+        print("Position: ", message.payload)
 
     if command == "connect":
-        state, vehicle = connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
+        connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
 
         # If connect is OK, initialize the telemetry data
         print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
         if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected':
-            sending_telemetry_info = True
+            AutopilotServiceDEE_DCM.functions_v0.variables.sending_telemetry_info = True
             y = threading.Thread(target=send_telemetry_info_v0, args=[external_client, internal_client, sending_topic])
             y.start()
 
     if command == "disconnect":
-        vehicle.close()
-        sending_telemetry_info = False
+        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.close()
+        AutopilotServiceDEE_DCM.functions_v0.variables.sending_telemetry_info = False
         AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disconnected'
-
 
     if command == "takeOff":
 
         print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
         if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'armed':
-            #state = 'takingOff'
-            w = threading.Thread(target=take_off_v0, args=[5,True])
+            # state = 'takingOff'
+            w = threading.Thread(target=take_off_v0, args=[5, True])
             w.start()
             w.join()
 
-        if state == 'flying':
-            w = threading.Thread(target=flying)
+        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'flying':
+            w = threading.Thread(target=flying_v0)
             w.start()
-
-
 
     if command == "returnToLaunch":
         # stop the process of getting positions
-        vehicle.mode = dronekit.VehicleMode("RTL")
-        state = 'returningHome'
-        direction = "RTL"
-        go = True
+        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.mode = dronekit.VehicleMode("RTL")
+        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'returningHome'
+        AutopilotServiceDEE_DCM.functions_v0.variables.direction = "RTL"
+        AutopilotServiceDEE_DCM.functions_v0.variables.go = True
         w = threading.Thread(target=returning)
         w.start()
 
@@ -352,23 +256,22 @@ def process_message(message, client):
         if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected':
             arm_v0_func.arm_v0()
             print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
-        #arm()
+        # arm()
         else:
             print('The vehicle is not armable as it is not connected')
 
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change
 
-        #DESCOMENTAR ESTO
-        #vehicle.add_attribute_listener('armed', armed_change)
-        #state = 'armed'
+        # DESCOMENTAR ESTO
+        # vehicle.add_attribute_listener('armed', armed_change)
+        # state = 'armed'
 
     if command == "disarmDrone":
-        vehicle.armed = False
-        while vehicle.armed:
+        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed = False
+        while AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
             time.sleep(1)
-        state = 'disarmed'
-
+        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disarmed'
 
     if command == "land":
 
@@ -379,9 +282,9 @@ def process_message(message, client):
         state = 'onHearth'
 
     if command == "go":
-        direction = message.payload.decode("utf-8")
-        print("Going ", direction)
-        go = True
+        AutopilotServiceDEE_DCM.functions_v0.variables.direction = message.payload.decode("utf-8")
+        print("Going ", AutopilotServiceDEE_DCM.functions_v0.variables.direction)
+        AutopilotServiceDEE_DCM.functions_v0.variables.go = True
 
     if command == 'executeFlightPlan':
         waypoints_json = str(message.payload.decode("utf-8"))
@@ -389,75 +292,76 @@ def process_message(message, client):
         w.start()
 
     if command == 'videoFrameWithColor':
-            # ya se está moviendo. Solo entonces hacemos caso de los colores
-            frameWithColor = json.loads(message.payload)
-            d = set_direction(frameWithColor['color'])
-            if d!= 'none':
-                direction = d
-                if direction == 'RTL':
-                    vehicle.mode = dronekit.VehicleMode("RTL")
-                    print ('cambio estado')
-                    state = 'returningHome'
-                    w = threading.Thread(target=returning)
-                    w.start()
+        # ya se está moviendo. Solo entonces hacemos caso de los colores
+        frameWithColor = json.loads(message.payload)
+        d = set_direction(frameWithColor['color'])
+        if d != 'none':
+            direction = d
+            if direction == 'RTL':
+                vehicle.mode = dronekit.VehicleMode("RTL")
+                print('cambio estado')
+                state = 'returningHome'
+                w = threading.Thread(target=returning)
+                w.start()
 
-                go = True
+            go = True
 
 
 def armed_change(self, attr_name, value):
     global vehicle
     global state
-    print ('cambio a ', )
+    print('cambio a ', )
     if vehicle.armed:
         state = 'armed'
     else:
         state = 'disarmed'
 
-    print ('cambio a ', state)
+    print('cambio a ', state)
+
 
 def on_internal_message(client, userdata, message):
     global internal_client
     process_message(message, internal_client)
 
+
 def on_external_message(client, userdata, message):
     global external_client
     process_message(message, external_client)
 
+
 def on_connect(external_client, userdata, flags, rc):
-    if rc==0:
+    if rc == 0:
         print("Connection OK")
     else:
         print("Bad connection")
 
-def AutopilotService (connection_mode, operation_mode, external_broker, username, password):
+
+def AutopilotService(connection_mode, operation_mode, external_broker, username, password):
     global op_mode
     global external_client
     global internal_client
     global state
 
-    print ('Connection mode: ', connection_mode)
-    print ('Operation mode: ', operation_mode)
+    print('Connection mode: ', connection_mode)
+    print('Operation mode: ', operation_mode)
     op_mode = operation_mode
-
-
 
     internal_client = mqtt.Client("Autopilot_internal")
     internal_client.on_message = on_internal_message
     internal_client.connect("localhost", 1884)
 
-
     external_client = mqtt.Client("Autopilot_external", transport="websockets")
     external_client.on_message = on_external_message
     external_client.on_connect = on_connect
 
-    if connection_mode== "global":
+    if connection_mode == "global":
         if external_broker == "hivemq":
             external_client.connect("broker.hivemq.com", 8000)
             print('Connected to broker.hivemq.com:8000')
 
         elif external_broker == "hivemq_cert":
             external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
-                           tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+                                    tls_version=ssl.PROTOCOL_TLS, ciphers=None)
             external_client.connect("broker.hivemq.com", 8884)
             print('Connected to broker.hivemq.com:8884')
 
@@ -473,7 +377,7 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
                 username, password
             )
             external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
-                           tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+                                    tls_version=ssl.PROTOCOL_TLS, ciphers=None)
             external_client.connect("classpip.upc.edu", 8883)
             print('Connected to classpip.upc.edu:8883')
         elif external_broker == "localhost":
@@ -490,8 +394,6 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
             external_client.connect("10.10.10.1", 8000)
             print('Connected to 10.10.10.1:8000')
 
-
-
     print("Waiting....")
     external_client.subscribe("+/autopilotService/#", 2)
     external_client.subscribe("cameraService/+/#", 2)
@@ -500,17 +402,16 @@ def AutopilotService (connection_mode, operation_mode, external_broker, username
     if operation_mode == 'simulation':
         external_client.loop_forever()
     else:
-        #external_client.loop_start() #when executed on board use loop_start instead of loop_forever
+        # external_client.loop_start() #when executed on board use loop_start instead of loop_forever
         external_client.loop_forever()
-
-
 
 
 if __name__ == '__main__':
     variables.init()
     import sys
-    connection_mode = sys.argv[1] # global or local
-    operation_mode = sys.argv[2] # simulation or production
+
+    connection_mode = sys.argv[1]  # global or local
+    operation_mode = sys.argv[2]  # simulation or production
     username = None
     password = None
     if connection_mode == 'global':
@@ -521,4 +422,4 @@ if __name__ == '__main__':
     else:
         external_broker = None
 
-    AutopilotService(connection_mode,operation_mode, external_broker, username, password)
+    AutopilotService(connection_mode, operation_mode, external_broker, username, password)
