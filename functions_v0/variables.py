@@ -14,6 +14,9 @@ go = False
 global direction
 direction = 'Stop'
 
+global reaching_waypoint
+reaching_waypoint = False
+
 
 def init():
     global state
@@ -24,6 +27,9 @@ def init():
 
     global vehicle
     vehicle = object
+
+    global reaching_waypoint
+    reaching_waypoint = False
 
 # class cls_variables:
 #   def __init__(self):

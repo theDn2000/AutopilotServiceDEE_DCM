@@ -16,13 +16,13 @@ from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
 from functions_v0.take_off_v0_func import take_off_v0
 from functions_v0.flying_v0_func import flying_v0
 from functions_v0.return_to_launch_v0_func import returning_v0
+from functions_v0.goto_v0_func import goto_v0
 from functions_v0 import variables
 
 # Import and init global :
 sending_telemetry_info = False
 vehicle = object
 state = 'disconnected'
-
 
 '''
 These are the different values for the state of the autopilot:
@@ -39,21 +39,6 @@ These are the different values for the state of the autopilot:
 The autopilot can also be 'disconnected' but this state will never appear in the telemetry_info packet 
 when disconnected the service will not send any packet
 '''
-
-
-def returning():
-    global sending_telemetry_info
-    global external_client
-    global internal_client
-    global sending_topic
-    global state
-
-    # wait until the drone is at home
-    while AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
-        time.sleep(1)
-    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'onHearth'
-
-
 
 
 def distanceInMeters(aLocation1, aLocation2):
@@ -275,12 +260,15 @@ def process_message(message, client):
         AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disarmed'
 
     if command == "land":
-
-        vehicle.mode = dronekit.VehicleMode("LAND")
-        state = 'landing'
-        while vehicle.armed:
-            time.sleep(1)
-        state = 'onHearth'
+        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'flying':
+            print('Going to the waypoint')
+            AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint = True
+            lat = -35.3622286
+            lon = 149.1650999
+            w = threading.Thread(target=goto_v0, args=[lat, lon, internal_client, external_client, sending_topic])
+            w.start()
+        else:
+            print('Vehicle not flying')
 
     if command == "go":
         AutopilotServiceDEE_DCM.functions_v0.variables.direction = message.payload.decode("utf-8")
@@ -302,7 +290,7 @@ def process_message(message, client):
                 vehicle.mode = dronekit.VehicleMode("RTL")
                 print('cambio estado')
                 state = 'returningHome'
-                w = threading.Thread(target=returning)
+                w = threading.Thread(target=returning_v0)
                 w.start()
 
             go = True

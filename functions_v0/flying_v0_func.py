@@ -16,8 +16,9 @@ def flying_v0():
     while not end:
         AutopilotServiceDEE_DCM.functions_v0.variables.go = False
         while not AutopilotServiceDEE_DCM.functions_v0.variables.go:
-            AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.send_mavlink(cmd)
-            time.sleep(1)
+            if not AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint:
+                AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.send_mavlink(cmd)
+                time.sleep(1)
         # a new go command has been received. Check direction
         print ('salgo del bucle por ', AutopilotServiceDEE_DCM.functions_v0.variables.direction)
         if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "North":
