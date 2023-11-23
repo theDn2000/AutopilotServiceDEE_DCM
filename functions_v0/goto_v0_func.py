@@ -15,6 +15,15 @@ from AutopilotServiceDEE_DCM.functions_v0 import variables
 import AutopilotServiceDEE_DCM.AutopilotService
 
 
+def goto_trigger(internal_client, external_client, sending_topic):
+    print('Going to the waypoint')
+    AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint = True
+    lat = -35.3622286
+    lon = 149.1650999
+    w = threading.Thread(target=goto_v0, args=[lat, lon, internal_client, external_client, sending_topic])
+    w.start()
+
+
 def goto_v0(lat, lon, internal_client, external_client, sending_topic):
     global vehicle
     global state

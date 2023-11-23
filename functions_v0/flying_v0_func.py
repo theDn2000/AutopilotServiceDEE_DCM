@@ -7,6 +7,12 @@ import AutopilotServiceDEE_DCM.AutopilotService
 from AutopilotServiceDEE_DCM.functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
 from AutopilotServiceDEE_DCM.functions_v0 import variables
 
+
+def flying_trigger():
+    w = threading.Thread(target=flying_v0)
+    w.start()
+
+
 def flying_v0():
     global direction
     global go
@@ -20,7 +26,7 @@ def flying_v0():
                 AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.send_mavlink(cmd)
                 time.sleep(1)
         # a new go command has been received. Check direction
-        print ('salgo del bucle por ', AutopilotServiceDEE_DCM.functions_v0.variables.direction)
+        print('salgo del bucle por ', AutopilotServiceDEE_DCM.functions_v0.variables.direction)
         if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "North":
             cmd = prepare_command(speed, 0, 0)  # NORTH
         if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "South":
@@ -67,3 +73,9 @@ def prepare_command(velocity_x, velocity_y, velocity_z):
     )  # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
 
     return msg
+
+
+def go_order(direction):
+    AutopilotServiceDEE_DCM.functions_v0.variables.direction = direction
+    print("Going ", AutopilotServiceDEE_DCM.functions_v0.variables.direction)
+    AutopilotServiceDEE_DCM.functions_v0.variables.go = True

@@ -2,7 +2,6 @@ import threading
 from dronekit import connect, Command, VehicleMode
 
 import AutopilotServiceDEE_DCM.AutopilotService
-from AutopilotServiceDEE_DCM.AutopilotService import state, sending_telemetry_info, vehicle  # noqa: F401
 from AutopilotServiceDEE_DCM.functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
 from AutopilotServiceDEE_DCM.functions_v0 import variables
 
@@ -47,3 +46,9 @@ def connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
 
     else:
         print('Autopilot already connected')
+
+
+def disconnect():
+    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.close()
+    AutopilotServiceDEE_DCM.functions_v0.variables.sending_telemetry_info = False
+    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disconnected'

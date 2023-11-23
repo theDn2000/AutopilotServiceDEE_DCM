@@ -6,6 +6,13 @@ from dronekit import connect, Command, VehicleMode
 from AutopilotServiceDEE_DCM.functions_v0 import variables
 import AutopilotServiceDEE_DCM.AutopilotService
 
+def take_off_trigger():
+
+    print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
+    w = threading.Thread(target=take_off_v0, args=[5, True])
+    w.start()
+    w.join()
+
 def take_off_v0(a_target_altitude, manualControl):
     global state
     global vehicle

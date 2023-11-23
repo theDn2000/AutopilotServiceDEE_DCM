@@ -32,3 +32,22 @@ def arm_v0():
 
     AutopilotServiceDEE_DCM.functions_v0.variables.state = 'armed'
     return
+
+
+
+def armed_change():
+    global vehicle
+    global state
+    print('cambio a ', )
+    if AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
+        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'armed'
+    else:
+        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disarmed'
+
+    print('cambio a ', AutopilotServiceDEE_DCM.functions_v0.variables.state)
+
+def disarm():
+    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed = False
+    while AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
+        time.sleep(1)
+    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disarmed'
