@@ -1,22 +1,13 @@
-import json
-import math
-
-import threading
 import paho.mqtt.client as mqtt
-import time
-import dronekit
-from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
-from pymavlink import mavutil
 
-import AutopilotServiceDEE_DCM.functions_v0.variables
+import AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables
 # Import functions from the function folder
-from functions_v0 import connect_v0_func, get_telemetry_info_v0_func, send_telemetry_info_v0_func, arm_v0_func
-from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
-from functions_v0.take_off_v0_func import take_off_v0, take_off_trigger
-from functions_v0.flying_v0_func import flying_v0, go_order, flying_trigger
-from functions_v0.return_to_launch_v0_func import returning_v0, returning_trigger
-from functions_v0.goto_v0_func import goto_v0, goto_trigger
+from functions_v0 import connect_v0_func, send_telemetry_info_v0_func, arm_v0_func
+from functions_v0.take_off_v0_func import take_off_trigger
+from functions_v0.flying_v0_func import go_order, flying_trigger
+from functions_v0.return_to_launch_v0_func import returning_trigger
+from functions_v0.goto_v0_func import goto_trigger
 from functions_v0 import variables
 
 '''
