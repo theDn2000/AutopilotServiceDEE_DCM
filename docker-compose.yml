@@ -3,7 +3,7 @@ services:
   autopilot:
     image: autopilotservicetest:v1
     privileged: true
-    command: ["Python3", "AutopilotService.py", "broker.hivemq.com"]
+    command: ["Python3", "AutopilotService.py", "global", "simulation", "hivemq"] # Command for running the autopilot service in simulation mode
     #command: ["tail", "-f", "/dev/null"]
     networks:
       main:
