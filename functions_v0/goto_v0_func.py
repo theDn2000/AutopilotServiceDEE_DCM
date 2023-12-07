@@ -6,12 +6,12 @@ import time
 import dronekit  # noqa: F401
 from dronekit import connect, Command, VehicleMode  # noqa: F401
 
-import AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.AutopilotService
+import AutopilotServiceDEE_DCM.AutopilotService
 
 
 def goto_trigger(internal_client, external_client, sending_topic):
     print('Going to the waypoint')
-    AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint = True
+    AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint = True
     lat = -35.3622286
     lon = 149.1650999
     w = threading.Thread(target=goto_v0, args=[lat, lon, internal_client, external_client, sending_topic])
@@ -25,17 +25,17 @@ def goto_v0(lat, lon, internal_client, external_client, sending_topic):
     distanceThreshold = 1
     altitude = 6
     origin = sending_topic.split('/')[1]
-    AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.mode = VehicleMode("GUIDED")
+    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.mode = VehicleMode("GUIDED")
 
     destinationPoint = dronekit.LocationGlobalRelative(float(lat), float(lon), altitude)
-    AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.simple_goto(destinationPoint, groundspeed=3)
+    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.simple_goto(destinationPoint, groundspeed=3)
 
-    currentLocation = AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.location.global_frame
+    currentLocation = AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.location.global_frame
     dist = distanceInMeters(destinationPoint, currentLocation)
 
     while dist > distanceThreshold:
         time.sleep(0.25)
-        currentLocation = AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.location.global_frame
+        currentLocation = AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.location.global_frame
         dist = distanceInMeters(destinationPoint, currentLocation)
     print('reached')
     destination_coordinates = {
@@ -44,7 +44,7 @@ def goto_v0(lat, lon, internal_client, external_client, sending_topic):
     }
 
     external_client.publish(sending_topic + "/destinationPointReached", json.dumps(destination_coordinates))
-    AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint = False
+    AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint = False
     print("Destination reached, message published")
 
 

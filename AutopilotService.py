@@ -1,14 +1,16 @@
 import paho.mqtt.client as mqtt
 from paho.mqtt.client import ssl
+import os
+import sys
+sys.path.append(os.path.abspath('../../..'))
 
-import AutopilotServiceDEE_DCM.AutopilotServiceDEE_DCM.functions_v0.variables
+import AutopilotServiceDEE_DCM.functions_v0.variables
 # Import functions from the function folder
-from functions_v0 import connect_v0_func, send_telemetry_info_v0_func, arm_v0_func
-from functions_v0.take_off_v0_func import take_off_trigger
-from functions_v0.flying_v0_func import go_order, flying_trigger
-from functions_v0.return_to_launch_v0_func import returning_trigger
-from functions_v0.goto_v0_func import goto_trigger
-from functions_v0 import variables
+from AutopilotServiceDEE_DCM.functions_v0 import send_telemetry_info_v0_func, arm_v0_func, variables, connect_v0_func
+from AutopilotServiceDEE_DCM.functions_v0.take_off_v0_func import take_off_trigger
+from AutopilotServiceDEE_DCM.functions_v0.flying_v0_func import go_order, flying_trigger
+from AutopilotServiceDEE_DCM.functions_v0.return_to_launch_v0_func import returning_trigger
+from AutopilotServiceDEE_DCM.functions_v0.goto_v0_func import goto_trigger
 
 '''
 These are the different values for the state of the autopilot:
@@ -131,7 +133,8 @@ def AutopilotService(connection_mode, operation_mode, external_broker, username,
 
     internal_client = mqtt.Client("Autopilot_internal")
     internal_client.on_message = on_internal_message
-    internal_client.connect("localhost", 1884)
+    # internal_client.connect("localhost", 1884)
+    internal_client.connect("192.168.208.2", 1884)
 
     external_client = mqtt.Client("Autopilot_external", transport="websockets")
     external_client.on_message = on_external_message
