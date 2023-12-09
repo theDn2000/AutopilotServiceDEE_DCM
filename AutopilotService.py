@@ -8,17 +8,16 @@ import dronekit
 from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
 from pymavlink import mavutil
+import os
+import sys
+
+sys.path.append(os.path.abspath('../../..'))
 
 from Dron import Dron
 
 import AutopilotServiceDEE_DCM.functions_v0.variables
 # Import functions from the function folder
-from functions_v0 import connect_v0_func, get_telemetry_info_v0_func, send_telemetry_info_v0_func, arm_v0_func
-from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
-from functions_v0.take_off_v0_func import take_off_v0, take_off_trigger
-from functions_v0.flying_v0_func import flying_v0, go_order, flying_trigger
-from functions_v0.return_to_launch_v0_func import returning_v0, returning_trigger
-from functions_v0.goto_v0_func import goto_v0, goto_trigger
+from functions_v0 import connect_v0_func, arm_v0_func
 from functions_v0 import variables
 
 '''
@@ -59,58 +58,57 @@ def process_message(message, client):
 
     if command == "connect":
 
-        Dron.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
-        #connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
+        dron.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
 
         # If connect is OK, initialize the telemetry data
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected':
-            send_telemetry_info_v0_func.send_telemetry_info_trigger(external_client, internal_client, sending_topic)
+        if dron.state == 'connected':
+            dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic)
 
     if command == "disconnect":
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected':
-            connect_v0_func.disconnect()
+        if dron.state == 'connected':
+            dron.disconnect()
         else:
             print('Vehicle is not connected')
 
     if command == "takeOff":
 
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'armed' or 'onHearth':
-            take_off_trigger()
+        if dron.state == 'armed' or 'onHearth':
+            dron.take_off_trigger()
             # The script waits for the take_off to finish
 
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'flying':
-            flying_trigger()
+        if dron.state == 'flying':
+            dron.flying_trigger()
 
     if command == "returnToLaunch":
         # stop the process of getting positions
-        returning_trigger()
+        dron.returning_trigger()
 
     if command == "armDrone":
 
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected' or 'onHearth' or 'disarmed':
-            arm_v0_func.arm_v0()
-            print(AutopilotServiceDEE_DCM.functions_v0.variables.state)
+        if dron.state == 'connected' or 'onHearth' or 'disarmed':
+            dron.arm_v0()
+            print(dron.state)
         else:
             print('The vehicle is not armable as it is not connected')
 
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change
 
-        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.add_attribute_listener('armed', arm_v0_func.armed_change())
+        #dron.vehicle.add_attribute_listener('armed', dron.armed_change())
 
     if command == "disarmDrone":
         if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'armed':
             arm_v0_func.disarm()
 
     if command == "land":
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'flying':
-            goto_trigger(internal_client, external_client, sending_topic)
+        if dron.state == 'flying':
+            dron.goto_trigger(internal_client, external_client, sending_topic)
         else:
             print('Vehicle not flying')
 
     if command == "go":
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'flying':
-            go_order(message.payload.decode("utf-8"))
+        if dron.state == 'flying':
+            dron.go_order(message.payload.decode("utf-8"))
         else:
             print('Vehicle is not flying')
 
@@ -132,23 +130,13 @@ def on_connect(external_client, userdata, flags, rc):
         print("Bad connection")
 
 
-def AutopilotService(connection_mode, operation_mode, external_broker, username, password):
+def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client, external_client):
     global op_mode
-    global external_client
-    global internal_client
     global state
 
     print('Connection mode: ', connection_mode)
     print('Operation mode: ', operation_mode)
     op_mode = operation_mode
-
-    internal_client = mqtt.Client("Autopilot_internal")
-    internal_client.on_message = on_internal_message
-    internal_client.connect("localhost", 1884)
-
-    external_client = mqtt.Client("Autopilot_external", transport="websockets")
-    external_client.on_message = on_external_message
-    external_client.on_connect = on_connect
 
     if connection_mode == "global":
         if external_broker == "hivemq":
@@ -218,4 +206,17 @@ if __name__ == '__main__':
     else:
         external_broker = None
 
-    AutopilotService(connection_mode, operation_mode, external_broker, username, password)
+    # Broker interno:
+    internal_client = mqtt.Client("Autopilot_internal")
+    internal_client.on_message = on_internal_message
+    internal_client.connect("localhost", 1884)
+
+    # Broker externo:
+    external_client = mqtt.Client("Autopilot_external", transport="websockets")
+    external_client.on_message = on_external_message
+    external_client.on_connect = on_connect
+
+    # Una vez definidos el broker interno y el externo, inicializamos el objeto Dron:
+    dron = Dron(internal_client, external_client)
+
+    AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client, external_client)

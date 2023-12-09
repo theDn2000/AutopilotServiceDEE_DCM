@@ -1,53 +1,43 @@
-import threading
 import dronekit
 import time
-import importlib
-from dronekit import connect, Command, VehicleMode
-
-from AutopilotServiceDEE_DCM.functions_v0 import variables
-import AutopilotServiceDEE_DCM.AutopilotService
 
 
-def arm_v0():
-    global vehicle
-
+def arm_v0(self):
     print('arming')
-    AutopilotServiceDEE_DCM.AutopilotService.state = 'arming'
+    self.state = 'arming'
 
     """Arms vehicle and fly to aTargetAltitude"""
     print("Basic pre-arm checks")  # Don't try to arm until autopilot is ready
-    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.mode = dronekit.VehicleMode("GUIDED")
-    while not AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.is_armable:
+    self.vehicle.mode = dronekit.VehicleMode("GUIDED")
+    while not self.vehicle.is_armable:
         print(" Waiting for vehicle to initialise...")
         time.sleep(1)
     print("Arming motors")
     # Copter should arm in GUIDED mode
 
-    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed = True
+    self.vehicle.armed = True
     # Confirm vehicle armed before attempting to take off
-    while not AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
+    while not self.vehicle.armed:
         print(" Waiting for arming...")
         time.sleep(1)
     print(" Armed")
 
-    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'armed'
+    self.state = 'armed'
     return
 
 
-
-def armed_change():
-    global vehicle
-    global state
+def armed_change(self):
     print('cambio a ', )
-    if AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
-        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'armed'
+    if self.vehicle.armed:
+        self.state = 'armed'
     else:
-        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disarmed'
+        self.state = 'disarmed'
 
-    print('cambio a ', AutopilotServiceDEE_DCM.functions_v0.variables.state)
+    print('cambio a ', self.state)
 
-def disarm():
-    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed = False
-    while AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.armed:
+
+def disarm(self):
+    self.vehicle.armed = False
+    while self.vehicle.armed:
         time.sleep(1)
-    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disarmed'
+    self.state = 'disarmed'

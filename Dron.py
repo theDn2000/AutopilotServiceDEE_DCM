@@ -1,15 +1,18 @@
 class Dron(object):
-    def __init__(self, broker):
-        self.client = broker # necesita el broker para publicar respuestas
-        self.state = "desconectado"
+    def __init__(self, internal_broker, external_broker):
+        self.internal_client = internal_broker  # necesita el broker interno para publicar respuestas
+        self.external_client = external_broker  # necesita el broker externo para publicar respuestas
+        self.state = "disconnected"
         ''' os otros estados son:
-            conectado
-            armando
-            volando
-            regresando
+            connected
+            armed
+            flying
+            returning
         '''
 
-        self.going = False # se usa en dron_nav
+        self.going = False  # se usa en dron_nav
+        self.reaching_waypoint = False
+        self.direction = "init"
 
     # aqui se importan los métodos de la clase Dron, que están organizados en ficheros.
     # Así podría orgenizarse la aportación de futuros alumnos que necesitasen incorporar nuevos servicios
@@ -18,11 +21,10 @@ class Dron(object):
     # ese atributo hay que declararlo aqui y no en el fichero con los métodos nuevos.
     # Ese es el caso del atributo going, que lo tengo que declarar aqui y preferiría poder declararlo en el fichero dron_goto
 
-    from functions_v0.connect_v0_func import connect_v0
-    from functions_v0.send_telemetry_info_v0_func import send_telemetry_info_trigger
-    from functions_v0.get_telemetry_info_v0_func import get_telemetry_info
-    from functions_v0.arm_v0_func import arm_v0
-    from functions_v0.take_off_v0_func import take_off_trigger
-    from functions_v0.return_to_launch_v0_func import returning_trigger
-    from functions_v0.flying_v0_func import flying_trigger
-    from functions_v0.goto_v0_func import goto_trigger
+    from functions_v0.connect_v0_func import connect_v0, disconnect
+    from functions_v0.telemetry_info_v0_func import send_telemetry_info_trigger, send_telemetry_info_v0, get_telemetry_info
+    from functions_v0.arm_v0_func import arm_v0, armed_change, disarm
+    from functions_v0.take_off_v0_func import take_off_trigger, take_off_v0
+    from functions_v0.return_to_launch_v0_func import returning_trigger, returning_v0
+    from functions_v0.flying_v0_func import flying_trigger, flying_v0, prepare_command, go_order
+    from functions_v0.goto_v0_func import goto_trigger, goto_v0, distanceInMeters

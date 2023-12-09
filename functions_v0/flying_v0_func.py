@@ -1,59 +1,52 @@
 import threading
-from dronekit import connect, Command, VehicleMode
 import time
 from pymavlink import mavutil
 
-import AutopilotServiceDEE_DCM.AutopilotService
-from AutopilotServiceDEE_DCM.functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
-from AutopilotServiceDEE_DCM.functions_v0 import variables
 
-
-def flying_trigger():
-    w = threading.Thread(target=flying_v0)
+def flying_trigger(self):
+    w = threading.Thread(target=self.flying_v0)
     w.start()
 
 
-def flying_v0():
-    global direction
-    global go
+def flying_v0(self):
     speed = 1
     end = False
-    cmd = prepare_command(0, 0, 0)  # stop
+    cmd = self.prepare_command(0, 0, 0)  # stop
     while not end:
-        AutopilotServiceDEE_DCM.functions_v0.variables.go = False
-        while not AutopilotServiceDEE_DCM.functions_v0.variables.go:
-            if not AutopilotServiceDEE_DCM.functions_v0.variables.reaching_waypoint:
-                AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.send_mavlink(cmd)
+        self.going = False
+        while not self.going:
+            if not self.reaching_waypoint:
+                self.vehicle.send_mavlink(cmd)
                 time.sleep(1)
         # a new go command has been received. Check direction
-        print('salgo del bucle por ', AutopilotServiceDEE_DCM.functions_v0.variables.direction)
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "North":
-            cmd = prepare_command(speed, 0, 0)  # NORTH
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "South":
-            cmd = prepare_command(-speed, 0, 0)  # SOUTH
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "East":
-            cmd = prepare_command(0, speed, 0)  # EAST
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "West":
-            cmd = prepare_command(0, -speed, 0)  # WEST
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "NorthWest":
-            cmd = prepare_command(speed, -speed, 0)  # NORTHWEST
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "NorthEast":
-            cmd = prepare_command(speed, speed, 0)  # NORTHEST
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "SouthWest":
-            cmd = prepare_command(-speed, -speed, 0)  # SOUTHWEST
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "SouthEast":
-            cmd = prepare_command(-speed, speed, 0)  # SOUTHEST
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "Stop":
-            cmd = prepare_command(0, 0, 0)  # STOP
-        if AutopilotServiceDEE_DCM.functions_v0.variables.direction == "RTL":
+        print('salgo del bucle por ', self.direction)
+        if self.direction == "North":
+            cmd = self.prepare_command(speed, 0, 0)  # NORTH
+        if self.direction == "South":
+            cmd = self.prepare_command(-speed, 0, 0)  # SOUTH
+        if self.direction == "East":
+            cmd = self.prepare_command(0, speed, 0)  # EAST
+        if self.direction == "West":
+            cmd = self.prepare_command(0, -speed, 0)  # WEST
+        if self.direction == "NorthWest":
+            cmd = self.prepare_command(speed, -speed, 0)  # NORTHWEST
+        if self.direction == "NorthEast":
+            cmd = self.prepare_command(speed, speed, 0)  # NORTHEST
+        if self.direction == "SouthWest":
+            cmd = self.prepare_command(-speed, -speed, 0)  # SOUTHWEST
+        if self.direction == "SouthEast":
+            cmd = self.prepare_command(-speed, speed, 0)  # SOUTHEST
+        if self.direction == "Stop":
+            cmd = self.prepare_command(0, 0, 0)  # STOP
+        if self.direction == "RTL":
             end = True
 
 
-def prepare_command(velocity_x, velocity_y, velocity_z):
+def prepare_command(self, velocity_x, velocity_y, velocity_z):
     """
     Move vehicle in direction based on specified velocity vectors.
     """
-    msg = AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.message_factory.set_position_target_local_ned_encode(
+    msg = self.vehicle.message_factory.set_position_target_local_ned_encode(
         0,  # time_boot_ms (not used)
         0,
         0,  # target system, target component
@@ -75,7 +68,7 @@ def prepare_command(velocity_x, velocity_y, velocity_z):
     return msg
 
 
-def go_order(direction):
-    AutopilotServiceDEE_DCM.functions_v0.variables.direction = direction
-    print("Going ", AutopilotServiceDEE_DCM.functions_v0.variables.direction)
-    AutopilotServiceDEE_DCM.functions_v0.variables.go = True
+def go_order(self, direction):
+    self.direction = direction
+    print("Going ", self.direction)
+    self.going = True

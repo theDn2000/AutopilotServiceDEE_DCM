@@ -2,6 +2,7 @@ from dronekit import connect
 
 
 def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic):
+    print(self.state)
     if self.state == 'disconnected':
         print("Autopilot service connected by " + origin)
         # para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
@@ -38,4 +39,4 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
 def disconnect(self):
     self.vehicle.close()
     self.sending_telemetry_info = False
-    self.variables.state = 'disconnected'
+    self.state = 'disconnected'
