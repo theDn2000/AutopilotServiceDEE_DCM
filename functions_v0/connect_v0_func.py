@@ -1,17 +1,8 @@
-import threading
-from dronekit import connect, Command, VehicleMode
-
-import AutopilotServiceDEE_DCM.AutopilotService
-from AutopilotServiceDEE_DCM.functions_v0.send_telemetry_info_v0_func import send_telemetry_info_v0
-from AutopilotServiceDEE_DCM.functions_v0 import variables
+from dronekit import connect
 
 
-
-def connect_v0(origin, op_mode, external_client, internal_client, sending_topic):
-    global state
-    global vehicle
-    global sending_telemetry_info
-    if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'disconnected':
+def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic):
+    if self.state == 'disconnected':
         print("Autopilot service connected by " + origin)
         # para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
         # hay que ejecutar el siguiente comando desde PowerShell desde  C:\Users\USER>
@@ -28,17 +19,13 @@ def connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
             connection_string = "com7"
             # connection_string = "udp:127.0.0.1:14550"
 
-        # vehicle = connect(connection_string, wait_ready=False, baud=115200)
-        # vehicle = connect(connection_string, wait_ready=False, baud=57600)
-        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle = connect(connection_string, wait_ready=False, baud=57600)
+        self.vehicle = connect(connection_string, wait_ready=False, baud=57600)
 
-        AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.wait_ready(True, timeout=5000)
-        #vehicle.wait_ready(True, timeout=5000)
+        self.vehicle.wait_ready(True, timeout=5000)
 
         print('Connected to flight controller')
-        state = 'connected'
-        AutopilotServiceDEE_DCM.functions_v0.variables.sending_telemetry_info = True
-        AutopilotServiceDEE_DCM.functions_v0.variables.state = 'connected'
+        self.sending_telemetry_info = True
+        self.state = 'connected'
 
         # return 'connected', vehicle
 
@@ -48,7 +35,7 @@ def connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
         print('Autopilot already connected')
 
 
-def disconnect():
-    AutopilotServiceDEE_DCM.functions_v0.variables.vehicle.close()
-    AutopilotServiceDEE_DCM.functions_v0.variables.sending_telemetry_info = False
-    AutopilotServiceDEE_DCM.functions_v0.variables.state = 'disconnected'
+def disconnect(self):
+    self.vehicle.close()
+    self.sending_telemetry_info = False
+    self.variables.state = 'disconnected'

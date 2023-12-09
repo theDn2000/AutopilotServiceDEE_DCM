@@ -9,6 +9,8 @@ from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
 from pymavlink import mavutil
 
+from Dron import Dron
+
 import AutopilotServiceDEE_DCM.functions_v0.variables
 # Import functions from the function folder
 from functions_v0 import connect_v0_func, get_telemetry_info_v0_func, send_telemetry_info_v0_func, arm_v0_func
@@ -56,7 +58,9 @@ def process_message(message, client):
         print("Position: ", message.payload)
 
     if command == "connect":
-        connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
+
+        Dron.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
+        #connect_v0_func.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
 
         # If connect is OK, initialize the telemetry data
         if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'connected':
