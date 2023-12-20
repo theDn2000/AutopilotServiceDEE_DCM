@@ -53,7 +53,7 @@ telemetry_info packets as soon as a *disconnect* command is received. This is an
     'battery': 80,
     'state': state
 }
-
+puta 
 ```
 The packet includes the state of the autopilot so that the module that receives the packet can take decisions (for instance, change color of the buttons).   
 

@@ -1,24 +1,11 @@
-import json
-import math
-
-import threading
 import paho.mqtt.client as mqtt
-import time
-import dronekit
-from dronekit import connect, Command, VehicleMode
 from paho.mqtt.client import ssl
-from pymavlink import mavutil
 import os
 import sys
 
 sys.path.append(os.path.abspath('../../..'))
 
 from Dron import Dron
-
-import AutopilotServiceDEE_DCM.functions_v0.variables
-# Import functions from the function folder
-from functions_v0 import connect_v0_func, arm_v0_func
-from functions_v0 import variables
 
 '''
 These are the different values for the state of the autopilot:
@@ -94,11 +81,11 @@ def process_message(message, client):
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change
 
-        #dron.vehicle.add_attribute_listener('armed', dron.armed_change())
+        # dron.vehicle.add_attribute_listener('armed', dron.armed_change())
 
     if command == "disarmDrone":
-        if AutopilotServiceDEE_DCM.functions_v0.variables.state == 'armed':
-            arm_v0_func.disarm()
+        if dron.state == 'armed':
+            dron.disarm()
 
     if command == "land":
         if dron.state == 'flying':
@@ -130,7 +117,8 @@ def on_connect(external_client, userdata, flags, rc):
         print("Bad connection")
 
 
-def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client, external_client):
+def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client,
+                     external_client):
     global op_mode
     global state
 
@@ -191,7 +179,6 @@ def AutopilotService(connection_mode, operation_mode, external_broker, username,
 
 
 if __name__ == '__main__':
-    variables.init()
     import sys
 
     connection_mode = sys.argv[1]  # global or local
@@ -209,6 +196,7 @@ if __name__ == '__main__':
     # Broker interno:
     internal_client = mqtt.Client("Autopilot_internal")
     internal_client.on_message = on_internal_message
+    # internal_client.connect("192.168.208.2", 1884)
     internal_client.connect("localhost", 1884)
 
     # Broker externo:
@@ -219,4 +207,5 @@ if __name__ == '__main__':
     # Una vez definidos el broker interno y el externo, inicializamos el objeto Dron:
     dron = Dron(internal_client, external_client)
 
-    AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client, external_client)
+    AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client,
+                     external_client)

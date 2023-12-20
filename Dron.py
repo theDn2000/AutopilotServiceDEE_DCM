@@ -10,6 +10,7 @@ class Dron(object):
             returning
         '''
 
+
         self.going = False  # se usa en dron_nav
         self.reaching_waypoint = False
         self.direction = "init"
