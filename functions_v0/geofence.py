@@ -1,6 +1,5 @@
-import pymavlink
 import pymavlink.dialects.v20.all as dialect
-from pymavlink.mavutil import default_native
+from pymavlink import mavutil
 
 
 def clear_GEOFence(self):
@@ -104,9 +103,26 @@ def upload_GEOFence(self, fence_list):
             if int(message["param_value"]) == fence_action_original:
                 break
 
+    self.vehicle.setparam('FENCE_ALT_MAX', 58)
+    self.vehicle.setparam('FENCE_ENABLE', 1)
+
 
 def enable_GEOFence(self, en_dis):
+    # ENABLE GEOFENCE IS num 310 command
+    command_code = 310
     if en_dis == "ENABLE":
-        self.command_long_send(CMD=dialect.MAV_CMD_DO_FENCE_ENABLE, param1=1)
+
+        self.vehicle.message_factory.command_long_encode(0, 0, command_code, 0, 1, 0, 0, 0, 0, 0, 0)
+        # command_long_send(command=dialect.MAV_CMD_DO_FENCE_ENABLE, param1=1)
     else:
-        self.command_long_send(CMD=dialect.MAV_CMD_DO_FENCE_ENABLE, param1=0)
+        # command_long_send(command=dialect.MAV_CMD_DO_FENCE_ENABLE, param1=0)
+        self.vehicle.message_factory.command_long_encode(0, 0, command_code, 0, 0, 0, 0, 0, 0, 0, 0)
+
+
+def command_long_send(self, command, confirm=0, param1=0, param2=0, param3=0, param4=0, param5=0, param6=0, param7=0):
+    #message = mavutil.mavlink.MAVLink_command_long_message(target_system=self.vehicle.system_id,
+                                                   #target_component=mavutil.mavlink.MAV_COMPONENT_ID_ALL, command=command,
+                                                   #confirmation=confirm, param1=param1, param2=param2,
+                                                   #param3=param3, param4=param4, param5=param5, param6=param6,
+                                                   #param7=param7)
+    self.vehicle.send_mavlink("COMMAND_LONG", 0, 0, command, 0, param1, param2, param3, param4, param5, param6, param7)
