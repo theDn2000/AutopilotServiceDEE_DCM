@@ -107,18 +107,7 @@ def upload_GEOFence(self, fence_list):
     self.vehicle.setparam('FENCE_ENABLE', 1)
 
 
-def enable_GEOFence(self, en_dis):
-    # ENABLE GEOFENCE IS num 310 command
-    command_code = 310
-    if en_dis == "ENABLE":
-
-        self.vehicle.message_factory.command_long_encode(0, 0, command_code, 0, 1, 0, 0, 0, 0, 0, 0)
-        # command_long_send(command=dialect.MAV_CMD_DO_FENCE_ENABLE, param1=1)
-    else:
-        # command_long_send(command=dialect.MAV_CMD_DO_FENCE_ENABLE, param1=0)
-        self.vehicle.message_factory.command_long_encode(0, 0, command_code, 0, 0, 0, 0, 0, 0, 0, 0)
-
-
+# ESTA FUNCIÓN ACTUALMENTE ESTÁ INCACTIVA
 def command_long_send(self, command, confirm=0, param1=0, param2=0, param3=0, param4=0, param5=0, param6=0, param7=0):
     #message = mavutil.mavlink.MAVLink_command_long_message(target_system=self.vehicle.system_id,
                                                    #target_component=mavutil.mavlink.MAV_COMPONENT_ID_ALL, command=command,
