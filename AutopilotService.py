@@ -87,6 +87,12 @@ def process_message(message, client):
         if dron.state == 'armed':
             dron.disarm()
 
+    if command == "goto":
+        if dron.state == 'flying':
+            dron.goto_trigger(internal_client, external_client, sending_topic)
+        else:
+            print('Vehicle not flying')
+
     if command == "land":
         if dron.state == 'flying':
             # dron.goto_trigger(internal_client, external_client, sending_topic)
