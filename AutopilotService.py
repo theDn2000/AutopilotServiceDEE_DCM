@@ -105,6 +105,11 @@ def process_message(message, client):
             else:
                 print("GEOFENCE is already enabled")
 
+            # CLEAR MISSION
+            dron.clear_Mission()
+            # CLEAR FENCE
+            dron.clear_GEOFence()
+
             # DEFINE SPACE
             fencelist = [[41.27640942348419, 1.9886658713221552],
                          [41.27643361279337, 1.988196484744549],
@@ -113,7 +118,6 @@ def process_message(message, client):
                          [41.27663317425185, 1.9890118762850764],
                          [41.27643361279337, 1.988196484744549]]
 
-            dron.clear_GEOFence()
             #dron.upload_GEOFence(fencelist)  # Upload GEOFence
         else:
             print('Vehicle not flying')

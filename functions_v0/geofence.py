@@ -1,11 +1,15 @@
 import pymavlink.dialects.v20.all as dialect
 from pymavlink import mavutil
 
-def 
+def clear_Mission(self):
+    self.vehicle.commands.clear()
+    self.vehicle.commands.upload()
+
+
 def clear_GEOFence(self):
-    message = dialect.MAVLink_mission_clear_all_message(target_system=self.target_system,
-                                                        target_component=self.target_component,
-                                                        mission_type=dialect.MAV_MISSION_TYPE_FENCE)
+    # Clear the fence
+    message = self.vehicle.message_factory.mission_clear_all_encode(self.vehicle.target_system, self.vehicle.target_component, dialect.MAV_MISSION_TYPE_FENCE)
+    # message = dialect.MAVLink_mission_clear_all_message(target_system=self.target_system, target_component=self.target_component, mission_type=dialect.MAV_MISSION_TYPE_FENCE)
     self.mav.mav.send(message)
 
 
