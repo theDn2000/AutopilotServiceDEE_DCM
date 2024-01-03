@@ -1,7 +1,7 @@
 import pymavlink.dialects.v20.all as dialect
 from pymavlink import mavutil
 
-
+def 
 def clear_GEOFence(self):
     message = dialect.MAVLink_mission_clear_all_message(target_system=self.target_system,
                                                         target_component=self.target_component,

@@ -95,7 +95,7 @@ def process_message(message, client):
 
     if command == "land":
         if dron.state == 'flying':
-            # dron.goto_trigger(internal_client, external_client, sending_topic)
+
             # ENABLE GEOFENCE:
             param_name = "FENCE_ENABLE"
             param_value = 1
@@ -105,7 +105,7 @@ def process_message(message, client):
             else:
                 print("GEOFENCE is already enabled")
 
-            # TEST GEOFENCE
+            # DEFINE SPACE
             fencelist = [[41.27640942348419, 1.9886658713221552],
                          [41.27643361279337, 1.988196484744549],
                          [41.27615341941283, 1.9883145019412043],
