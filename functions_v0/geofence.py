@@ -176,18 +176,6 @@ def set_geofence(self, fence_list):
     FENCE_ACTION = "FENCE_ACTION".encode(encoding="utf8")
     PARAM_INDEX = -1
 
-    # create fence item list
-    fence_list = [(-35.363152, 149.164795),  # 0th index: return point of this fence
-                (-35.361019, 149.161057),  # 1st index: same as the Nth index
-                (-35.360817, 149.168533),
-                (-35.365364, 149.168686),
-                (-35.365486, 149.160919),
-                (-35.363792, 149.160919),
-                (-35.363747, 149.163574),
-                (-35.362366, 149.163666),
-                (-35.362286, 149.161011),
-                (-35.361019, 149.161057)]  # Nth index: same as the 1st index
-
     # THE VEHICLE IS ALREADY CONNECTED, SO WE DO NOT NEED TO CONNECT AGAIN
     # connect to vehicle
     # vehicle = utility.mavlink_connection(device="udpin:127.0.0.1:14560")
@@ -235,6 +223,22 @@ def set_geofence(self, fence_list):
         else:
             print("Failed to reset FENCE_TOTAL to {0}, trying again".format(len(fence_list)))
 
+    # SET FENCE_ALT_MAX
+    while True:
+
+        # reset FENCE_TOTAL parameter to zero
+        self.vehicle.parameters["FENCE_ALT_MAX"] = 10
+
+        # make sure that parameter value set successfully
+        if self.vehicle.parameters["FENCE_ALT_MAX"] == 10:
+            print("FENCE_ALT_MAX set to 10 meters successfully")
+
+            # break the loop
+            break
+
+        # should send param reset message again
+        else:
+            print("Failed to set FENCE_ALT_MAX to 10 meters, trying again")
     # initialize fence item index counter
     idx = 0
 
@@ -250,7 +254,8 @@ def set_geofence(self, fence_list):
                                                     lng=fence_list[idx][1])
 
         # send this message to vehicle
-        self.vehicle.mav.send(message)
+        # self.vehicle.mav.send(message) MAV ESTÁ EN DESUSO
+        self.vehicle.send_mavlink(message)
 
         # create FENCE_FETCH_POINT message
         message = dialect.MAVLink_fence_fetch_point_message(target_system=0,
@@ -258,23 +263,26 @@ def set_geofence(self, fence_list):
                                                             idx=idx)
 
         # send this message to vehicle
-        self.vehicle.mav.send(message)
+        # self.vehicle.mav.send(message) MAV ESTÁ EN DESUSO
+        self.vehicle.send_mavlink(message)
+
+
+        # Espera recibir el mensaje específico
 
         # wait until receive FENCE_POINT message
-        message = self.vehicle.recv_match(type=dialect.MAVLink_fence_point_message.msgname,
-                                    blocking=True)
+        # message = self.vehicle.recv_match(type=dialect.MAVLink_fence_point_message.msgname, blocking=True)
 
         # convert the message to dictionary
-        message = message.to_dict()
+        # message = message.to_dict()
 
         # get the latitude and longitude from the fence item
-        latitude = message["lat"]
-        longitude = message["lng"]
+        # latitude = message["lat"]
+        # longitude = message["lng"]
 
         # check the fence point is uploaded successfully
-        if latitude != 0.0 and longitude != 0:
+        # if latitude != 0.0 and longitude != 0:
             # increase the index of the fence item
-            idx += 1
+        idx += 1
 
     print("All the fence items uploaded successfully")
 

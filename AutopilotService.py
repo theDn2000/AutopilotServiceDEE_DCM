@@ -111,12 +111,12 @@ def process_message(message, client):
             dron.clear_GEOFence()
 
             # DEFINE SPACE
-            fencelist = [(41.27640942348419, 1.9886658713221552, 20),
-                         (41.27643361279337, 1.988196484744549, 20),
-                         (41.27615341941283, 1.9883145019412043, 20),
-                         (41.27635096595008, 1.9891352578997614, 20),
-                         (41.27663317425185, 1.9890118762850764, 20),
-                         (41.27643361279337, 1.988196484744549, 20)]
+            fencelist = [(-35.363925, 149.164797,), # 0th index: return point of this fence
+                         (-35.363925, 149.164797,), # 1st index: same as the Nth index
+                         (-35.362147, 149.164465,),
+                         (-35.361924, 149.166149,),
+                         (-35.363715, 149.166455,),
+                         (-35.363925, 149.164797,)] # Nth index: same as the 1st index
 
             # ENABLE WAYPOINT LIMIT:
             param_name = "FENCE_TOTAL"
@@ -125,7 +125,7 @@ def process_message(message, client):
             print("Fence total: ", dron.get_parameter(param_name))
 
             # SET GEOFENCE:
-            dron.set_geofence()
+            dron.set_geofence(fence_list=fencelist)  # Upload GEOFence
             # dron.prepare_geofence(fencelist)  # Upload GEOFence
         else:
             print('Vehicle not flying')
