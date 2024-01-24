@@ -1,3 +1,4 @@
+import threading
 import pymavlink
 from pymavlink.mavutil import default_native
 import pymavlink.dialects.v20.all as dialect
@@ -7,6 +8,7 @@ class Dron(object):
     def __init__(self, internal_broker, external_broker):
         self.internal_client = internal_broker  # necesita el broker interno para publicar respuestas
         self.external_client = external_broker  # necesita el broker externo para publicar respuestas
+        self.lock = threading.Lock()  # para evitar que se solapen las publicaciones de los dos hilos
         self.state = "disconnected"
         ''' os otros estados son:
             connected
@@ -28,7 +30,7 @@ class Dron(object):
 
     from functions_v0.connect_v0_func import connect_v0, disconnect
     from functions_v0.telemetry_info_v0_func import send_telemetry_info_trigger, send_telemetry_info_v0, \
-        get_telemetry_info
+        get_telemetry_info, send_telemetry_info_MAMVLINK
     from functions_v0.arm_v0_func import arm_v0, armed_change, disarm
     from functions_v0.take_off_v0_func import take_off_trigger, take_off_v0
     from functions_v0.return_to_launch_v0_func import returning_trigger, returning_v0
