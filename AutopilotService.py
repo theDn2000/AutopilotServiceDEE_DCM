@@ -38,7 +38,7 @@ def process_message(message, client):
     origin = splited[0]
     command = splited[2]
     sending_topic = "autopilotService/" + origin
-    print('- Autopilot Service: Received "', command +'".')
+    print('- Autopilot Service: Received "' + command +'".')
 
     if command == "position":
         print("Position: ", message.payload)
@@ -60,11 +60,13 @@ def process_message(message, client):
     if command == "takeOff":
 
         if dron.state == 'armed' or 'onHearth':
+            print("- Autopilot Service: Vehicle taking off")
             dron.take_off_trigger()
+            print("- Autopilot Service: Vehicle reached target altitude")
             # The script waits for the take_off to finish
 
-        if dron.state == 'flying':
-            dron.flying_trigger()
+        # if dron.state == 'flying':
+            # dron.flying_trigger()
 
     if command == "returnToLaunch":
         # stop the process of getting positions
@@ -73,10 +75,10 @@ def process_message(message, client):
     if command == "armDrone":
 
         if dron.state == 'connected' or 'onHearth' or 'disarmed':
-            dron.arm_v0()
-            print(dron.state)
+            dron.arm_MAVLINK()
+            print("- Autopilot Service: Vehicle armed")
         else:
-            print('The vehicle is not armable as it is not connected')
+            print('- Autopilot Service: The vehicle is not armable as it is not connected')
 
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change

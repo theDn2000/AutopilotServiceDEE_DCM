@@ -10,7 +10,7 @@ import itertools
 def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic):
     # print("The current state is: " + self.state + " , trying to connect...")
     if self.state == 'disconnected':
-        print("Autopilot service connection request by " + origin)
+        print("- Autopilot Service: Connection request by " + origin)
         # para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
         # hay que ejecutar el siguiente comando desde PowerShell desde  C:\Users\USER>
         # mavproxy - -master =COM12 - -out = udp:127.0.0.1: 14550 - -out = udp:127.0.0.1: 14551
@@ -34,7 +34,7 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
             for c in itertools.cycle(['|', '/', '-', '\\']):
                 if done:
                     break
-                sys.stdout.write('\rconnecting ' + c)
+                sys.stdout.write('\rConnecting ' + c)
                 sys.stdout.flush()
                 time.sleep(0.1)
             sys.stdout.write('\rConnected to flight controller     \n')
@@ -49,7 +49,8 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
 
         time.sleep(1)
         done = True
-        time.sleep(5)
+        time.sleep(1)
+        # time.sleep(5)
         # print('Connected to flight controller')
 
         self.sending_telemetry_info = True
@@ -58,7 +59,7 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
         # external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
 
     else:
-        print('Autopilot already connected')
+        print('- Autopilot Service: '+origin+' already connected')
 
 
 def disconnect(self):

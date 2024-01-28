@@ -18,7 +18,6 @@ def get_telemetry_info(self):
 
 
 def send_telemetry_info_trigger(self, external_client, internal_client, sending_topic):
-    print(self.state)
     self.sending_telemetry_info = True
     y = threading.Thread(target=self.send_telemetry_info_MAMVLINK, args=[sending_topic])
     y.start()
@@ -31,7 +30,7 @@ def send_telemetry_info_v0(self, external_client, internal_client, sending_topic
 
 
 def send_telemetry_info_MAMVLINK(self, sending_topic):
-    print('Starting to send telemetry info...', self.state)
+    print('- Autopilot Service: Telemetry info sending started')
     frequency_hz = 2
     self.vehicle.mav.command_long_send(
         self.vehicle.target_system,  self.vehicle.target_component,
@@ -45,6 +44,8 @@ def send_telemetry_info_MAMVLINK(self, sending_topic):
     while self.state != 'desconectado' and self.sending_telemetry_info:
     #msg = self.vehicle.recv_match(type='AHRS2', blocking= True).to_dict()
         msg = self.vehicle.recv_match(type='GLOBAL_POSITION_INT', blocking= False)
+        # Get battery information
+        msg_battery = self.vehicle.recv_match(type='BATTERY_STATUS', blocking= False)
         if msg:
             msg = msg.to_dict()
             self.lat = float(msg['lat'] / 10 ** 7)
