@@ -20,7 +20,7 @@ def get_telemetry_info(self):
 def send_telemetry_info_trigger(self, external_client, internal_client, sending_topic):
     print(self.state)
     self.sending_telemetry_info = True
-    y = threading.Thread(target=self.send_telemetry_info_v0, args=[external_client, internal_client, sending_topic])
+    y = threading.Thread(target=self.send_telemetry_info_MAMVLINK, args=[sending_topic])
     y.start()
 
 
@@ -66,4 +66,3 @@ def send_telemetry_info_MAMVLINK(self, sending_topic):
             self.external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
             self.lock.release()
         time.sleep(0.25)
-        print(telemetry_info)
