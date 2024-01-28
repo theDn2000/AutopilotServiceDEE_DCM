@@ -38,7 +38,7 @@ def process_message(message, client):
     origin = splited[0]
     command = splited[2]
     sending_topic = "autopilotService/" + origin
-    print('- Autopilot: received ', command)
+    print('recibo ', command)
 
     if command == "position":
         print("Position: ", message.payload)
@@ -49,7 +49,7 @@ def process_message(message, client):
 
         # If connect is OK, initialize the telemetry data
         if dron.state == 'connected':
-            dron.send_telemetry_info_MAMVLINK(sending_topic)
+            dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic)
 
     if command == "disconnect":
         if dron.state == 'connected':
@@ -110,7 +110,7 @@ def process_message(message, client):
             # CLEAR FENCE
             dron.clear_GEOFence()
 
-            # DEFINE SPACE
+            # DEFINE SPACE (Boundaries of )
             fencelist = [(-35.363925, 149.164797,), # 0th index: return point of this fence
                          (-35.363925, 149.164797,), # 1st index: same as the Nth index
                          (-35.362147, 149.164465,),
