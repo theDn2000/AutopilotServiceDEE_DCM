@@ -38,7 +38,7 @@ def process_message(message, client):
     origin = splited[0]
     command = splited[2]
     sending_topic = "autopilotService/" + origin
-    print('recibo ', command)
+    print('- Autopilot Service: Received "', command +'".')
 
     if command == "position":
         print("Position: ", message.payload)
