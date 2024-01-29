@@ -65,8 +65,8 @@ def process_message(message, client):
             print("- Autopilot Service: Vehicle reached target altitude")
             # The script waits for the take_off to finish
 
-        # if dron.state == 'flying':
-            # dron.flying_trigger()
+        if dron.state == 'flying':
+            dron.flying_trigger()
 
     if command == "returnToLaunch":
         # stop the process of getting positions

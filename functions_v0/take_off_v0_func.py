@@ -23,6 +23,7 @@ def take_off_v0(self, a_target_altitude, manualControl):
     self.state = 'flying'
 
 def takeOff_MAVLINK(self, aTargetAltitude, manualControl):
+    self.state = 'takingOff'
     self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component,
                                          mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, aTargetAltitude)
 

@@ -16,10 +16,10 @@ def flying_v0(self):
         self.going = False
         while not self.going:
             if not self.reaching_waypoint:
-                self.vehicle.send_mavlink(cmd)
+                self.vehicle.mav.send(cmd)
                 time.sleep(1)
         # a new go command has been received. Check direction
-        print('salgo del bucle por ', self.direction)
+        # print('salgo del bucle por ', self.direction)
         if self.direction == "North":
             cmd = self.prepare_command(speed, 0, 0)  # NORTH
         if self.direction == "South":
@@ -46,10 +46,10 @@ def prepare_command(self, velocity_x, velocity_y, velocity_z):
     """
     Move vehicle in direction based on specified velocity vectors.
     """
-    msg = self.vehicle.message_factory.set_position_target_local_ned_encode(
+    msg = mavutil.mavlink.MAVLink_set_position_target_global_int_message(
         0,  # time_boot_ms (not used)
-        0,
-        0,  # target system, target component
+        self.vehicle.target_system,
+        self.vehicle.target_component,  # target system, target component
         mavutil.mavlink.MAV_FRAME_LOCAL_NED,  # frame
         0b0000111111000111,  # type_mask (only speeds enabled)
         0,
@@ -70,5 +70,5 @@ def prepare_command(self, velocity_x, velocity_y, velocity_z):
 
 def go_order(self, direction):
     self.direction = direction
-    print("Going ", self.direction)
+    print("- Autopilot Service: Going ", self.direction)
     self.going = True
