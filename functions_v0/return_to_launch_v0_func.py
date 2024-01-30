@@ -34,5 +34,5 @@ def returnToLaunch_MAVLINK(self):
     arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=True, timeout=3)
     print('- Autopilot Service: Returning to launch')
     self.vehicle.motors_disarmed_wait()
-    self.state = "connected"
+    self.state = "onHearth"
 
