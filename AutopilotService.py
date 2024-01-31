@@ -97,38 +97,7 @@ def process_message(message, client):
 
     if command == "land":
         if dron.state == 'flying':
-
-            # ENABLE GEOFENCE:
-            param_name = "FENCE_ENABLE"
-            param_value = 1
-            if dron.get_parameter(param_name) != param_value:
-                dron.modify_parameter(param_name, param_value)
-                print("GEOFENCE ENABLED")
-            else:
-                print("GEOFENCE is already enabled")
-
-            # CLEAR MISSION
-            dron.clear_Mission()
-            # CLEAR FENCE
-            dron.clear_GEOFence()
-
-            # DEFINE SPACE (Boundaries of )
-            fencelist = [(-35.363925, 149.164797,), # 0th index: return point of this fence
-                         (-35.363925, 149.164797,), # 1st index: same as the Nth index
-                         (-35.362147, 149.164465,),
-                         (-35.361924, 149.166149,),
-                         (-35.363715, 149.166455,),
-                         (-35.363925, 149.164797,)] # Nth index: same as the 1st index
-
-            # ENABLE WAYPOINT LIMIT:
-            param_name = "FENCE_TOTAL"
-            param_value = len(fencelist)
-            dron.modify_parameter(param_name, param_value)
-            print("Fence total: ", dron.get_parameter(param_name))
-
-            # SET GEOFENCE:
-            dron.set_geofence(fence_list=fencelist)  # Upload GEOFence
-            # dron.prepare_geofence(fencelist)  # Upload GEOFence
+            dron.geofence_trigger()
         else:
             print('Vehicle not flying')
 

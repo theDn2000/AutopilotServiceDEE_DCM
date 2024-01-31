@@ -4,10 +4,43 @@ import pymavlink.mavutil as utility
 
 import time
 
+def geofence_trigger(self):
+    # ENABLE GEOFENCE:
+    param_name = "FENCE_ENABLE".encode(encoding="utf-8")
+    param_value = 1
+    if self.get_parameter_MAVLINK(param_name) != param_value:
+        self.modify_parameter_MAVLINK(param_name, param_value)
+        print("- Geofence Controller: GEOFENCE ENABLED")
+    else:
+        print("- Geofence Controller: GEOFENCE is already enabled")
+
+    # CLEAR MISSION
+    self.clear_Mission()
+    # CLEAR FENCE
+    self.clear_GEOFence()
+
+    # DEFINE SPACE (fencelist se debería establecer como un parámetro de la función geofence_trigger. Actualmente hecho así por comodidad de desarrollo y pruebas MAVLink)
+    fencelist = [(-35.363925, 149.164797,), # 0th index: return point of this fence
+                    (-35.363925, 149.164797,), # 1st index: same as the Nth index
+                    (-35.362147, 149.164465,),
+                    (-35.361924, 149.166149,),
+                    (-35.363715, 149.166455,),
+                    (-35.363925, 149.164797,)] # Nth index: same as the 1st index
+
+    # ENABLE WAYPOINT LIMIT:
+    param_name = "FENCE_TOTAL"
+    param_value = len(fencelist)
+    self.modify_parameter(param_name, param_value)
+    print("- Geofence Controller: Fence total: ", self.get_parameter(param_name))
+
+    # SET GEOFENCE:
+    self.set_geofence(fence_list=fencelist)  # Upload GEOFence
+    # dron.prepare_geofence(fencelist)  # Upload GEOFence
+
+
 def clear_Mission(self):
     self.vehicle.commands.clear()
     self.vehicle.commands.upload()
-
 
 def clear_GEOFence(self):
     # Clear the fence
@@ -501,6 +534,7 @@ def set_geofence_MAVLINK(self, fence_list):
             idx += 1
 
     print("All the fence items uploaded successfully")
+    fence_action_brake = 3
 
     # run until parameter set successfully
     while True:
@@ -509,7 +543,7 @@ def set_geofence_MAVLINK(self, fence_list):
         message = dialect.MAVLink_param_set_message(target_system=self.vehicle.target_system,
                                                     target_component=self.vehicle.target_component,
                                                     param_id=FENCE_ACTION,
-                                                    param_value=fence_action_original,
+                                                    param_value=fence_action_brake,
                                                     param_type=dialect.MAV_PARAM_TYPE_REAL32)
 
         # send parameter set message to the vehicle
@@ -527,11 +561,11 @@ def set_geofence_MAVLINK(self, fence_list):
 
             # make sure that parameter value set successfully
             if int(message["param_value"]) == fence_action_original:
-                print("FENCE_ACTION set to original value {0} successfully".format(fence_action_original))
+                print("FENCE_ACTION set to value {0} successfully".format(fence_action_brake))
 
                 # break the loop
                 break
 
             # should send param set message again
             else:
-                print("Failed to set FENCE_ACTION to original value {0} ".format(fence_action_original))
+                print("Failed to set FENCE_ACTION to value {0} ".format(fence_action_brake))
