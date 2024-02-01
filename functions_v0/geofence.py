@@ -17,7 +17,7 @@ def geofence_trigger(self):
     # CLEAR MISSION
     self.clear_Mission()
     # CLEAR FENCE
-    self.clear_GEOFence()
+    # self.clear_GEOFence()
 
     # DEFINE SPACE (fencelist se debería establecer como un parámetro de la función geofence_trigger. Actualmente hecho así por comodidad de desarrollo y pruebas MAVLink)
     fencelist = [(-35.363925, 149.164797,), # 0th index: return point of this fence
@@ -28,26 +28,38 @@ def geofence_trigger(self):
                     (-35.363925, 149.164797,)] # Nth index: same as the 1st index
 
     # ENABLE WAYPOINT LIMIT:
-    param_name = "FENCE_TOTAL"
+    param_name = "FENCE_TOTAL".encode(encoding="utf-8")
     param_value = len(fencelist)
-    self.modify_parameter(param_name, param_value)
-    print("- Geofence Controller: Fence total: ", self.get_parameter(param_name))
+    self.modify_parameter_MAVLINK(param_name, param_value)
+    print("- Geofence Controller: Fence total: ", self.get_parameter_MAVLINK(param_name))
 
     # SET GEOFENCE:
-    self.set_geofence(fence_list=fencelist)  # Upload GEOFence
+    self.set_geofence_MAVLINK(fence_list=fencelist)  # Upload GEOFence
     # dron.prepare_geofence(fencelist)  # Upload GEOFence
 
 
 def clear_Mission(self):
-    self.vehicle.commands.clear()
-    self.vehicle.commands.upload()
+    self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
 
 def clear_GEOFence(self):
     # Clear the fence
-    self.vehicle.commands.clear()
-    # message = self.vehicle.message_factory.mission_clear_all_encode(self.vehicle.target_system, self.vehicle.target_component, dialect.MAV_MISSION_TYPE_FENCE)
-    # message = dialect.MAVLink_mission_clear_all_message(target_system=self.target_system, target_component=self.target_component, mission_type=dialect.MAV_MISSION_TYPE_FENCE)
-    # self.mav.mav.send(message)
+    # Crea un mensaje MAVLink FENCE_CLEAR_ALL para borrar todos los límites del GeoFence
+    msg = self.vehicle.mav.command_long_encode(
+        self.vehicle.target_system,         # ID del sistema al que se envía el mensaje
+        self.vehicle.target_component,      # ID del componente al que se envía el mensaje
+        mavutil.mavlink.MAV_CMD_NAV_FENCE_CLEAR_ALL, # Comando para limpiar el GeoFence
+        0,                            # Confirmación automática
+        0,                            # Param1 (no utilizado)
+        0,                            # Param2 (no utilizado)
+        0,                            # Param3 (no utilizado)
+        0,                            # Param4 (no utilizado)
+        0,                            # Param5 (no utilizado)
+        0,                            # Param6 (no utilizado)
+        0                             # Param7 (no utilizado)
+    )
+
+    # Envía el mensaje MAVLink
+    self.vehicle.mav.send(msg)
 
 def prepare_geofence(self, fencelist):
     """
