@@ -97,7 +97,8 @@ def process_message(message, client):
 
     if command == "land":
         if dron.state == 'flying':
-            dron.geofence_trigger()
+            # dron.geofence_trigger()
+            print(dron.get_parameter_MAVLINK('SIM_OPOS_HDG'))
         else:
             print('Vehicle not flying')
 
