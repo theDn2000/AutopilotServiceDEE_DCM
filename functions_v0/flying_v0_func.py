@@ -7,7 +7,6 @@ def flying_trigger(self):
     w = threading.Thread(target=self.flying_v0)
     w.start()
 
-
 def flying_v0(self):
     speed = 1
     end = False
@@ -42,6 +41,7 @@ def flying_v0(self):
             end = True
 
 
+
 def prepare_command(self, velocity_x, velocity_y, velocity_z):
     """
     Move vehicle in direction based on specified velocity vectors.
@@ -66,6 +66,7 @@ def prepare_command(self, velocity_x, velocity_y, velocity_z):
     )  # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
 
     return msg
+
 
 
 def go_order(self, direction):

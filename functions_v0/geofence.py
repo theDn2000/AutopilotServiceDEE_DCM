@@ -378,14 +378,14 @@ def set_fence_geofence(self, fence_list):
             # Increase the index of the fence item
             idx += 1
 
-    print("- Geofence Controller (5/7): All the fence items uploaded successfully")
+    print("- Geofence Controller: All the fence items uploaded successfully")
 
 def action_geofence(self, action):
     # SET FENCE_ACTION PARAMETER
     while True:
         
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_ACTION", int(action)
+        self.modify_parameter_MAVLINK("FENCE_ACTION", int(action))
         # Get the parameter value
         if self.get_parameter_MAVLINK("FENCE_ACTION") == int(action):
             print("- Geofence Controller: FENCE_ACTION set to value 3 successfully")

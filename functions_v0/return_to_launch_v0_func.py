@@ -11,11 +11,6 @@ def returning_trigger(self):
     w.start()
 
 
-def returning_v0(self):
-    # wait until the drone is at home
-    while self.vehicle.armed:
-        time.sleep(1)
-    self.state = 'onHearth'
 
 def returnToLaunch_MAVLINK(self):
     mode = 'RTL'

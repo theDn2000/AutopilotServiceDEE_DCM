@@ -7,6 +7,7 @@ import sys
 import itertools
 
 
+
 def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic):
     # print("The current state is: " + self.state + " , trying to connect...")
     if self.state == 'disconnected':
@@ -60,7 +61,6 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
 
     else:
         print('- Autopilot Service: '+origin+' already connected')
-
 
 def disconnect(self):
     self.vehicle.close()
