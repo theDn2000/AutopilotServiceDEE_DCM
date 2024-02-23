@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 from paho.mqtt.client import ssl
+import json
 import os
 import sys
 
@@ -49,7 +50,7 @@ def process_message(message, client):
 
         # If connect is OK, initialize the telemetry data
         if dron.state == 'connected':
-            dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic)
+            dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
 
     if command == "disconnect":
         if dron.state == 'connected':
@@ -128,6 +129,11 @@ def on_connect(external_client, userdata, flags, rc):
         print("Connection OK")
     else:
         print("Bad connection")
+
+
+def process_output(telemetry_info):
+    # Callback function to send the telemetry_info packet
+    dron.external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
 
 
 def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client,

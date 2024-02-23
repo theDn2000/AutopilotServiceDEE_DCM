@@ -29,12 +29,11 @@ class Dron(object):
     # Ese es el caso del atributo going, que lo tengo que declarar aqui y preferiría poder declararlo en el fichero dron_goto
 
     from functions_v0.connect_v0_func import connect_v0, disconnect
-    from functions_v0.telemetry_info_v0_func import send_telemetry_info_trigger, send_telemetry_info_v0, \
-        get_telemetry_info, send_telemetry_info_MAMVLINK
-    from functions_v0.arm_v0_func import arm_v0, armed_change, disarm, arm_MAVLINK
-    from functions_v0.take_off_v0_func import take_off_trigger, take_off_v0, takeOff_MAVLINK
-    from functions_v0.return_to_launch_v0_func import returning_trigger, returning_v0, returnToLaunch_MAVLINK
+    from functions_v0.telemetry_info_v0_func import send_telemetry_info_trigger, get_telemetry_info, send_telemetry_info_MAVLINK
+    from functions_v0.arm_v0_func import armed_change, disarm, arm_MAVLINK
+    from functions_v0.take_off_v0_func import take_off_trigger, takeOff_MAVLINK
+    from functions_v0.return_to_launch_v0_func import returning_trigger, returnToLaunch_MAVLINK
     from functions_v0.flying_v0_func import flying_trigger, flying_v0, prepare_command, go_order
-    from functions_v0.goto_v0_func import goto_trigger, goto_v0, distanceInMeters
+    from functions_v0.goto_v0_func import goto_trigger, distanceInMeters
     from functions_v0.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence
-    from functions_v0.modify_parameters import modify_parameter, get_parameter, modify_parameter_MAVLINK, get_parameter_MAVLINK
+    from functions_v0.modify_parameters import modify_parameter_MAVLINK, get_parameter_MAVLINK

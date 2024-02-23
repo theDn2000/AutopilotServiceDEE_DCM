@@ -18,12 +18,12 @@ def get_telemetry_info(self):
 
 
 
-def send_telemetry_info_trigger(self, external_client, internal_client, sending_topic):
+def send_telemetry_info_trigger(self, external_client, internal_client, sending_topic, callback):
     self.sending_telemetry_info = True
-    y = threading.Thread(target=self.send_telemetry_info_MAVLINK, args=[sending_topic])
+    y = threading.Thread(target=self.send_telemetry_info_MAVLINK, args=[sending_topic, callback])
     y.start()
 
-def send_telemetry_info_MAVLINK(self, sending_topic):
+def send_telemetry_info_MAVLINK(self, sending_topic, callback):
     print('- Autopilot Service: Telemetry info sending started')
     frequency_hz = 2
     self.vehicle.mav.command_long_send(
@@ -66,8 +66,10 @@ def send_telemetry_info_MAVLINK(self, sending_topic):
                 'battery': self.battery,
                 'state': self.state
             }
+            # Send telemetry info using the apropiate method
             self.lock.acquire()
-            self.external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
+            callback(telemetry_info)
+            #self.external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
             self.lock.release()
         time.sleep(0.25)
 
