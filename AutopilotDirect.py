@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import os
 import sys
+import time
 import threading
 
 # Import the Dron class
@@ -56,7 +57,7 @@ class App(ctk.CTk):
         self.info_textbox.grid(row=0, column=1, padx=0, pady=3, rowspan=3)
         self.info_textbox.insert("1.0", "Welcome to AutopilotDirect.\nThis tool allows you to interact with the\nautopilot functions directly without using any\nbroker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
-        self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info added")
+        self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info      added.\n\n- Version: 0.1.2: Control and pad buttons added.")
 
         self.info_textbox.configure(state="disabled")
 
@@ -166,7 +167,7 @@ class App(ctk.CTk):
         self.control_button_land = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off", command=self.take_off, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_land.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_button_goto = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_goto = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_goto.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
 
@@ -190,34 +191,34 @@ class App(ctk.CTk):
         self.main_frame_control_pad.rowconfigure(2, weight=1)
 
 
-
         # Create the control pad buttons
-        self.control_pad_button_nw = ctk.CTkButton(self.main_frame_control_pad, text="NW", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_nw = ctk.CTkButton(self.main_frame_control_pad, text="NW", command=lambda : self.go("NorthWest"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_nw.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_n = ctk.CTkButton(self.main_frame_control_pad, text="N", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_n = ctk.CTkButton(self.main_frame_control_pad, text="N", command=lambda : self.go("North"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_n.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_ne = ctk.CTkButton(self.main_frame_control_pad, text="NE", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_ne = ctk.CTkButton(self.main_frame_control_pad, text="NE", command=lambda : self.go("NorthEast"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_ne.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_w = ctk.CTkButton(self.main_frame_control_pad, text="W", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_w = ctk.CTkButton(self.main_frame_control_pad, text="W", command=lambda : self.go("West"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_w.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_stop = ctk.CTkButton(self.main_frame_control_pad, text="STOP", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_stop = ctk.CTkButton(self.main_frame_control_pad, text="STOP", command=lambda : self.go("Stop"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_stop.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_e = ctk.CTkButton(self.main_frame_control_pad, text="E", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_e = ctk.CTkButton(self.main_frame_control_pad, text="E", command=lambda : self.go("East"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_e.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_sw = ctk.CTkButton(self.main_frame_control_pad, text="SW", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_sw = ctk.CTkButton(self.main_frame_control_pad, text="SW", command=lambda : self.go("SouthWest"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_sw.grid(row=2, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_s = ctk.CTkButton(self.main_frame_control_pad, text="S", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_s = ctk.CTkButton(self.main_frame_control_pad, text="S", command=lambda : self.go("South"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_s.grid(row=2, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", command=lambda : self.go("SouthEast"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_se.grid(row=2, column=2, padx=5, pady=5, sticky="we", ipady=10)
+
 
 
     # FUNCTIONS (BACKEND)
@@ -267,15 +268,39 @@ class App(ctk.CTk):
 
     def take_off(self):
         # Take off
-        dron.takeOff_MAVLINK(5, True)
+        if dron.state == "armed" or "onHearth":
+            t = threading.Thread(target=dron.takeOff_MAVLINK, args=[5, True])
+            t.start()
+            print("Vehicle taking off.")
+        else:
+            print("The vehicle is not armed.")
 
-        self.after(1000, self.connect)
-        print("Vehicle reached target altitude.")
+        # Wait until the vehicle reaches the target altitude
+        t2 = threading.Thread(target=self.wait_take_off)
+        t2.start()
 
+    def go(self, direction):
+        # Go to a direction
+        if dron.state == "flying":
+            dron.go_order(direction)
+        else:
+            print("The vehicle is not flying.")
+
+    def rtl(self):
+        # Return to launch
+        if dron.state == "flying":
+            dron.returning_trigger()
+
+    def wait_take_off(self):
+        # Wait until the vehicle reaches the target altitude
+        while dron.state != "flying":
+            if dron.state == "flying":
+                break
+            else:
+                # Wait 0.5 seconds
+                time.sleep(0.5)
         dron.flying_trigger()
-
-
-
+        print("Vehicle reached target altitude.")
 
 
 

@@ -10,8 +10,6 @@ def returning_trigger(self):
     w = threading.Thread(target=self.returnToLaunch_MAVLINK)
     w.start()
 
-
-
 def returnToLaunch_MAVLINK(self):
     mode = 'RTL'
 
