@@ -7,7 +7,7 @@ import threading
 # Import the Dron class
 from Dron import Dron
 # Create a Dron object
-dron = Dron(None, None)
+dron = Dron()
 
 # Night mode
 ctk.set_appearance_mode("dark")
