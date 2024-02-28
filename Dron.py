@@ -5,9 +5,8 @@ import pymavlink.dialects.v20.all as dialect
 
 
 class Dron(object):
-    def __init__(self, internal_broker, external_broker):
-        self.internal_client = internal_broker  # necesita el broker interno para publicar respuestas
-        self.external_client = external_broker  # necesita el broker externo para publicar respuestas
+    def __init__(self, ID):
+        self.ID = ID # ID del dron
         self.lock = threading.Lock()  # para evitar que se solapen las publicaciones de los dos hilos
         self.state = "disconnected"
         ''' os otros estados son:

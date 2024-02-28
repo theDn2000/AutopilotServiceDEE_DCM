@@ -7,7 +7,7 @@ import threading
 # Import the Dron class
 from Dron import Dron
 # Create a Dron object
-dron = Dron()
+dron = Dron(ID=1)
 
 # Night mode
 ctk.set_appearance_mode("dark")
@@ -19,7 +19,7 @@ class App(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("600x400")
-        self.title("Autopilot Direct")
+        self.title("Dashboard Direct")
         self.resizable(False, False)
 
 
@@ -55,7 +55,7 @@ class App(ctk.CTk):
         # Create the info_textbox (read-only)
         self.info_textbox = ctk.CTkTextbox(self.main_frame, width=280, height=310)
         self.info_textbox.grid(row=0, column=1, padx=0, pady=3, rowspan=3)
-        self.info_textbox.insert("1.0", "Welcome to AutopilotDirect.\nThis tool allows you to interact with the\nautopilot functions directly without using any\nbroker.\n\nPlease, click the 'Connect' button to start.")
+        self.info_textbox.insert("1.0", "Welcome to DashboardDirect.\nThis tool allows you to interact with the\nautopilot functions directly without using any\nbroker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
         self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info      added.\n\n- Version: 0.1.2: Control and pad buttons added.")
 
@@ -227,7 +227,7 @@ class App(ctk.CTk):
     def connect(self):
 
         # Connect to the autopilot
-        dron.connect_v0("AutopilotDirect", "simulation", None, None, None)
+        dron.connect_v0("DashboardDirect", "simulation", None, None, None)
 
         if dron.state == "connected":
             # Delete every element and start the main page view

@@ -224,7 +224,8 @@ if __name__ == '__main__':
     external_client.on_connect = on_connect
 
     # Una vez definidos el broker interno y el externo, inicializamos el objeto Dron:
-    dron = Dron(internal_client, external_client)
+    ID = 1
+    dron = Dron(ID)
 
     AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client,
                      external_client)
