@@ -7,7 +7,7 @@ import sys
 import itertools
 
 
-
+# Connect main function
 def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic):
     # print("The current state is: " + self.state + " , trying to connect...")
     if self.state == 'disconnected':
@@ -62,6 +62,17 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
     else:
         print('- Autopilot Service: '+origin+' already connected')
 
+# Connect trigger function (for blocking or non-blocking)
+def connect(self, origin, op_mode, external_client, internal_client, sending_topic, blocking):
+    if blocking:
+        connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic)
+    else:
+        t = threading.Thread(target=connect_v0, args=(self, origin, op_mode, external_client, internal_client, sending_topic))
+        t.start()
+
+
+
+# Disconnect function
 def disconnect(self):
     self.vehicle.close()
     self.sending_telemetry_info = False

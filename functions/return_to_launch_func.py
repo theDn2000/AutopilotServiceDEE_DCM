@@ -4,15 +4,11 @@ import time
 from pymavlink import mavutil
 
 
-def returning_trigger(self):
-    self.state = 'returningHome'
-    self.going = True
-    w = threading.Thread(target=self.returnToLaunch_MAVLINK)
-    w.start()
-
+# Return to launch main function
 def returnToLaunch_MAVLINK(self):
     mode = 'RTL'
-
+    self.state = 'returningHome'
+    self.going = True
     # Check if mode is available
     if mode not in self.vehicle.mode_mapping():
         print('Unknown mode : {}'.format(mode))
@@ -29,3 +25,10 @@ def returnToLaunch_MAVLINK(self):
     self.vehicle.motors_disarmed_wait()
     self.state = "onHearth"
 
+# Return to launch trigger function (for blocking and non-blocking)
+def return_to_launch(self, blocking):
+    if blocking:
+        returnToLaunch_MAVLINK(self)
+    else:
+        t = threading.Thread(target=self.returnToLaunch_MAVLINK)
+        t.start()

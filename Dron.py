@@ -27,12 +27,12 @@ class Dron(object):
     # ese atributo hay que declararlo aqui y no en el fichero con los métodos nuevos.
     # Ese es el caso del atributo going, que lo tengo que declarar aqui y preferiría poder declararlo en el fichero dron_goto
 
-    from functions_v0.connect_v0_func import connect_v0, disconnect
-    from functions_v0.telemetry_info_v0_func import send_telemetry_info_trigger, get_telemetry_info, send_telemetry_info_MAVLINK
-    from functions_v0.arm_v0_func import armed_change, disarm, arm_MAVLINK
-    from functions_v0.take_off_v0_func import take_off_trigger, takeOff_MAVLINK
-    from functions_v0.return_to_launch_v0_func import returning_trigger, returnToLaunch_MAVLINK
-    from functions_v0.flying_v0_func import flying_trigger, flying_v0, prepare_command, go_order
-    from functions_v0.goto_v0_func import goto_trigger, distanceInMeters
-    from functions_v0.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence
-    from functions_v0.modify_parameters import modify_parameter_MAVLINK, get_parameter_MAVLINK
+    from functions.connect_func import connect, disconnect
+    from functions.telemetry_info_func import send_telemetry_info_trigger, get_telemetry_info, send_telemetry_info_MAVLINK
+    from functions.arm_func import armed_change, disarm, arm
+    from functions.take_off_func import take_off, takeOff_MAVLINK
+    from functions.return_to_launch_func import return_to_launch, returnToLaunch_MAVLINK
+    from functions.flying_func import flying_trigger, flying_v0, prepare_command, go_order
+    from functions.goto_func import goto_trigger, distanceInMeters
+    from functions.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence
+    from functions.modify_parameters import modify_parameter_MAVLINK, get_parameter_MAVLINK

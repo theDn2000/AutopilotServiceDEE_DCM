@@ -46,7 +46,7 @@ def process_message(message, client):
 
     if command == "connect":
 
-        dron.connect_v0(origin, op_mode, external_client, internal_client, sending_topic)
+        dron.connect(origin, op_mode, external_client, internal_client, sending_topic, True)
 
         # If connect is OK, initialize the telemetry data
         if dron.state == 'connected':
@@ -62,7 +62,7 @@ def process_message(message, client):
 
         if dron.state == 'armed' or 'onHearth':
             print("- Autopilot Service: Vehicle taking off")
-            dron.take_off_trigger()
+            dron.take_off(10, True)
             print("- Autopilot Service: Vehicle reached target altitude")
             # The script waits for the take_off to finish
 
@@ -71,12 +71,12 @@ def process_message(message, client):
 
     if command == "returnToLaunch":
         # stop the process of getting positions
-        dron.returning_trigger()
+        dron.return_to_launch(False)
 
     if command == "armDrone":
 
         if dron.state == 'connected' or 'onHearth' or 'disarmed':
-            dron.arm_MAVLINK()
+            dron.arm(True)
             print("- Autopilot Service: Vehicle armed")
         else:
             print('- Autopilot Service: The vehicle is not armable as it is not connected')

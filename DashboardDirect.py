@@ -7,7 +7,8 @@ import threading
 # Import the Dron class
 from Dron import Dron
 # Create a Dron object
-dron = Dron(ID=1)
+ID = 1
+dron = Dron(ID)
 
 # Night mode
 ctk.set_appearance_mode("dark")
@@ -227,7 +228,7 @@ class App(ctk.CTk):
     def connect(self):
 
         # Connect to the autopilot
-        dron.connect_v0("DashboardDirect", "simulation", None, None, None)
+        dron.connect("DashboardDirect", "simulation", None, None, None, True)
 
         if dron.state == "connected":
             # Delete every element and start the main page view
@@ -264,20 +265,22 @@ class App(ctk.CTk):
 
     def arm(self):
         # Arm the drone
-        dron.arm_MAVLINK()
+        dron.arm(False)
 
     def take_off(self):
+
+        dron.take_off(10, False)
         # Take off
-        if dron.state == "armed" or "onHearth":
-            t = threading.Thread(target=dron.takeOff_MAVLINK, args=[5, True])
-            t.start()
-            print("Vehicle taking off.")
-        else:
-            print("The vehicle is not armed.")
+        #if dron.state == "armed" or "onHearth":
+        #    t = threading.Thread(target=dron.takeOff_MAVLINK, args=[5, True])
+        #    t.start()
+        #    print("Vehicle taking off.")
+        #else:
+        #    print("The vehicle is not armed.")
 
         # Wait until the vehicle reaches the target altitude
-        t2 = threading.Thread(target=self.wait_take_off)
-        t2.start()
+        #t2 = threading.Thread(target=self.wait_take_off)
+        #t2.start()
 
     def go(self, direction):
         # Go to a direction
@@ -289,7 +292,7 @@ class App(ctk.CTk):
     def rtl(self):
         # Return to launch
         if dron.state == "flying":
-            dron.returning_trigger()
+            dron.return_to_launch(False)
 
     def wait_take_off(self):
         # Wait until the vehicle reaches the target altitude

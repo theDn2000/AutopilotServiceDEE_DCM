@@ -1,9 +1,10 @@
 import dronekit
 import time
 from pymavlink import mavutil
+import threading
 
 
-
+# Arm maiun function
 def arm_MAVLINK(self):
     mode = 'GUIDED'
 
@@ -26,8 +27,16 @@ def arm_MAVLINK(self):
     self.vehicle.motors_armed_wait()
     self.state = "armed"
 
+# Arm trigger function (for blocking and non-blocking)
+def arm(self, blocking):
+    if blocking:
+        arm_MAVLINK(self)
+    else:
+        t = threading.Thread(target=arm_MAVLINK, args=(self,))
+        t.start()
 
 
+# Dev:
 def armed_change(self):
     print('cambio a ', )
     if self.vehicle.armed:
