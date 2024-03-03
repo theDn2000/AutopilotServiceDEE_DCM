@@ -16,6 +16,10 @@ def takeOff_MAVLINK(self, aTargetAltitude):
         time.sleep(1)
     self.state = "flying"
 
+    # Enable flying trigger
+    self.flying_trigger()
+    print("Vehicle flying")
+
 # Take off trigger function (for blocking and non-blocking)
 def take_off(self,aTargetAltitude, blocking):
     if blocking:
