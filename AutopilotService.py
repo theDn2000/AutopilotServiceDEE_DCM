@@ -92,7 +92,7 @@ def process_message(message, client):
 
     if command == "goto":
         if dron.state == 'flying':
-            dron.goto_trigger(internal_client, external_client, sending_topic)
+            dron.goto(internal_client, external_client, sending_topic, lat=1, lon=1, blocking=True) # TEST
         else:
             print('Vehicle not flying')
 

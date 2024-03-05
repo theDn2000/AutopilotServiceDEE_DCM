@@ -7,15 +7,16 @@ from pymavlink import mavutil
 from dronekit import connect, Command, VehicleMode  # noqa: F401
 
 
-def goto_trigger(self, internal_client, external_client, sending_topic):
+def goto(self, internal_client, external_client, sending_topic, lat, lon, blocking=False):
     print('- Autopilot Service: Going to the waypoint')
-    self.reaching_waypoint = True
-    lat = -35.3622286
-    lon = 149.1650999
-    w = threading.Thread(target=self.goto_MAVLINK, args=[lat, lon, internal_client, external_client, sending_topic])
-    w.start()
+    if blocking:
+        goto_MAVLINK(self, lat, lon, internal_client, external_client, sending_topic)
+    else:
+        w = threading.Thread(target=self.goto_MAVLINK, args=[lat, lon, internal_client, external_client, sending_topic])
+        w.start()
 
 def goto_MAVLINK(self, lat, lon, alt, sending_topic):
+    self.reaching_waypoint = True
     self.vehicle.mav.send(
         mavutil.mavlink.MAVLink_set_position_target_global_int_message(10, self.vehicle.target_system,
                                                                        self.vehicle.target_component,
@@ -23,17 +24,15 @@ def goto_MAVLINK(self, lat, lon, alt, sending_topic):
                                                                        int(0b110111111000), int(lat * 10 ** 7),
                                                                        int(lon * 10 ** 7), alt, 0, 0, 0, 0, 0, 0, 0,
                                                                        0))
-
-
-
     dist = self._distanceToDestinationInMeters(lat ,lon)
     distanceThreshold = 0.5
     while dist > distanceThreshold:
         time.sleep(0.25)
         dist = self._distanceToDestinationInMeters(lat, lon)
-    self.lock.acquire()
-    self.client.publish(sending_topic + '/arrivedToPoint')
-    self.lock.release()
+    print('- Autopilot Service: Arrived to the waypoint')
+    #self.lock.acquire()
+    #self.client.publish(sending_topic + '/arrivedToPoint')
+    #self.lock.release()
 
 
 

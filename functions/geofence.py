@@ -78,9 +78,9 @@ def complete_disable_geofence(self):
     while True:
 
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_TOTAL", 0)
+        self.modify_parameter("FENCE_TOTAL", 0, True)
         # Get the parameter value
-        if self.get_parameter_MAVLINK("FENCE_TOTAL") == 0:
+        if self.get_parameter("FENCE_TOTAL", True) == 0:
             print("- Geofence Controller (2/5): FENCE_TOTAL reset to 0 successfully")
 
             # Break the loop
@@ -93,9 +93,9 @@ def complete_disable_geofence(self):
     while True:
         
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_ACTION", 0)
+        self.modify_parameter("FENCE_ACTION", 0, True)
         # Get the parameter value
-        if self.get_parameter_MAVLINK("FENCE_ACTION") == 0:
+        if self.get_parameter("FENCE_ACTION", True) == 0:
             print("- Geofence Controller (3/5): FENCE_ACTION set to value 0 successfully")
 
             # Break the loop
@@ -105,14 +105,14 @@ def complete_disable_geofence(self):
             print("- Geofence Controller: Failed to set FENCE_ACTION to value 0, trying again")
 
     # DISABLE GEOFENCE
-    if self.get_parameter_MAVLINK("FENCE_ENABLE") != 0:
+    if self.get_parameter("FENCE_ENABLE", True) != 0:
 
         while True:
             
             # Modify the parameter value
-            self.modify_parameter_MAVLINK("FENCE_ENABLE", 0)
+            self.modify_parameter("FENCE_ENABLE", 0, True)
             # Get the parameter value
-            if self.get_parameter_MAVLINK("FENCE_ENABLE") == 0:
+            if self.get_parameter("FENCE_ENABLE", True) == 0:
                 print("- Geofence Controller (4/5): Geofence disabled successfully")
 
                 # Break the loop
@@ -152,14 +152,14 @@ def complete_enable_geofence(self, fence_list):
     print("- Geofence Controller (1/7): Previous missions and waypoints cleared successfully")
 
     # ENABLE GEOFENCE
-    if self.get_parameter_MAVLINK("FENCE_ENABLE") != 1:
+    if self.get_parameter("FENCE_ENABLE", True) != 1:
 
         while True:
             
             # Modify the parameter value
-            self.modify_parameter_MAVLINK("FENCE_ENABLE", 1)
+            self.modify_parameter("FENCE_ENABLE", 1, True)
             # Get the parameter value
-            if self.get_parameter_MAVLINK("FENCE_ENABLE") == 1:
+            if self.get_parameter("FENCE_ENABLE", True) == 1:
                 print("- Geofence Controller (2/7): Geofence enabled successfully")
 
                 # Break the loop
@@ -176,9 +176,9 @@ def complete_enable_geofence(self, fence_list):
     while True:
 
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_TOTAL", 0)
+        self.modify_parameter("FENCE_TOTAL", 0, True)
         # Get the parameter value
-        if self.get_parameter_MAVLINK("FENCE_TOTAL") == 0:
+        if self.get_parameter("FENCE_TOTAL", True) == 0:
             print("- Geofence Controller (3/7): FENCE_TOTAL reset to 0 successfully")
 
             # Break the loop
@@ -191,9 +191,9 @@ def complete_enable_geofence(self, fence_list):
     while True:
 
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_TOTAL", len(fence_list))
+        self.modify_parameter("FENCE_TOTAL", len(fence_list), True)
         # Get the parameter value
-        if self.get_parameter_MAVLINK("FENCE_TOTAL") == len(fence_list):
+        if self.get_parameter("FENCE_TOTAL", True) == len(fence_list):
             print("- Geofence Controller (4/7): FENCE_TOTAL set to {0} successfully".format(len(fence_list)))
 
             # Break the loop
@@ -253,9 +253,9 @@ def complete_enable_geofence(self, fence_list):
     while True:
         
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_ACTION", 3)
+        self.modify_parameter("FENCE_ACTION", 3, True)
         # Get the parameter value
-        if self.get_parameter_MAVLINK("FENCE_ACTION") == 3:
+        if self.get_parameter("FENCE_ACTION", True) == 3:
             print("- Geofence Controller (6/7): FENCE_ACTION set to value 3 successfully")
 
             # Break the loop
@@ -274,14 +274,14 @@ def enable_geofence(self):
 
 
     # ENABLE GEOFENCE
-    if self.get_parameter_MAVLINK("FENCE_ENABLE") != 1:
+    if self.get_parameter("FENCE_ENABLE", True) != 1:
 
         while True:
             
             # Modify the parameter value
-            self.modify_parameter_MAVLINK("FENCE_ENABLE", 1)
+            self.modify_parameter("FENCE_ENABLE", 1, True)
             # Get the parameter value
-            if self.get_parameter_MAVLINK("FENCE_ENABLE") == 1:
+            if self.get_parameter("FENCE_ENABLE", True) == 1:
                 print("- Geofence Controller: Geofence enabled successfully")
 
                 # Break the loop
@@ -296,14 +296,14 @@ def enable_geofence(self):
 
 def disable_geofence(self):
     # DISABLE GEOFENCE
-    if self.get_parameter_MAVLINK("FENCE_ENABLE") != 0:
+    if self.get_parameter("FENCE_ENABLE", True) != 0:
 
         while True:
             
             # Modify the parameter value
-            self.modify_parameter_MAVLINK("FENCE_ENABLE", 0)
+            self.modify_parameter("FENCE_ENABLE", 0, True)
             # Get the parameter value
-            if self.get_parameter_MAVLINK("FENCE_ENABLE") == 0:
+            if self.get_parameter("FENCE_ENABLE", True) == 0:
                 print("- Geofence Controller: Geofence disabled successfully")
 
                 # Break the loop
@@ -323,9 +323,9 @@ def set_fence_geofence(self, fence_list):
     while True:
 
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_TOTAL", len(fence_list))
+        self.modify_parameter("FENCE_TOTAL", len(fence_list), True)
         # Get the parameter value
-        if self.get_parameter_MAVLINK("FENCE_TOTAL") == len(fence_list):
+        if self.get_parameter("FENCE_TOTAL", True) == len(fence_list):
             print("- Geofence Controller FENCE_TOTAL set to {0} successfully".format(len(fence_list)))
 
             # Break the loop
@@ -385,9 +385,9 @@ def action_geofence(self, action):
     while True:
         
         # Modify the parameter value
-        self.modify_parameter_MAVLINK("FENCE_ACTION", int(action))
+        self.modify_parameter("FENCE_ACTION", int(action), True)
         # Get the parameter value
-        if self.get_parameter_MAVLINK("FENCE_ACTION") == int(action):
+        if self.get_parameter("FENCE_ACTION", True) == int(action):
             print("- Geofence Controller: FENCE_ACTION set to value 3 successfully")
 
             # Break the loop
