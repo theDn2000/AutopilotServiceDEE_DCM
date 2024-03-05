@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import tkintermapview as tkmap
 import os
 import sys
 import time
@@ -90,11 +91,14 @@ class App(ctk.CTk):
     def set_main_page(self):
         # Create the main page view
 
-        # Create the main_textbox (for pages of the main view)
-        self.main_textbox = ctk.CTkTextbox(self.main_frame, width=300, height=380)
-        self.main_textbox.grid(row=0, column=0, padx=10, pady=0, rowspan=4)
-        self.main_textbox.insert("1.0", "Space reserved for the pages of the main view.")
-        self.main_textbox.configure(state="disabled")
+        # Create the main_frame with tabs for the functionalities of the dashboard
+        # Insert tabview
+        self.main_tabview = ctk.CTkTabview(self.main_frame, width=300, height=380)
+        self.main_tabview.grid(row=0, column=0, padx=10, pady=0, rowspan=4)
+        # Create the tabs
+        self.main_tabview.add("Parameters")
+        self.main_tabview.add("Mission")
+        self.main_tabview.add("Geofence")
 
 
 
@@ -219,6 +223,10 @@ class App(ctk.CTk):
 
         self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", command=lambda : self.go("SouthEast"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_se.grid(row=2, column=2, padx=5, pady=5, sticky="we", ipady=10)
+
+
+
+
 
 
 
