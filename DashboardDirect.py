@@ -7,9 +7,7 @@ import threading
 
 # Import the Dron class
 from Dron import Dron
-# Create a Dron object
-ID = 1
-dron = Dron(ID)
+
 
 # Night mode
 ctk.set_appearance_mode("dark")
@@ -20,6 +18,10 @@ ctk.set_appearance_mode("dark")
 class App(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Create dron object
+        self.dron = Dron(1)
+
+        # Create the app
         self.geometry("600x400")
         self.title("Dashboard Direct")
         self.resizable(False, False)
@@ -99,6 +101,17 @@ class App(ctk.CTk):
         self.main_tabview.add("Parameters")
         self.main_tabview.add("Mission")
         self.main_tabview.add("Geofence")
+        # Add the map to the mission tab
+        self.map_widget = tkmap.TkinterMapView(self.main_tabview.tab("Mission"), width=200, height=280)
+        # Change the map style to satellite
+        x = -35.3633515
+        y = 149.1652412
+        z = 15
+        self.map_widget.set_tile_server("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", max_zoom=22)
+        self.map_widget.set_position(x, y)
+        self.map_widget.place(relx=0.5, rely=0.5, anchor="center")
+        
+        
 
 
 
@@ -236,9 +249,9 @@ class App(ctk.CTk):
     def connect(self):
 
         # Connect to the autopilot
-        dron.connect("DashboardDirect", "simulation", None, None, None, True)
+        self.dron.connect("DashboardDirect", "simulation", None, None, None, True)
 
-        if dron.state == "connected":
+        if self.dron.state == "connected":
             # Delete every element and start the main page view
             self.connect_label.grid_forget()
             self.info_textbox.grid_forget()
@@ -248,7 +261,7 @@ class App(ctk.CTk):
             self.set_main_page()
 
             # Start the telemetry info
-            dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
+            self.dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
 
         else:
             # Make the label invisible and show the button again
@@ -273,11 +286,11 @@ class App(ctk.CTk):
 
     def arm(self):
         # Arm the drone
-        dron.arm(False)
+        self.dron.arm(False)
 
     def take_off(self):
 
-        dron.take_off(10, False)
+        self.dron.take_off(10, False)
         # Take off
         #if dron.state == "armed" or "onHearth":
         #    t = threading.Thread(target=dron.takeOff_MAVLINK, args=[5, True])
@@ -292,25 +305,25 @@ class App(ctk.CTk):
 
     def go(self, direction):
         # Go to a direction
-        if dron.state == "flying":
-            dron.go_order(direction)
+        if self.dron.state == "flying":
+            self.dron.go_order(direction)
         else:
             print("The vehicle is not flying.")
 
     def rtl(self):
         # Return to launch
-        if dron.state == "flying":
-            dron.return_to_launch(False)
+        if self.dron.state == "flying":
+            self.dron.return_to_launch(False)
 
     def wait_take_off(self):
         # Wait until the vehicle reaches the target altitude
-        while dron.state != "flying":
-            if dron.state == "flying":
+        while self.dron.state != "flying":
+            if self.dron.state == "flying":
                 break
             else:
                 # Wait 0.5 seconds
                 time.sleep(0.5)
-        dron.flying_trigger()
+        self.dron.flying_trigger()
         print("Vehicle reached target altitude.")
 
 
