@@ -20,7 +20,12 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
 
         if op_mode == 'simulation':
             print('Simulation mode selected')
-            connection_string = "tcp:127.0.0.1:5763"
+            if self.ID == 1:
+                connection_string = "tcp:127.0.0.1:5763"
+            if self.ID == 2:
+                connection_string = "tcp:127.0.0.1:5773"
+            else:
+                connection_string = "tcp:127.0.0.1:5763"
             # connection_string = "udp:127.0.0.1:14550"
             # connection_string = "com7"
         else:

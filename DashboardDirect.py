@@ -18,9 +18,6 @@ ctk.set_appearance_mode("dark")
 class App(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Create dron object
-        self.dron = Dron(1)
-
         # Create the app
         self.geometry("600x400")
         self.title("Dashboard Direct")
@@ -33,9 +30,17 @@ class App(ctk.CTk):
         self.main_frame = ctk.CTkFrame(self)
         self.main_frame.pack(fill="both", expand=True)
 
-        # Separate the main_frame into two vertical sections
-        column0 = self.main_frame.columnconfigure(0, weight=1)
-        column1 = self.main_frame.columnconfigure(1, weight=1)
+        # Separate the main_frame into 8 vertical sections
+        self.column0 = self.main_frame.columnconfigure(0, weight=1)
+        self.column1 = self.main_frame.columnconfigure(1, weight=1)
+        self.column2 = self.main_frame.columnconfigure(2, weight=1)
+        self.column3 = self.main_frame.columnconfigure(3, weight=1)
+        self.column4 = self.main_frame.columnconfigure(4, weight=1)
+        self.column5 = self.main_frame.columnconfigure(5, weight=1)
+        self.column6 = self.main_frame.columnconfigure(6, weight=1)
+        self.column7 = self.main_frame.columnconfigure(7, weight=1)
+
+
 
         # Separate the main_frame into 4 horizontal sections
         self.main_frame.rowconfigure(0, weight=1)
@@ -44,21 +49,16 @@ class App(ctk.CTk):
         self.main_frame.rowconfigure(3, weight=1)
 
 
+
         # BUTTONS
         # Create the connect_button
         self.connect_button = ctk.CTkButton(self.main_frame, text="Connect", command=self.on_button_connect_click, fg_color="#3117ea", hover_color="#190b95")
-        self.connect_button.grid(row=3, column=1, padx=10, pady=0, sticky="we", ipady=10)
-
-
-
-        # LABELS
-
-        
+        self.connect_button.grid(row=3, column=5, padx=10, pady=0, sticky="we", ipady=10, columnspan=3)
 
         # TEXTBOXES
         # Create the info_textbox (read-only)
         self.info_textbox = ctk.CTkTextbox(self.main_frame, width=280, height=310)
-        self.info_textbox.grid(row=0, column=1, padx=0, pady=3, rowspan=3)
+        self.info_textbox.grid(row=0, column=4, padx=0, pady=3, rowspan=3, columnspan=4)
         self.info_textbox.insert("1.0", "Welcome to DashboardDirect.\nThis tool allows you to interact with the\nautopilot functions directly without using any\nbroker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
         self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info      added.\n\n- Version: 0.1.2: Control and pad buttons added.")
@@ -67,10 +67,13 @@ class App(ctk.CTk):
 
         # Create the info_textbox2 (read-only)
         self.info_textbox2 = ctk.CTkTextbox(self.main_frame, width=280, height=380)
-        self.info_textbox2.grid(row=0, column=0, padx=0, pady=0, rowspan=4)
+        self.info_textbox2.grid(row=0, column=0, padx=10, pady=0, rowspan=4, columnspan=4)
         self.info_textbox2.insert("1.0", "Space reserved for the logo or image.")
         self.info_textbox2.configure(state="disabled")
 
+        # Create the ID input textbox with a shadow text inside
+        self.id_input = ctk.CTkEntry(self.main_frame, border_color="#3117ea", text_color="gray")
+        self.id_input.grid(row=3, column=4, padx=20, pady=0, ipady=0)
 
 
 
@@ -80,15 +83,28 @@ class App(ctk.CTk):
 
     # FUNCTIONS (FRONTEND)
     def on_button_connect_click(self):
+        # If it is not a integer, show an error message in the textbox, in red
+        if not self.id_input.get().isdigit():
+            self.info_textbox.configure(state="normal")
+            self.info_textbox.delete("1.0", "end")
+            self.info_textbox.insert("1.0", "Error: The ID must be a number.")
+            self.info_textbox.configure(state="disabled")
+            self.info_textbox.configure(text_color="red")
+            return
+        else:
+            # Set the ID of the dron
+            self.dron.ID = int(self.id_input.get())
+            # Create the dron object
+            self.dron = Dron(self.dron.ID)
+            # Make the button invisible and substitute it with a label
+            self.connect_button.grid_forget()
+            self.id_input.grid_forget()
+            self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
+            self.connect_label.grid(row=3, column=5, padx=10, pady=0, sticky="we", ipady=10, columnspan=3)
 
-        # Make the button invisible and substitute it with a label
-        self.connect_button.grid_forget()
-        self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
-        self.connect_label.grid(row=3, column=1, padx=10, pady=0, sticky="we", ipady=10)
 
-
-        # Connect to the autopilot 1000ms later
-        self.after(1000, self.connect)
+            # Connect to the autopilot 1000ms later
+            self.after(1000, self.connect)
 
     def set_main_page(self):
         # Create the main page view
