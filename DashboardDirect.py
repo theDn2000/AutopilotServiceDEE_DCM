@@ -92,10 +92,8 @@ class App(ctk.CTk):
             self.info_textbox.configure(text_color="red")
             return
         else:
-            # Set the ID of the dron
-            self.dron.ID = int(self.id_input.get())
-            # Create the dron object
-            self.dron = Dron(self.dron.ID)
+            self.dron = Dron(int(self.id_input.get()))
+            
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
             self.id_input.grid_forget()
