@@ -8,7 +8,7 @@ import itertools
 
 
 # Connect main function
-def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic):
+def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string):
     # print("The current state is: " + self.state + " , trying to connect...")
     if self.state == 'disconnected':
         print("- Autopilot Service: Connection request by " + origin)
@@ -31,7 +31,7 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
         else:
             print ('Real mode selected')
             # connection_string = "/dev/ttyS0"
-            connection_string = "com7"
+            ##connection_string = "com7"
             # connection_string = "udp:127.0.0.1:14550"
 
         done = False
@@ -68,11 +68,11 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
         print('- Autopilot Service: '+origin+' already connected')
 
 # Connect trigger function (for blocking or non-blocking)
-def connect(self, origin, op_mode, external_client, internal_client, sending_topic, blocking):
+def connect(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string, blocking):
     if blocking:
-        connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic)
+        connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string)
     else:
-        t = threading.Thread(target=connect_v0, args=(self, origin, op_mode, external_client, internal_client, sending_topic))
+        t = threading.Thread(target=connect_v0, args=(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string))
         t.start()
 
 

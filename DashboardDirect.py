@@ -53,12 +53,12 @@ class App(ctk.CTk):
         # BUTTONS
         # Create the connect_button
         self.connect_button = ctk.CTkButton(self.main_frame, text="Connect", command=self.on_button_connect_click, fg_color="#3117ea", hover_color="#190b95")
-        self.connect_button.grid(row=3, column=5, padx=10, pady=0, sticky="we", ipady=10, columnspan=3)
+        self.connect_button.grid(row=3, column=4, padx=10, pady=0, sticky="we", ipady=0, columnspan=4)
 
         # TEXTBOXES
         # Create the info_textbox (read-only)
-        self.info_textbox = ctk.CTkTextbox(self.main_frame, width=280, height=310)
-        self.info_textbox.grid(row=0, column=4, padx=0, pady=3, rowspan=3, columnspan=4)
+        self.info_textbox = ctk.CTkTextbox(self.main_frame, width=280, height=280)
+        self.info_textbox.grid(row=0, column=4, padx=10, pady=5, rowspan=2, columnspan=4)
         self.info_textbox.insert("1.0", "Welcome to DashboardDirect.\nThis tool allows you to interact with the\nautopilot functions directly without using any\nbroker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
         self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info      added.\n\n- Version: 0.1.2: Control and pad buttons added.")
@@ -72,8 +72,12 @@ class App(ctk.CTk):
         self.info_textbox2.configure(state="disabled")
 
         # Create the ID input textbox with a shadow text inside
-        self.id_input = ctk.CTkEntry(self.main_frame, border_color="#3117ea", text_color="gray")
-        self.id_input.grid(row=3, column=4, padx=20, pady=0, ipady=0)
+        self.id_input = ctk.CTkEntry(self.main_frame, border_color="#3117ea", text_color="gray", width=130, placeholder_text="type drone ID...")
+        self.id_input.grid(row=2, column=4, padx=10, pady=0, ipady=0, columnspan=2)
+
+        # Create a option selector for the mode (real or simulation)
+        self.mode_selector = ctk.CTkOptionMenu(self.main_frame, values=["Simulation", "Real"], width=130)
+        self.mode_selector.grid(row=2, column=6, padx=10, pady=0, ipady=0, columnspan=2)
 
 
 
@@ -97,8 +101,9 @@ class App(ctk.CTk):
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
             self.id_input.grid_forget()
+            self.mode_selector.grid_forget()
             self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
-            self.connect_label.grid(row=3, column=5, padx=10, pady=0, sticky="we", ipady=10, columnspan=3)
+            self.connect_label.grid(row=3, column=5, padx=10, pady=0, sticky="we", columnspan=2)
 
 
             # Connect to the autopilot 1000ms later
@@ -110,13 +115,13 @@ class App(ctk.CTk):
         # Create the main_frame with tabs for the functionalities of the dashboard
         # Insert tabview
         self.main_tabview = ctk.CTkTabview(self.main_frame, width=300, height=380)
-        self.main_tabview.grid(row=0, column=0, padx=10, pady=0, rowspan=4)
+        self.main_tabview.grid(row=0, column=0, padx=10, pady=10, rowspan=4)
         # Create the tabs
         self.main_tabview.add("Parameters")
         self.main_tabview.add("Mission")
         self.main_tabview.add("Geofence")
         # Add the map to the mission tab
-        self.map_widget = tkmap.TkinterMapView(self.main_tabview.tab("Mission"), width=200, height=280)
+        self.map_widget = tkmap.TkinterMapView(self.main_tabview.tab("Mission"), width=280, height=360)
         # Change the map style to satellite
         x = -35.3633515
         y = 149.1652412
@@ -262,8 +267,27 @@ class App(ctk.CTk):
     # Connect
     def connect(self):
 
+        # Depending if real time or simulation mode is selected, the connection string will be different
+        mode_selector = self.mode_selector.get()
+        mode_selector = "simulation" # This variable will change depending on the user's selection when connecting
+
+        if mode_selector == "simulation":
+            print('Simulation mode selected')
+            if self.dron.ID == 1:
+                connection_string = "tcp:127.0.0.1:5763"
+            if self.dron.ID == 2:
+                connection_string = "tcp:127.0.0.1:5773"
+            else:
+                connection_string = "tcp:127.0.0.1:5763" # Default connection string
+        
+        else:
+            print ('Real mode selected')
+            # connection_string = "/dev/ttyS0"
+            connection_string = "com7"
+            # connection_string = "udp:127.0.0.1:14550"
+
         # Connect to the autopilot
-        self.dron.connect("DashboardDirect", "simulation", None, None, None, True)
+        self.dron.connect("DashboardDirect", "simulation", None, None, None, connection_string, True)
 
         if self.dron.state == "connected":
             # Delete every element and start the main page view
@@ -284,7 +308,7 @@ class App(ctk.CTk):
             # Show an error message in the textbox, in red
             self.info_textbox.configure(state="normal")
             self.info_textbox.delete("1.0", "end")
-            self.info_textbox.insert("1.0", "Error: Couldn't connect to the autopilot. Please, try again.")
+            self.info_textbox.insert("1.0", "Error: Couldn't connect to the autopilot. Please, reset the application and try again.")
             self.info_textbox.configure(state="disabled")
             # The message should be in red
             self.info_textbox.configure(text_color="red")
