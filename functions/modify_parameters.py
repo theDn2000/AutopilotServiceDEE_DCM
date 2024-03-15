@@ -40,3 +40,31 @@ def get_parameter_MAVLINK(self, param_name):
     # Return the value of the parameter
     return response.param_value
     
+
+
+def  get_all_parameters(self, blocking=False):
+    if blocking:
+        return get_all_parameters_MAVLINK(self)
+    else:
+        w = threading.Thread(target=get_all_parameters_MAVLINK, args=[self])
+        w.start()
+
+def get_all_parameters_MAVLINK(self):
+    # Print all parameters
+    msg = self.vehicle.mav.param_request_list_encode(
+        self.vehicle.target_system, mavutil.mavlink.MAV_COMP_ID_ALL)
+    
+    self.vehicle.mav.send(msg)
+
+    # Create a list with all the parameters
+    parameters_id = []
+    parameters_value = []
+    while True:
+        response = self.vehicle.recv_match(type='PARAM_VALUE', blocking=True)
+        if response.param_count == response.param_index + 1:
+
+            break
+        print(response.param_id, response.param_value)
+        parameters_id.append(response.param_id)
+        parameters_value.append(response.param_value)
+    return parameters_id, parameters_value

@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import tkinter as ttk
 import tkintermapview as tkmap
 import os
 import sys
@@ -120,6 +121,15 @@ class App(ctk.CTk):
         self.main_tabview.add("Parameters")
         self.main_tabview.add("Mission")
         self.main_tabview.add("Geofence")
+
+        # Parameters tab
+        # Add a table to see the parameters using treeview
+        ####
+        # Add a TEST button to get all the parameters
+        self.get_parameters_button = ctk.CTkButton(self.main_tabview.tab("Parameters"), text="Get parameters", command=self.get_all_parameters, fg_color="#3117ea", hover_color="#190b95")
+        self.get_parameters_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
+
+        # Mission tab
         # Add the map to the mission tab
         self.map_widget = tkmap.TkinterMapView(self.main_tabview.tab("Mission"), width=280, height=360)
         # Change the map style to satellite
@@ -256,8 +266,12 @@ class App(ctk.CTk):
         self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", command=lambda : self.go("SouthEast"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_se.grid(row=2, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-
-
+    def create_table(self): # Incomplete
+        columns = ("ID", "Value")
+        self.table = ttk.Treeview(self.main_tabview.tab("Parameters"), columns=columns, show="headings")
+        self.table.heading("ID", text="ID")
+        self.table.heading("Value", text="Value")
+        self.table.grid(row=1, column=0, padx=10, pady=10, sticky="we", columnspan=2)
 
 
 
@@ -364,6 +378,11 @@ class App(ctk.CTk):
         self.dron.flying_trigger()
         print("Vehicle reached target altitude.")
 
+    def get_all_parameters(self):
+        # Get all parameters
+        parameters_id, parameters_value = self.dron.get_all_parameters(True)
+        print("Button pressed. Getting all parameters...")
+        print(parameters_id) # Ver como mostrarlo en la interfaz
 
 
 
@@ -373,8 +392,7 @@ class App(ctk.CTk):
 
 
 
-
-
+ 
 
 
 
