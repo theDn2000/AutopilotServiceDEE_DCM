@@ -128,6 +128,54 @@ class App(ctk.CTk):
         # Add a TEST button to get all the parameters
         self.get_parameters_button = ctk.CTkButton(self.main_tabview.tab("Parameters"), text="Get parameters", command=self.get_all_parameters, fg_color="#3117ea", hover_color="#190b95")
         self.get_parameters_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
+        # Create a frame for the table
+        #self.table_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
+        #self.table_frame.grid(row=1, column=0, padx=10, pady=10, sticky="we")
+
+        # Create a frame for get a parameter, with grey background
+        self.get_parameter_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
+        self.get_parameter_frame.grid(row=2, column=0, padx=0, pady=10, sticky="we")
+        self.get_parameter_frame.configure(fg_color="#1f1f1f")
+        # Separate the frame into 2 vertical sections
+        self.get_parameter_frame.columnconfigure(0, weight=1)
+        self.get_parameter_frame.columnconfigure(1, weight=1)
+        # Separate the frame into 2 horizontal section
+        self.get_parameter_frame.rowconfigure(0, weight=1)
+        self.get_parameter_frame.rowconfigure(1, weight=1)
+        
+        # Add a button to get the value of a parameter
+        self.get_parameter_button = ctk.CTkButton(self.get_parameter_frame, text="Get parameter", command=self.get_parameter, fg_color="#3117ea", hover_color="#190b95", width=40)
+        self.get_parameter_button.grid(row=0, column=1, padx=10, pady=10)
+        # Add a entry to write the parameter ID
+        self.parameter_id_input = ctk.CTkEntry(self.get_parameter_frame, border_color="#3117ea", text_color="gray", width=130, placeholder_text="type parameter ID...")
+        self.parameter_id_input.grid(row=0, column=0, padx=10, pady=10)
+        # Add a label to show the value of the parameter
+        self.parameter_value_label = ctk.CTkLabel(self.get_parameter_frame, text="Value: ", font=("TkDefaultFont", 11))
+        self.parameter_value_label.grid(row=1, column=0, padx=10, pady=5, sticky="w", columnspan=2)
+
+
+        # Create a frame for set a parameter, with grey background
+        self.set_parameter_frame2 = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
+        self.set_parameter_frame2.grid(row=3, column=0, padx=0, pady=10, sticky="we")
+        self.set_parameter_frame2.configure(fg_color="#1f1f1f")
+        # Separate the frame into 2 vertical sections
+        self.set_parameter_frame2.columnconfigure(0, weight=1)
+        self.set_parameter_frame2.columnconfigure(1, weight=1)
+        # Separate the frame into 2 horizontal section
+        self.set_parameter_frame2.rowconfigure(0, weight=1)
+        self.set_parameter_frame2.rowconfigure(1, weight=1)
+
+        # Add a button to set the value of a parameter
+        self.set_parameter_button = ctk.CTkButton(self.set_parameter_frame2, text="Set parameter", command=self.set_parameter, fg_color="#3117ea", hover_color="#190b95", width=40)
+        self.set_parameter_button.grid(row=1, column=0, padx=10, pady=10, columnspan=2, sticky="we")
+        # Add a entry to write the parameter ID
+        self.parameter_id_input_set = ctk.CTkEntry(self.set_parameter_frame2, border_color="#3117ea", text_color="gray", placeholder_text="type ID...", width=120)
+        self.parameter_id_input_set.grid(row=0, column=0, padx=10, pady=10)
+        # Add a entry to write the parameter value
+        self.parameter_value_input = ctk.CTkEntry(self.set_parameter_frame2, border_color="#3117ea", text_color="gray", placeholder_text="type value...", width=100)
+        self.parameter_value_input.grid(row=0, column=1, padx=10, pady=10)
+
+
 
         # Mission tab
         # Add the map to the mission tab
@@ -384,9 +432,26 @@ class App(ctk.CTk):
         print("Button pressed. Getting all parameters...")
         print(parameters_id) # Ver como mostrarlo en la interfaz
 
+    def get_parameter(self):
+        # Get a parameter and show it in the label
+        parameter_id = self.parameter_id_input.get()
+        if parameter_id != "":
+            parameter_value = self.dron.get_parameter_MAVLINK(parameter_id)
+            self.parameter_value_label.configure(text="Value: " + str(parameter_value))
+        else:
+            self.parameter_value_label.configure(text="Value: ")
 
-
-
+    def set_parameter(self):
+        # Set a parameter
+        parameter_id = self.parameter_id_input_set.get()
+        parameter_value = float(self.parameter_value_input.get())
+        if parameter_id != "" and parameter_value != "":
+            # Try to set the parameter, if it is not possible, show an error message
+            try:
+                self.dron.modify_parameter_MAVLINK(parameter_id, parameter_value)
+                print("Parameter set.")
+            except:
+                print("Error setting the parameter.")
 
 
 
