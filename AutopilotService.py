@@ -133,7 +133,7 @@ def on_connect(external_client, userdata, flags, rc):
 
 def process_output(telemetry_info):
     # Callback function to send the telemetry_info packet
-    dron.external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
+    external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
 
 
 def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client,
