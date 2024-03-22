@@ -18,22 +18,6 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
         # ahora el servicio puede conectarse por udp a cualquira de los dos puertos 14550 o 14551 y Mission Planner
         # al otro
 
-        if op_mode == 'simulation':
-            print('Simulation mode selected')
-            if self.ID == 1:
-                connection_string = "tcp:127.0.0.1:5763"
-            if self.ID == 2:
-                connection_string = "tcp:127.0.0.1:5773"
-            else:
-                connection_string = "tcp:127.0.0.1:5763"
-            # connection_string = "udp:127.0.0.1:14550"
-            # connection_string = "com7"
-        else:
-            print ('Real mode selected')
-            # connection_string = "/dev/ttyS0"
-            ##connection_string = "com7"
-            # connection_string = "udp:127.0.0.1:14550"
-
         done = False
         #here is the animation
         def animate():
