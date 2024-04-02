@@ -20,10 +20,13 @@ class App(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Create the app
-        self.geometry("600x400")
+        self.geometry("900x600")
         self.title("Dashboard Direct")
         self.resizable(False, False)
 
+        # CLASS VARIABLES
+        self.mission_waypoints = []
+        self.geofence_points = []
 
 
         # MAIN FRAME
@@ -43,23 +46,27 @@ class App(ctk.CTk):
 
 
 
-        # Separate the main_frame into 4 horizontal sections
+        # Separate the main_frame into 8 horizontal sections
         self.main_frame.rowconfigure(0, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
         self.main_frame.rowconfigure(2, weight=1)
         self.main_frame.rowconfigure(3, weight=1)
+        self.main_frame.rowconfigure(4, weight=1)
+        self.main_frame.rowconfigure(5, weight=1)
+        self.main_frame.rowconfigure(6, weight=1)
+        self.main_frame.rowconfigure(7, weight=1)
 
 
 
         # BUTTONS
         # Create the connect_button
         self.connect_button = ctk.CTkButton(self.main_frame, text="Connect", command=self.on_button_connect_click, fg_color="#3117ea", hover_color="#190b95")
-        self.connect_button.grid(row=3, column=4, padx=10, pady=0, sticky="we", ipady=0, columnspan=4)
+        self.connect_button.grid(row=7, column=6, padx=10, pady=10, sticky="nswe", ipady=0, columnspan=2)
 
         # TEXTBOXES
         # Create the info_textbox (read-only)
-        self.info_textbox = ctk.CTkTextbox(self.main_frame, width=280, height=280)
-        self.info_textbox.grid(row=0, column=4, padx=10, pady=5, rowspan=2, columnspan=4)
+        self.info_textbox = ctk.CTkTextbox(self.main_frame)
+        self.info_textbox.grid(row=0, column=6, padx=10, pady=10, rowspan=6, columnspan=2, sticky="nswe")
         self.info_textbox.insert("1.0", "Welcome to DashboardDirect.\nThis tool allows you to interact with the\nautopilot functions directly without using any\nbroker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
         self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info      added.\n\n- Version: 0.1.2: Control and pad buttons added.")
@@ -67,18 +74,18 @@ class App(ctk.CTk):
         self.info_textbox.configure(state="disabled")
 
         # Create the info_textbox2 (read-only)
-        self.info_textbox2 = ctk.CTkTextbox(self.main_frame, width=280, height=380)
-        self.info_textbox2.grid(row=0, column=0, padx=10, pady=0, rowspan=4, columnspan=4)
+        self.info_textbox2 = ctk.CTkTextbox(self.main_frame)
+        self.info_textbox2.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=6, sticky="nswe")
         self.info_textbox2.insert("1.0", "Space reserved for the logo or image.")
         self.info_textbox2.configure(state="disabled")
 
         # Create the ID input textbox with a shadow text inside
         self.id_input = ctk.CTkEntry(self.main_frame, border_color="#3117ea", text_color="gray", width=130, placeholder_text="type drone ID...")
-        self.id_input.grid(row=2, column=4, padx=10, pady=0, ipady=0, columnspan=2)
+        self.id_input.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
         # Create a option selector for the mode (real or simulation)
         self.mode_selector = ctk.CTkOptionMenu(self.main_frame, values=["Simulation", "Real"], width=130)
-        self.mode_selector.grid(row=2, column=6, padx=10, pady=0, ipady=0, columnspan=2)
+        self.mode_selector.grid(row=6, column=7, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
 
 
@@ -104,7 +111,7 @@ class App(ctk.CTk):
             self.id_input.grid_forget()
             self.mode_selector.grid_forget()
             self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
-            self.connect_label.grid(row=3, column=5, padx=10, pady=0, sticky="we", columnspan=2)
+            self.connect_label.grid(row=7, column=6, padx=10, pady=0, sticky="nswe", columnspan=2)
 
 
             # Connect to the autopilot 1000ms later
@@ -114,9 +121,23 @@ class App(ctk.CTk):
         # Create the main page view
 
         # Create the main_frame with tabs for the functionalities of the dashboard
+
+        # Add a map to the main frame
+        self.map_widget = tkmap.TkinterMapView(self.main_frame)
+        self.map_widget.grid(row=0, column=0, padx=10, pady=10, rowspan=5, columnspan=6, sticky="nswe")
+        # Change the map style to satellite
+        x = -35.3633515
+        y = 149.1652412
+        z = 15
+        self.map_widget.set_tile_server("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", max_zoom=22)
+        self.map_widget.set_position(x, y)
+        #self.map_widget.place(relx=0.5, rely=0.5, anchor="center")
+        self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True)
+
+
         # Insert tabview
-        self.main_tabview = ctk.CTkTabview(self.main_frame, width=300, height=380)
-        self.main_tabview.grid(row=0, column=0, padx=10, pady=10, rowspan=4)
+        self.main_tabview = ctk.CTkTabview(self.main_frame)
+        self.main_tabview.grid(row=5, column=0, padx=10, pady=10, rowspan=3, columnspan=6, sticky="nswe")
         # Create the tabs
         self.main_tabview.add("Parameters")
         self.main_tabview.add("Mission")
@@ -126,37 +147,41 @@ class App(ctk.CTk):
         # Add a table to see the parameters using treeview
         ####
         # Add a TEST button to get all the parameters
-        self.get_parameters_button = ctk.CTkButton(self.main_tabview.tab("Parameters"), text="Get parameters", command=self.get_all_parameters, fg_color="#3117ea", hover_color="#190b95")
-        self.get_parameters_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
+        #self.get_parameters_button = ctk.CTkButton(self.main_tabview.tab("Parameters"), text="Get parameters", command=self.get_all_parameters, fg_color="#3117ea", hover_color="#190b95")
+        #self.get_parameters_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
+        
         # Create a frame for the table
         #self.table_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
         #self.table_frame.grid(row=1, column=0, padx=10, pady=10, sticky="we")
 
         # Create a frame for get a parameter, with grey background
-        self.get_parameter_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
-        self.get_parameter_frame.grid(row=2, column=0, padx=0, pady=10, sticky="we")
+        self.get_parameter_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), height=80, width=265)
+        self.get_parameter_frame.grid(row=0, column=0, padx=10, pady=5, sticky="we")
         self.get_parameter_frame.configure(fg_color="#1f1f1f")
-        # Separate the frame into 2 vertical sections
+        # Separate the frame into 4 vertical sections
         self.get_parameter_frame.columnconfigure(0, weight=1)
         self.get_parameter_frame.columnconfigure(1, weight=1)
+        self.get_parameter_frame.columnconfigure(2, weight=1)
+        self.get_parameter_frame.columnconfigure(3, weight=1)
         # Separate the frame into 2 horizontal section
         self.get_parameter_frame.rowconfigure(0, weight=1)
         self.get_parameter_frame.rowconfigure(1, weight=1)
         
         # Add a button to get the value of a parameter
         self.get_parameter_button = ctk.CTkButton(self.get_parameter_frame, text="Get parameter", command=self.get_parameter, fg_color="#3117ea", hover_color="#190b95", width=40)
-        self.get_parameter_button.grid(row=0, column=1, padx=10, pady=10)
+        self.get_parameter_button.grid(row=0, column=1, padx=10, pady=5)
         # Add a entry to write the parameter ID
         self.parameter_id_input = ctk.CTkEntry(self.get_parameter_frame, border_color="#3117ea", text_color="gray", width=130, placeholder_text="type parameter ID...")
-        self.parameter_id_input.grid(row=0, column=0, padx=10, pady=10)
+        self.parameter_id_input.grid(row=0, column=0, padx=10, pady=5)
         # Add a label to show the value of the parameter
         self.parameter_value_label = ctk.CTkLabel(self.get_parameter_frame, text="Value: ", font=("TkDefaultFont", 11))
-        self.parameter_value_label.grid(row=1, column=0, padx=10, pady=5, sticky="w", columnspan=2)
-
+        self.parameter_value_label.grid(row=3, column=0, padx=10, pady=5, sticky="w", columnspan=2)
+        
 
         # Create a frame for set a parameter, with grey background
+        
         self.set_parameter_frame2 = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
-        self.set_parameter_frame2.grid(row=3, column=0, padx=0, pady=10, sticky="we")
+        self.set_parameter_frame2.grid(row=1, column=0, padx=10, pady=5, sticky="we", columnspan=2)
         self.set_parameter_frame2.configure(fg_color="#1f1f1f")
         # Separate the frame into 2 vertical sections
         self.set_parameter_frame2.columnconfigure(0, weight=1)
@@ -167,34 +192,26 @@ class App(ctk.CTk):
 
         # Add a button to set the value of a parameter
         self.set_parameter_button = ctk.CTkButton(self.set_parameter_frame2, text="Set parameter", command=self.set_parameter, fg_color="#3117ea", hover_color="#190b95", width=40)
-        self.set_parameter_button.grid(row=1, column=0, padx=10, pady=10, columnspan=2, sticky="we")
+        self.set_parameter_button.grid(row=1, column=0, padx=10, pady=5, columnspan=2, sticky="we")
         # Add a entry to write the parameter ID
         self.parameter_id_input_set = ctk.CTkEntry(self.set_parameter_frame2, border_color="#3117ea", text_color="gray", placeholder_text="type ID...", width=120)
-        self.parameter_id_input_set.grid(row=0, column=0, padx=10, pady=10)
+        self.parameter_id_input_set.grid(row=0, column=0, padx=10, pady=5)
         # Add a entry to write the parameter value
         self.parameter_value_input = ctk.CTkEntry(self.set_parameter_frame2, border_color="#3117ea", text_color="gray", placeholder_text="type value...", width=100)
-        self.parameter_value_input.grid(row=0, column=1, padx=10, pady=10)
-
+        self.parameter_value_input.grid(row=0, column=1, padx=10, pady=5)
+        
 
 
         # Mission tab
-        # Add the map to the mission tab
-        self.map_widget = tkmap.TkinterMapView(self.main_tabview.tab("Mission"), width=280, height=360)
-        # Change the map style to satellite
-        x = -35.3633515
-        y = 149.1652412
-        z = 15
-        self.map_widget.set_tile_server("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", max_zoom=22)
-        self.map_widget.set_position(x, y)
-        self.map_widget.place(relx=0.5, rely=0.5, anchor="center")
+        
         
         
 
 
 
         # Create the main_frame_telemetry (for telemetry info)
-        self.frame_telemetry = ctk.CTkFrame(self.main_frame, width=300, height=80)
-        self.frame_telemetry.grid(row=0, column=1, padx=10, pady=9, rowspan=1, sticky="we")
+        self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=80)
+        self.frame_telemetry.grid(row=0, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
         # Color the frame
         self.frame_telemetry.configure(fg_color="#1f1f1f")
         # frame_telemetry can't be resized
@@ -210,6 +227,7 @@ class App(ctk.CTk):
         self.frame_telemetry.rowconfigure(2, weight=1)
 
         # Create the labels for the telemetry info, 6 parameters (lat, lon, alt, heading, groundSpeed, battery) inide every frame
+        
         self.label_telemetry_lat = ctk.CTkLabel(self.frame_telemetry, text="Latitude: ", font=("TkDefaultFont", 11))
         self.label_telemetry_lat.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.label_telemetry_lat_value = ctk.CTkLabel(self.frame_telemetry, text="0.0", font=("TkDefaultFont", 11, "bold"))
@@ -239,12 +257,12 @@ class App(ctk.CTk):
         self.label_telemetry_bat.grid(row=2, column=1, padx=5, pady=5, sticky="w")
         self.label_telemetry_bat_value = ctk.CTkLabel(self.frame_telemetry, text="0.0", font=("TkDefaultFont", 11, "bold"))
         self.label_telemetry_bat_value.grid(row=2, column=1, padx=5, pady=5, sticky="e")
-
+        
 
 
         # Create the main_frame_control_buttons (for control buttons)
-        self.main_frame_control_buttons = ctk.CTkFrame(self.main_frame, width=300, height=200)
-        self.main_frame_control_buttons.grid(row=2, column=1, padx=10, pady=10, rowspan=2)
+        self.main_frame_control_buttons = ctk.CTkFrame(self.main_frame)
+        self.main_frame_control_buttons.grid(row=2, column=6, padx=10, pady=10, rowspan=7, columnspan=2, sticky="nswe")
         # Color the frame
         self.main_frame_control_buttons.configure(fg_color="#1f1f1f")
         # frame_telemetry can't be resized
@@ -256,6 +274,7 @@ class App(ctk.CTk):
         self.main_frame_control_buttons.columnconfigure(2, weight=1)
 
         # Create the control buttons
+        
         self.control_button_take_off = ctk.CTkButton(self.main_frame_control_buttons, text="Arm", command=self.arm, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_take_off.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
@@ -264,12 +283,13 @@ class App(ctk.CTk):
 
         self.control_button_goto = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_goto.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
-
+        
 
 
         # Create the main_frame_control_pad (for control pad)
-        self.main_frame_control_pad = ctk.CTkFrame(self.main_frame, width=300, height=100)
-        self.main_frame_control_pad.grid(row=1, column=1, padx=10, pady=10, rowspan=1)
+        
+        self.main_frame_control_pad = ctk.CTkFrame(self.main_frame)
+        self.main_frame_control_pad.grid(row=1, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
         # Color the frame
         self.main_frame_control_pad.configure(fg_color="#1f1f1f")
         # frame_telemetry can't be resized
@@ -284,9 +304,10 @@ class App(ctk.CTk):
         self.main_frame_control_pad.rowconfigure(0, weight=1)
         self.main_frame_control_pad.rowconfigure(1, weight=1)
         self.main_frame_control_pad.rowconfigure(2, weight=1)
-
+        
 
         # Create the control pad buttons
+        
         self.control_pad_button_nw = ctk.CTkButton(self.main_frame_control_pad, text="NW", command=lambda : self.go("NorthWest"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_nw.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
@@ -313,7 +334,8 @@ class App(ctk.CTk):
 
         self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", command=lambda : self.go("SouthEast"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_se.grid(row=2, column=2, padx=5, pady=5, sticky="we", ipady=10)
-
+        
+        
     def create_table(self): # Incomplete
         columns = ("ID", "Value")
         self.table = ttk.Treeview(self.main_tabview.tab("Parameters"), columns=columns, show="headings")
@@ -452,6 +474,12 @@ class App(ctk.CTk):
                 print("Parameter set.")
             except:
                 print("Error setting the parameter.")
+
+    # MAP:
+    def add_mission_waypoint_event(self, coords):
+        print("Add Mission Waypoint:", coords)
+        new_marker = self.map_widget.set_marker(coords[0], coords[1], text="new marker")
+    
 
 
 
