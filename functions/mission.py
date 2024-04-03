@@ -16,32 +16,30 @@ def uploadFlightPlan(self, waypoints_json):
     ]
     }
     '''
+    # Open and load the waypoints file (JSON format)
+    #~waypoints = json.loads(waypoints_json)
+    with open(waypoints_json, 'r') as f:
+        waypoints = json.load(f)
 
-    # The vehicle should be already connected and armed
-    if self.state != 'armed':
-        print('Vehicle is not armed')
-        return False
-    
-    else:
-        # Open and load the waypoints file (JSON format)
-        waypoints = json.loads(waypoints_json)
+    # Print the waypoints
+    print(waypoints)
 
-        # Delete all previous waypoints
-        self.vehicle.mav.waypoint_clear_all_send()
+    # Delete all previous missions and waypoints
+    self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
 
-        # Add as waypoints the coordinates in the JSON file
-        for waypoint in waypoints['coordinates']:
-            latitude = waypoint['lat']
-            longitude = waypoint['lon']
-            altitude = waypoint['alt']
+    # Add as waypoints the coordinates in the JSON file
+    for waypoint in waypoints['coordinates']:
+        latitude = waypoint['lat']
+        longitude = waypoint['lon']
+        altitude = waypoint['alt']
 
-            # Add the waypoint
-            self.vehicle.mav.mission_item_send(self.vehicle.target_system, self.vehicle.target_component, 0, 0, 16, 0, 0, 0, 0, 0, latitude, longitude, altitude)
+        # Add the waypoint
+        self.vehicle.mav.mission_item_send(self.vehicle.target_system, self.vehicle.target_component, 0, 0, 16, 0, 0, 0, 0, 0, latitude, longitude, altitude)
 
-        # Upload and send feedback to the user
-        self.vehicle.mav.mission_set_current_send(self.vehicle.target_system, self.vehicle.target_component, 0)
-        print('Flight plan uploaded')
-        return True
+    # Upload and send feedback to the user
+    self.vehicle.mav.mission_set_current_send(self.vehicle.target_system, self.vehicle.target_component, 0)
+    print('Flight plan uploaded')
+    return True
     
 def executeFlightPlan(self):
     '''

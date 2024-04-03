@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import threading
+import json
 
 # Import the Dron class
 from Dron import Dron
@@ -132,7 +133,10 @@ class App(ctk.CTk):
         self.map_widget.set_tile_server("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", max_zoom=22)
         self.map_widget.set_position(x, y)
         #self.map_widget.place(relx=0.5, rely=0.5, anchor="center")
+        # Add a right click menu to add mission waypoints
         self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True)
+        # Add a right click menu to add geofence points
+        self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True)
 
 
         # Insert tabview
@@ -203,10 +207,19 @@ class App(ctk.CTk):
 
 
         # Mission tab
-        
-        
-        
+        # Separate the tab into 2 horizontal sections
+        self.main_tabview.tab("Mission").rowconfigure(0, weight=1)
+        self.main_tabview.tab("Mission").rowconfigure(1, weight=1)
 
+        # Separate the tab into 4 vertical sections
+        self.main_tabview.tab("Mission").columnconfigure(0, weight=1)
+        self.main_tabview.tab("Mission").columnconfigure(1, weight=1)
+        self.main_tabview.tab("Mission").columnconfigure(2, weight=1)
+        self.main_tabview.tab("Mission").columnconfigure(3, weight=1)
+        
+        # Add a button to upload the flight plan
+        self.upload_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Upload Flight Plan", command=self.upload_flight_plan, fg_color="#3117ea", hover_color="#190b95")
+        self.upload_flight_plan_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
 
 
         # Create the main_frame_telemetry (for telemetry info)
@@ -475,12 +488,43 @@ class App(ctk.CTk):
             except:
                 print("Error setting the parameter.")
 
+    def upload_flight_plan(self):
+        # Upload the flight plan
+        print("Uploading flight plan...")
+        # Create a JSON string with the mission waypoints, with the following format:
+        '''
+        {
+        "coordinates": [
+            {"lat": 47.6205, "lon": -122.3493, "alt": 100},  // Coordinate 1
+            {"lat": 47.6153, "lon": -122.3448, "alt": 150},  // Coordinate 2
+            {"lat": 47.6102, "lon": -122.3425, "alt": 200}   // Coordinate 3
+        ]
+        }
+        '''
+        waypoints_json = {"coordinates": self.mission_waypoints}
+        print(waypoints_json)
+        #with open("waypoints.json", "w") as f:
+            #json.dump({"coordinates": self.mission_waypoints}, f, in)
+        
+        
+        #self.dron.uploadFlightPlan(str(waypoints_json))
+        #print("Flight plan uploaded.")
+
+
     # MAP:
     def add_mission_waypoint_event(self, coords):
+        # Add altitude to the coords (6 meters)
+        coords = (coords[0], coords[1], 6)
         print("Add Mission Waypoint:", coords)
-        new_marker = self.map_widget.set_marker(coords[0], coords[1], text="new marker")
+        # Add the waypoint to the mission waypoints list with altitude 6
+        self.mission_waypoints.append(coords)
+        new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.mission_waypoints)), marker_color_circle="red", marker_color_outside="black", text_color="red")
     
-
+    def add_geofence_point_event(self, coords):
+        print("Add Geofence Point:", coords)
+        # Add the point to the geofence points list
+        self.geofence_points.append(coords)
+        new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.geofence_points)), marker_color_circle="blue", marker_color_outside="black", text_color="blue")
 
 
 

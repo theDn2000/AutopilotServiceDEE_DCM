@@ -36,3 +36,4 @@ class Dron(object):
     from functions.goto_func import goto, distanceInMeters
     from functions.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence
     from functions.modify_parameters import modify_parameter_MAVLINK, get_parameter_MAVLINK, get_all_parameters
+    from functions.mission import uploadFlightPlan, executeFlightPlan
