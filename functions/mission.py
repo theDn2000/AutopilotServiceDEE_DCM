@@ -41,7 +41,11 @@ def executeFlightPlan(self):
     Execute a flight plan uploaded previously
     '''
     # The vehicle should be in auto mode
-    self.vehicle.mode = 'AUTO'
+    mode_id = self.vehicle.mode_mapping()['AUTO']
+    self.vehicle.mav.set_mode_send(
+        self.vehicle.target_system,
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
+        mode_id)
 
 
     # The vehicle should be already connected and armed
