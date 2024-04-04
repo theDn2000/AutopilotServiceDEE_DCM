@@ -221,6 +221,10 @@ class App(ctk.CTk):
         self.upload_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Upload Flight Plan", command=self.upload_flight_plan, fg_color="#3117ea", hover_color="#190b95")
         self.upload_flight_plan_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
 
+        # Add a button to execute the flight plan
+        self.execute_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Execute Flight Plan", command=self.execute_flight_plan, fg_color="#3117ea", hover_color="#190b95")
+        self.execute_flight_plan_button.grid(row=0, column=1, padx=10, pady=10, sticky="we", ipady=10)
+
 
         # Create the main_frame_telemetry (for telemetry info)
         self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=80)
@@ -488,6 +492,8 @@ class App(ctk.CTk):
             except:
                 print("Error setting the parameter.")
 
+    # FLIGHT PLAN:
+
     def upload_flight_plan(self):
         # Upload the flight plan
         print("Uploading flight plan...")
@@ -501,15 +507,16 @@ class App(ctk.CTk):
         ]
         }
         '''
-        waypoints_json = {"coordinates": self.mission_waypoints}
+        waypoints = {"coordinates": self.mission_waypoints}
+        waypoints_json = json.dumps(waypoints)
         print(waypoints_json)
-        #with open("waypoints.json", "w") as f:
-            #json.dump({"coordinates": self.mission_waypoints}, f, in)
         
-        
-        #self.dron.uploadFlightPlan(str(waypoints_json))
-        #print("Flight plan uploaded.")
+        self.dron.uploadFlightPlan(waypoints_json)
 
+    def execute_flight_plan(self):
+        # Execute the flight plan
+        print("Executing flight plan...")
+        self.dron.executeFlightPlan()
 
     # MAP:
     def add_mission_waypoint_event(self, coords):
@@ -517,13 +524,15 @@ class App(ctk.CTk):
         coords = (coords[0], coords[1], 6)
         print("Add Mission Waypoint:", coords)
         # Add the waypoint to the mission waypoints list with altitude 6
-        self.mission_waypoints.append(coords)
+        entry = {"lat": coords[0], "lon": coords[1], "alt": 6}
+        self.mission_waypoints.append(entry)
         new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.mission_waypoints)), marker_color_circle="red", marker_color_outside="black", text_color="red")
     
     def add_geofence_point_event(self, coords):
         print("Add Geofence Point:", coords)
         # Add the point to the geofence points list
-        self.geofence_points.append(coords)
+        entry = {"lat": coords[0], "lon": coords[1]}
+        self.geofence_points.append(entry)
         new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.geofence_points)), marker_color_circle="blue", marker_color_outside="black", text_color="blue")
 
 
