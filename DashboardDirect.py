@@ -513,6 +513,7 @@ class App(ctk.CTk):
         
         self.dron.uploadFlightPlan(waypoints_json)
 
+
     def execute_flight_plan(self):
         # Execute the flight plan
         print("Executing flight plan...")
