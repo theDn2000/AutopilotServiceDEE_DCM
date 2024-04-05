@@ -34,6 +34,6 @@ class Dron(object):
     from functions.return_to_launch_func import return_to_launch, returnToLaunch_MAVLINK
     from functions.flying_func import flying_trigger, flying_v0, prepare_command, go_order
     from functions.goto_func import goto, distanceInMeters
-    from functions.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence
-    from functions.modify_parameters import modify_parameter_MAVLINK, get_parameter_MAVLINK, get_all_parameters
+    from functions.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence, set_fence_geofence, action_geofence
+    from functions.modify_parameters import modify_parameter, get_parameter, get_all_parameters
     from functions.mission import uploadFlightPlan, executeFlightPlan

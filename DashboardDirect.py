@@ -27,7 +27,11 @@ class App(ctk.CTk):
 
         # CLASS VARIABLES
         self.mission_waypoints = []
+        self.mission_markers = []
+
         self.geofence_points = []
+        self.geofence_markers = []
+        self.geofence_enabled = False
 
 
         # MAIN FRAME
@@ -224,6 +228,34 @@ class App(ctk.CTk):
         # Add a button to execute the flight plan
         self.execute_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Execute Flight Plan", command=self.execute_flight_plan, fg_color="#3117ea", hover_color="#190b95")
         self.execute_flight_plan_button.grid(row=0, column=1, padx=10, pady=10, sticky="we", ipady=10)
+
+
+
+        # Geofence tab
+        # Separate the tab into 2 horizontal sections
+        self.main_tabview.tab("Geofence").rowconfigure(0, weight=1)
+        self.main_tabview.tab("Geofence").rowconfigure(1, weight=1)
+
+        # Separate the tab into 3 vertical sections
+        self.main_tabview.tab("Geofence").columnconfigure(0, weight=1)
+        self.main_tabview.tab("Geofence").columnconfigure(1, weight=1)
+        self.main_tabview.tab("Geofence").columnconfigure(2, weight=1)
+
+        # Add a button to Enable the geofence
+        self.enable_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Enable Geofence", command=self.enable_disable_geofence, fg_color="#3117ea", hover_color="#190b95")
+        self.enable_geofence_button.grid(row=0, column=0, padx=10, pady=10, sticky="we")
+
+        # Add a button to upload the geofence
+        self.upload_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Upload Fence", command=self.upload_geofence, fg_color="#3117ea", hover_color="#190b95")
+        self.upload_geofence_button.grid(row=0, column=1, padx=10, pady=10, sticky="we")
+
+        # Add a selector to choose the geofence action
+        self.geofence_action_selector = ctk.CTkOptionMenu(self.main_tabview.tab("Geofence"), values=["RTL", "Report", "Brake"], width=130, command=self.set_geofence_action)
+        self.geofence_action_selector.grid(row=0, column=2, padx=10, pady=10, sticky="we")
+
+        # Add a button to clear the geofence and map
+        self.clear_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Clear Geofence Points", command=self.clear_geofence, fg_color="#3117ea", hover_color="#190b95")
+        self.clear_geofence_button.grid(row=1, column=0, padx=10, pady=10, sticky="we", columnspan=3)
 
 
         # Create the main_frame_telemetry (for telemetry info)
@@ -475,7 +507,7 @@ class App(ctk.CTk):
         # Get a parameter and show it in the label
         parameter_id = self.parameter_id_input.get()
         if parameter_id != "":
-            parameter_value = self.dron.get_parameter_MAVLINK(parameter_id)
+            parameter_value = self.dron.get_parameter(parameter_id, True)
             self.parameter_value_label.configure(text="Value: " + str(parameter_value))
         else:
             self.parameter_value_label.configure(text="Value: ")
@@ -487,7 +519,7 @@ class App(ctk.CTk):
         if parameter_id != "" and parameter_value != "":
             # Try to set the parameter, if it is not possible, show an error message
             try:
-                self.dron.modify_parameter_MAVLINK(parameter_id, parameter_value)
+                self.dron.modify_parameter(parameter_id, parameter_value, True)
                 print("Parameter set.")
             except:
                 print("Error setting the parameter.")
@@ -513,13 +545,77 @@ class App(ctk.CTk):
         
         self.dron.uploadFlightPlan(waypoints_json)
 
-
     def execute_flight_plan(self):
         # Execute the flight plan
         print("Executing flight plan...")
         self.dron.executeFlightPlan()
 
+    # GEOFENCE:
+
+    def enable_disable_geofence(self):
+        # Check if the geofence is enabled or disabled
+        if self.geofence_enabled:
+            # Disable the geofence
+            print("Disabling geofence...")
+            self.dron.disable_geofence() # Disable the geofence
+            self.geofence_enabled = False
+
+            # Make the button blue and change the text to "Enable Geofence"
+            self.enable_geofence_button.configure(text="Enable Geofence", fg_color="#3117ea", hover_color="#190b95")
+        else:
+            # Enable the geofence
+            print("Enabling geofence...")
+
+            self.dron.enable_geofence() # Enable the geofence
+            self.geofence_enabled = True
+
+            # Make the button red and change the text to "Disable Geofence"
+            self.enable_geofence_button.configure(text="Disable Geofence", fg_color="red", hover_color="darkred")
+
+    def upload_geofence(self):
+        if len(self.geofence_points) < 3:
+            print("Error: You need at least 3 points to create a geofence.")
+
+        else:
+            # Add the first point to the end of the list to close the geofence
+            self.geofence_points.append(self.geofence_points[0])
+            # Add the first point to the first position of the list, as the reference point
+            self.geofence_points.insert(0, self.geofence_points[0])
+            # Convert the list of points to a list of tuples
+            fencelist = [(point["lat"], point["lon"]) for point in self.geofence_points]
+
+            print(fencelist)
+
+            # Call the function to upload the geofence
+            print("Uploading geofence...")
+            self.dron.set_fence_geofence(fencelist)
+        
+    def set_geofence_action(self, action):
+        # Set the geofence action
+        print("Geofence action set to:", action)
+        if action == "RTL":
+            action_id = 1
+        elif action == "Report":
+            action_id = 2
+        elif action == "Brake":
+            action_id = 3
+        else:
+            action_id = 1
+        self.dron.action_geofence(action_id)
+    
+    def clear_geofence(self):
+        # Clear the geofence
+        print("Clearing geofence...")
+        # Delete every element from the geofence points list
+        self.geofence_points = []
+        # Delete every element from the geofence markers list
+        for marker in self.geofence_markers:
+            marker.delete()
+        # Delete every element from the geofence markers list
+        self.geofence_markers = []
+
     # MAP:
+
     def add_mission_waypoint_event(self, coords):
         # Add altitude to the coords (6 meters)
         coords = (coords[0], coords[1], 6)
@@ -535,7 +631,8 @@ class App(ctk.CTk):
         entry = {"lat": coords[0], "lon": coords[1]}
         self.geofence_points.append(entry)
         new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.geofence_points)), marker_color_circle="blue", marker_color_outside="black", text_color="blue")
-
+        # Add the new marker to the list
+        self.geofence_markers.append(new_marker)
 
 
 

@@ -388,13 +388,13 @@ def action_geofence(self, action):
         self.modify_parameter("FENCE_ACTION", int(action), True)
         # Get the parameter value
         if self.get_parameter("FENCE_ACTION", True) == int(action):
-            print("- Geofence Controller: FENCE_ACTION set to value 3 successfully")
+            print("- Geofence Controller: FENCE_ACTION set to value " + str(int(action)) + " successfully")
 
             # Break the loop
             break
 
         else :
-            print("- Geofence Controller: Failed to set FENCE_ACTION to value 3, trying again")
+            print("- Geofence Controller: Failed to set FENCE_ACTION to value " + str(int(action)) + ", trying again")
     
     print("- Geofence Controller: Completed!")
 
