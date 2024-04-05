@@ -28,6 +28,10 @@ def uploadFlightPlan(self, waypoints_json):
 
     self.vehicle.mav.mission_count_send(self.vehicle.target_system, self.vehicle.target_component, n, 0)
 
+    # Wait for the ACK
+    ack = self.vehicle.recv_match(type='MISSION_REQUEST', blocking=True)
+    print(str(ack))
+
     # Add as waypoints the coordinates in the JSON file
     for waypoint in waypoints_json['coordinates']:
         latitude = waypoint['lat']
@@ -42,15 +46,22 @@ def uploadFlightPlan(self, waypoints_json):
                                            mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,            # Command
                                            0,                                               # Current
                                            1,                                               # Autocontinue
-                                           0,                                               # Param 1
-                                           0,                                               # Param 2                  
-                                           0,                                               # Param 3
+                                           0.0,                                             # Param 1
+                                           2.00,                                            # Param 2                  
+                                           20.00,                                           # Param 3
                                            math.nan,                                        # Param 4
                                            latitude,                                        # Param 5 (Latitude)
                                            longitude,                                       # Param 6 (Longitude)
                                            altitude,                                        # Param 7 (Altitude)
                                            0)                                               # Mission type                                
-                                            
+
+    if waypoint != waypoints_json['coordinates'][-1]:
+        # Wait for the ACK
+        ack = self.vehicle.recv_match(type='MISSION_REQUEST', blocking=True)   
+        print(str(ack))                             
+    # Wait for the ACK
+    ack = self.vehicle.recv_match(type='MISSION_ACK', blocking=True)
+    print(str(ack))
 
     # Upload and send feedback to the user
     # self.vehicle.mav.mission_set_current_send(self.vehicle.target_system, self.vehicle.target_component, 0)
@@ -80,6 +91,10 @@ def executeFlightPlan(self):
     '''
     # Start the mission
     self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, mavutil.mavlink.MAV_CMD_MISSION_START, 0, 0, 0, 0, 0, 0, 0, 0)
+
+    # Wait for the ACK
+    ack = self.vehicle.recv_match(type='MISSION_ACK', blocking=True)
+    print(str(ack))
 
     # Send feedback to the user
     print('Flight plan executed')
