@@ -8,6 +8,9 @@ import math
 
 def uploadFlightPlan(self, waypoints_json):
     '''
+    A mission is a set of waypoints that the vehicle will follow, from taking off to landing. 
+    This function uploads a mission to the vehicle. 
+
     The waypoints_json parameter is a JSON string with the following format:
     {
     "coordinates": [
@@ -17,56 +20,125 @@ def uploadFlightPlan(self, waypoints_json):
     ]
     }
     '''
+    waypoint_loader = []
+
     # Load the JSON file
     waypoints_json = json.loads(waypoints_json)
 
     # Delete all previous missions and waypoints
-    self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
+    #self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
 
     # Count the number of waypoints
     n = len(waypoints_json['coordinates'])
 
-    self.vehicle.mav.mission_count_send(self.vehicle.target_system, self.vehicle.target_component, n, 0)
+    # The first waypoint is the home location, we can obtain it from the vehicle and add it to the mission
+    self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, mavutil.mavlink.MAV_CMD_GET_HOME_POSITION, 0, 0, 0, 0, 0, 0, 0, 0)
+    
+    msg = self.vehicle.recv_match(type='HOME_POSITION', blocking=True)
+    msg = msg.to_dict()
+    latitude_home = msg['latitude']
+    longitude_home = msg['longitude']
+    altitude_home = msg['altitude']
 
-    # Wait for the ACK
-    ack = self.vehicle.recv_match(type='MISSION_REQUEST', blocking=True)
-    print(str(ack))
+    # Add the home waypoint to the mission
+    waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(self.vehicle.target_system,  # Target system
+                                       self.vehicle.target_component,                                    # Target component
+                                       0,                                                                # Sequence number (0 is the home waypoint)
+                                       0,                                                                # Frame
+                                       16,                                                               # Command
+                                       0,                                                                # Current
+                                       0,                                                                # Autocontinue
+                                       0,                                                                # Param 1
+                                       0,                                                                # Param 2
+                                       0,                                                                # Param 3
+                                       0,                                                                # Param 4
+                                       latitude_home,                                                    # Param 5 (Latitude)
+                                       longitude_home,                                                   # Param 6 (Longitude)
+                                       altitude_home))                                                   # Param 7 (Altitude)
 
-    # Add as waypoints the coordinates in the JSON file
+    # Add the takeoff waypoint to the mission
+    waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(self.vehicle.target_system,   # Target system
+                                        self.vehicle.target_component,                                    # Target component
+                                        1,                                                                # Sequence number (1 is the takeoff waypoint)
+                                        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,                    # Frame
+                                        mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,                              # Command
+                                        0,                                                                # Current
+                                        True,                                                             # Autocontinue
+                                        0,                                                                # Param 1
+                                        0,                                                                # Param 2
+                                        0,                                                                # Param 3
+                                        0,                                                                # Param 4
+                                        latitude_home,                                                    # Param 5 (Latitude)
+                                        longitude_home,                                                   # Param 6 (Longitude)
+                                        10))                                                              # Param 7 (Altitude)
+
+    # Add the route waypoints to the mission
+    sequence = 2
     for waypoint in waypoints_json['coordinates']:
-        latitude = waypoint['lat']
-        longitude = waypoint['lon']
-        altitude = waypoint['alt']
+        latitude = int(waypoint['lat']*10**7)
+        longitude = int(waypoint['lon']*10**7)
+        altitude = int(waypoint['alt'])
 
         # Add the waypoint
-        self.vehicle.mav.mission_item_send(self.vehicle.target_system,                      # Target system
-                                           self.vehicle.target_component,                   # Target component
-                                           1,                                               # Sequence number
-                                           mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,   # Frame
-                                           mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,            # Command
-                                           0,                                               # Current
-                                           1,                                               # Autocontinue
-                                           0.0,                                             # Param 1
-                                           2.00,                                            # Param 2                  
-                                           20.00,                                           # Param 3
-                                           math.nan,                                        # Param 4
-                                           latitude,                                        # Param 5 (Latitude)
-                                           longitude,                                       # Param 6 (Longitude)
-                                           altitude,                                        # Param 7 (Altitude)
-                                           0)                                               # Mission type                                
+        waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(self.vehicle.target_system,  # Target system
+                                           self.vehicle.target_component,                                    # Target component
+                                           sequence,                                                         # Sequence number
+                                           mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,                    # Frame
+                                           mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,                             # Command
+                                           0,                                                                # Current
+                                           True,                                                             # Autocontinue
+                                           0,                                                                # Param 1
+                                           0,                                                                # Param 2
+                                           0,                                                                # Param 3
+                                           0,                                                                # Param 4
+                                           latitude,                                                         # Param 5 (Latitude)
+                                           longitude,                                                        # Param 6 (Longitude)
+                                           altitude))                                                        # Param 7 (Altitude)
+        sequence += 1
 
-    if waypoint != waypoints_json['coordinates'][-1]:
-        # Wait for the ACK
-        ack = self.vehicle.recv_match(type='MISSION_REQUEST', blocking=True)   
-        print(str(ack))                             
+    # Add a RTL command to the mission to end the mission
+    waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(self.vehicle.target_system,   # Target system
+                                        self.vehicle.target_component,                                    # Target component
+                                        sequence,                                                         # Sequence number
+                                        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,                    # Frame
+                                        mavutil.mavlink.MAV_CMD_NAV_RETURN_TO_LAUNCH,                     # Command
+                                        0,                                                                # Current
+                                        True,                                                             # Autocontinue
+                                        0,                                                                # Param 1
+                                        0,                                                                # Param 2
+                                        0,                                                                # Param 3
+                                        0,                                                                # Param 4
+                                        0,                                                                # Param 5 (Latitude)
+                                        0,                                                                # Param 6 (Longitude)
+                                        0))                                                               # Param 7 (Altitude)
+    
+    # Delete all previous missions and waypoints
+    self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
+
+    # Recieve the ACK
+    ack = self.vehicle.recv_match(type='MISSION_ACK', blocking=True)
+
+    # Send the number of waypoints
+    self.vehicle.waypoint_count_send(len(waypoint_loader))
+
+    # Send all the items
+    for i in range(0, len(waypoint_loader)):
+        print("Waiting for request")
+        msg = self.vehicle.recv_match(type=['MISSION_REQUEST_INT', 'MISSION_REQUEST'], blocking=True)
+        print(f'Sending waypoint {msg.seq}/{len(waypoint_loader) - 1}')
+
+        self.vehicle.mav.send(waypoint_loader[msg.seq])
+
+
+        # Break the loop if the last waypoint was sent´
+        if msg.seq == len(waypoint_loader) - 1:
+            break
+                                        
     # Wait for the ACK
     ack = self.vehicle.recv_match(type='MISSION_ACK', blocking=True)
-    print(str(ack))
 
-    # Upload and send feedback to the user
-    # self.vehicle.mav.mission_set_current_send(self.vehicle.target_system, self.vehicle.target_component, 0)
-    print('Flight plan uploaded')
-    return True
+    # Send feedback to the user
+    print('Flight plan uploaded!')
     
 def executeFlightPlan(self):
     '''
