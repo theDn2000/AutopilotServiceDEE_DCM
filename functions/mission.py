@@ -25,9 +25,6 @@ def uploadFlightPlan(self, waypoints_json):
     # Load the JSON file
     waypoints_json = json.loads(waypoints_json)
 
-    # Delete all previous missions and waypoints
-    #self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
-
     # Count the number of waypoints
     n = len(waypoints_json['coordinates'])
 
@@ -41,8 +38,8 @@ def uploadFlightPlan(self, waypoints_json):
     altitude_home = msg['altitude']
 
     # Add the home waypoint to the mission
-    waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(self.vehicle.target_system,  # Target system
-                                       self.vehicle.target_component,                                    # Target component
+    waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(0,  # Target system
+                                       0,                                    # Target component
                                        0,                                                                # Sequence number (0 is the home waypoint)
                                        0,                                                                # Frame
                                        16,                                                               # Command
@@ -111,10 +108,10 @@ def uploadFlightPlan(self, waypoints_json):
                                         0,                                                                # Param 5 (Latitude)
                                         0,                                                                # Param 6 (Longitude)
                                         0))                                                               # Param 7 (Altitude)
-    
+
     # Delete all previous missions and waypoints
     self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
-
+    
     # Recieve the ACK
     ack = self.vehicle.recv_match(type='MISSION_ACK', blocking=True)
 
@@ -123,11 +120,15 @@ def uploadFlightPlan(self, waypoints_json):
 
     # Send all the items
     for i in range(0, len(waypoint_loader)):
-        print("Waiting for request")
+        print("Waiting for response...")
+        
         msg = self.vehicle.recv_match(type=['MISSION_REQUEST_INT', 'MISSION_REQUEST'], blocking=True)
-        print(f'Sending waypoint {msg.seq}/{len(waypoint_loader) - 1}')
-
-        self.vehicle.mav.send(waypoint_loader[msg.seq])
+        
+        print(f'Sending waypoint {msg.seq}/{len(waypoint_loader) - 1}: {waypoint_loader[msg.seq]}')
+        msg_sent = self.vehicle.mav.send(waypoint_loader[msg.seq])
+        # Wait 2 seconds before sending the next waypoint
+        time.sleep(2)
+        print(msg_sent)
 
 
         # Break the loop if the last waypoint was sent´
