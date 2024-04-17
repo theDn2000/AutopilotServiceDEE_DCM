@@ -197,7 +197,7 @@ class App(ctk.CTk):
         self.frame_drone_selector.columnconfigure(2, weight=1)
 
         # Create the drone selector (1 button left, 1 label center, 1 button right)
-        self.drone_selector_left = ctk.CTkButton(self.frame_drone_selector, text="<", fg_color="#3117ea", hover_color="#190b95", height=15, width=15)
+        self.drone_selector_left = ctk.CTkButton(self.frame_drone_selector, text="<", fg_color="#3117ea", hover_color="#190b95", command=self.get_swarm_info, height=15, width=15)
         self.drone_selector_left.grid(row=0, column=0, padx=2, pady=2, sticky="w")
 
         self.drone_selector_label = ctk.CTkLabel(self.frame_drone_selector, text="Drone ID: 1", font=("TkDefaultFont", 10), height=15)
@@ -306,9 +306,9 @@ class App(ctk.CTk):
         if mode_selector == "simulation":
             print('Simulation mode selected')
             if self.dron.ID == 1:
-                connection_string = "tcp:127.0.0.1:5763"
+                connection_string = "tcp:127.0.0.1:5763" # First drone (Port range from 5760 to 5763) [Mission Planner connected to 5760]
             if self.dron.ID == 2:
-                connection_string = "tcp:127.0.0.1:5773"
+                connection_string = "tcp:127.0.0.1:5773" # Second drone (Port range from 5770 to 5773) [Mission Planner connected to 5770]
             else:
                 connection_string = "tcp:127.0.0.1:5763" # Default connection string
         
@@ -534,7 +534,13 @@ class App(ctk.CTk):
         self.geofence_markers.append(new_marker)
 
 
+    # SWARM
 
+    def get_swarm_info(self):
+        # Get the swarm info
+        print("Getting swarm info...")
+        swarm_info = self.dron.get_swarm_info()
+        print(swarm_info)
  
 
 
