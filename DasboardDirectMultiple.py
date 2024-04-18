@@ -84,9 +84,9 @@ class App(ctk.CTk):
         self.info_textbox2.insert("1.0", "Space reserved for the logo or image.")
         self.info_textbox2.configure(state="disabled")
 
-        # Create the ID input textbox with a shadow text inside
-        self.id_input = ctk.CTkEntry(self.main_frame, border_color="#3117ea", text_color="gray", width=130, placeholder_text="type drone ID...")
-        self.id_input.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
+        # Create a option selector for the number of drones (1 to 10)
+        self.id_drone_number = ctk.CTkOptionMenu(self.main_frame, values=["Select swarm size...", "2","3", "4", "5","6", "7", "8","9", "10" ], width=130)
+        self.id_drone_number.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
         # Create a option selector for the mode (real or simulation)
         self.mode_selector = ctk.CTkOptionMenu(self.main_frame, values=["Simulation", "Real"], width=130)
@@ -100,16 +100,19 @@ class App(ctk.CTk):
 
     # FUNCTIONS (FRONTEND)
     def on_button_connect_click(self):
-        # If it is not a integer, show an error message in the textbox, in red
-        if not self.id_input.get().isdigit():
+        # If the swarm size is not selected, show an error message
+        if self.id_drone_number.get() == "Select swarm size...":
             self.info_textbox.configure(state="normal")
             self.info_textbox.delete("1.0", "end")
-            self.info_textbox.insert("1.0", "Error: The ID must be a number.")
+            self.info_textbox.insert("1.0", "Error: Please, select the swarm size.")
             self.info_textbox.configure(state="disabled")
             self.info_textbox.configure(text_color="red")
             return
         else:
-            self.dron = Dron(int(self.id_input.get()))
+            # Create the drones (1 to 10 depending on the selection) [i is the ID of the drone]
+            self.drones = []
+            for i in range(1, int(self.id_drone_number.get()) + 1):
+                self.drones.append(Dron(i))
             
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
