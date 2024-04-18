@@ -68,16 +68,17 @@ def send_telemetry_info_MAVLINK(self, sending_topic, callback):
             }
             # Send telemetry info using the apropiate method
             self.lock.acquire()
-            callback(telemetry_info)
+            callback(telemetry_info, self.ID)
             #self.external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
             self.lock.release()
         time.sleep(0.25)
 
 
-
+'''
 def send_output(self, data, callback):
     # This function gets the output data, process it and sends it using the callback function
     if data is not None:
         callback(data)
     else:
         print ('No output data received')
+'''

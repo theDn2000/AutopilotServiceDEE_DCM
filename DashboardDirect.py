@@ -435,7 +435,7 @@ class App(ctk.CTk):
             # The message should be in red
             self.info_textbox.configure(text_color="red")
 
-    def telemetry(self, telemetry_info):
+    def telemetry(self, telemetry_info, drone_id):
         # Callback function to update the telemetry info in the main page view
         self.label_telemetry_lat_value.configure(text=telemetry_info['lat'])
         self.label_telemetry_lon_value.configure(text=telemetry_info['lon'])

@@ -32,7 +32,15 @@ class App(ctk.CTk):
         self.geofence_points = []
         self.geofence_markers = []
         self.geofence_enabled = False
+        
+        # Drone selector
+        self.drone_selector_id = 1
 
+        # Drone selected
+        self.dron = None
+
+        # Drones
+        self.drones = []
 
         # MAIN FRAME
         # Create the main frame
@@ -110,13 +118,16 @@ class App(ctk.CTk):
             return
         else:
             # Create the drones (1 to 10 depending on the selection) [i is the ID of the drone]
-            self.drones = []
             for i in range(1, int(self.id_drone_number.get()) + 1):
                 self.drones.append(Dron(i))
+
+            # Before finishing, select the first drone as the selected drone
+            self.dron = self.drones[0]
+            print("Drone selected: " + str(self.dron))
             
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
-            self.id_input.grid_forget()
+            self.id_drone_number.grid_forget()
             self.mode_selector.grid_forget()
             self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
             self.connect_label.grid(row=7, column=6, padx=10, pady=0, sticky="nswe", columnspan=2)
@@ -200,13 +211,13 @@ class App(ctk.CTk):
         self.frame_drone_selector.columnconfigure(2, weight=1)
 
         # Create the drone selector (1 button left, 1 label center, 1 button right)
-        self.drone_selector_left = ctk.CTkButton(self.frame_drone_selector, text="<", fg_color="#3117ea", hover_color="#190b95", command=self.get_swarm_info, height=15, width=15)
+        self.drone_selector_left = ctk.CTkButton(self.frame_drone_selector, text="<", fg_color="#3117ea", hover_color="#190b95", command=self.select_previous_drone, height=15, width=15)
         self.drone_selector_left.grid(row=0, column=0, padx=2, pady=2, sticky="w")
 
         self.drone_selector_label = ctk.CTkLabel(self.frame_drone_selector, text="Drone ID: 1", font=("TkDefaultFont", 10), height=15)
         self.drone_selector_label.grid(row=0, column=1, padx=0, pady=2, sticky="we")
 
-        self.drone_selector_right = ctk.CTkButton(self.frame_drone_selector, text=">", fg_color="#3117ea", hover_color="#190b95", height=15, width=15)
+        self.drone_selector_right = ctk.CTkButton(self.frame_drone_selector, text=">", fg_color="#3117ea", hover_color="#190b95", command=self.select_next_drone, height=15, width=15)
         self.drone_selector_right.grid(row=0, column=2, padx=2, pady=2, sticky="e")
 
 
@@ -301,30 +312,37 @@ class App(ctk.CTk):
         
     # Connect
     def connect(self):
+        # The connection ports are the following [10 possible drones]:
+        self.ports = [5763, 5773, 5783, 5793, 5803, 5813, 5823, 5833, 5843, 5853]
 
         # Depending if real time or simulation mode is selected, the connection string will be different
-        mode_selector = self.mode_selector.get()
-        mode_selector = "simulation" # This variable will change depending on the user's selection when connecting
+        mode_selector = str(self.mode_selector.get())
 
-        if mode_selector == "simulation":
+        if mode_selector == "Simulation":
             print('Simulation mode selected')
-            if self.dron.ID == 1:
-                connection_string = "tcp:127.0.0.1:5763" # First drone (Port range from 5760 to 5763) [Mission Planner connected to 5760]
-            if self.dron.ID == 2:
-                connection_string = "tcp:127.0.0.1:5773" # Second drone (Port range from 5770 to 5773) [Mission Planner connected to 5770]
-            else:
-                connection_string = "tcp:127.0.0.1:5763" # Default connection string
-        
+            # Connect every drone to the autopilot
+            for dron in self.drones:
+                dron.connect("DashboardDirect", "simulation", None, None, None, "tcp:127.0.0.1:" + str(self.ports[dron.ID - 1]), True)
+                # Wait 1 second and check if the drone is connected
+                time.sleep(1)
+                if dron.state == "connected":
+                    print("Drone " + str(dron.ID) + " connected.")
+                else:
+                    print("Error: Drone " + str(dron.ID) + " couldn't connect.")
         else:
+            # A HACER
             print ('Real mode selected')
             # connection_string = "/dev/ttyS0"
             connection_string = "com7"
             # connection_string = "udp:127.0.0.1:14550"
 
-        # Connect to the autopilot
-        self.dron.connect("DashboardDirect", "simulation", None, None, None, connection_string, True)
-
-        if self.dron.state == "connected":
+        # Check that every drone is connected
+        verification = True
+        for dron in self.drones:
+            if dron.state !="connected":
+                verification = False
+                break
+        if verification:
             # Delete every element and start the main page view
             self.connect_label.grid_forget()
             self.info_textbox.grid_forget()
@@ -333,8 +351,9 @@ class App(ctk.CTk):
             # Create the main page view
             self.set_main_page()
 
-            # Start the telemetry info
-            self.dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
+            # Start the telemetry info for every drone
+            for dron in self.drones:
+                dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
 
         else:
             # Make the label invisible and show the button again
@@ -348,14 +367,17 @@ class App(ctk.CTk):
             # The message should be in red
             self.info_textbox.configure(text_color="red")
 
-    def telemetry(self, telemetry_info):
+    def telemetry(self, telemetry_info, drone_id):
         # Callback function to update the telemetry info in the main page view
-        #self.label_telemetry_lat_value.configure(text=telemetry_info['lat'])
-        #self.label_telemetry_lon_value.configure(text=telemetry_info['lon'])
-        self.label_telemetry_alt_value.configure(text=telemetry_info['altitude'])
-        self.label_telemetry_hea_value.configure(text=telemetry_info['heading'])
-        self.label_telemetry_gs_value.configure(text=telemetry_info['groundSpeed'])
-        self.label_telemetry_bat_value.configure(text=telemetry_info['battery'])
+        # Check if the drone ID is the same as the selected drone
+        if drone_id == self.drone_selector_id:
+            # Update the telemetry info
+            #self.label_telemetry_lat_value.configure(text=telemetry_info['lat'])
+            #self.label_telemetry_lon_value.configure(text=telemetry_info['lon'])
+            self.label_telemetry_alt_value.configure(text=telemetry_info['altitude'])
+            self.label_telemetry_hea_value.configure(text=telemetry_info['heading'])
+            self.label_telemetry_gs_value.configure(text=telemetry_info['groundSpeed'])
+            self.label_telemetry_bat_value.configure(text=telemetry_info['battery'])
 
     def arm(self):
         # Arm the drone
@@ -537,13 +559,29 @@ class App(ctk.CTk):
         self.geofence_markers.append(new_marker)
 
 
-    # SWARM
+    # DRONE SELECTOR:
 
-    def get_swarm_info(self):
-        # Get the swarm info
-        print("Getting swarm info...")
-        swarm_info = self.dron.get_swarm_info()
-        print(swarm_info)
+    def select_previous_drone(self):
+        # Select the previous drone
+        if self.drone_selector_id > 1:
+            self.drone_selector_id -= 1
+            self.drone_selector_label.configure(text="Drone ID: " + str(self.drone_selector_id))
+            self.dron = self.drones[self.drone_selector_id - 1]
+        else:
+            self.drone_selector_id = len(self.drones)
+            self.drone_selector_label.configure(text="Drone ID: " + str(self.drone_selector_id))
+            self.dron = self.drones[self.drone_selector_id - 1]
+
+    def select_next_drone(self):
+        # Select the next drone
+        if self.drone_selector_id < len(self.drones):
+            self.drone_selector_id += 1
+            self.drone_selector_label.configure(text="Drone ID: " + str(self.drone_selector_id))
+            self.dron = self.drones[self.drone_selector_id - 1]
+        else:
+            self.drone_selector_id = 1
+            self.drone_selector_label.configure(text="Drone ID: " + str(self.drone_selector_id))
+            self.dron = self.drones[self.drone_selector_id - 1]
  
 
 
