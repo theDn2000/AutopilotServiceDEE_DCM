@@ -380,6 +380,8 @@ class App(ctk.CTk):
             self.label_telemetry_bat_value.configure(text=telemetry_info['battery'])
 
     def arm(self):
+        # Change the arm button color to yellow
+        self.control_button_take_off.configure(fg_color="yellow", hover_color="darkyellow")
         # Arm the drone
         self.dron.arm(False)
 
