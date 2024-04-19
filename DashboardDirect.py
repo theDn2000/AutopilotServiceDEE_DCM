@@ -381,28 +381,46 @@ class App(ctk.CTk):
         self.table.heading("Value", text="Value")
         self.table.grid(row=1, column=0, padx=10, pady=10, sticky="we", columnspan=2)
 
+
+
     # UPDATE CONTROL BUTTONS
     def update_control_buttons(self):
         while True:
-            print(str(self.dron.state))
+            if self.dron.state == "connected":
+                # The other buttons are disabled
+                self.control_button_take_off.configure(state="disabled")
+                self.control_button_RTL.configure(state="disabled")
             if self.dron.state == "armed":
                 # Change the color of the arm button to green
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen")
+                # The take off button is enabled and the RTL button is disabled
+                self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.dron.state == "takingOff":
                 # Change the color of the take off button to orange
                 self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
+                # The arm button is disabled and the RTL button is disabled
+                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.dron.state == "flying":
                 # Change the color of the take off button to green
-                self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen")
+                self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                # The arm button is disabled and the RTL button is enabled
+                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
             if self.dron.state == "returningHome":
                 # Change the color of the RTL button to orange
                 self.control_button_RTL.configure(fg_color="orange", hover_color="darkorange")
+                # The arm button is disabled and the take off button is disabled
+                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
             if self.dron.state == "onHearth":
                 # Reset the colors of the buttons
                 self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-                self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+                self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             time.sleep(0.5)
+
 
 
     # FUNCTIONS (BACKEND)
