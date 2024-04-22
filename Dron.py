@@ -35,5 +35,5 @@ class Dron(object):
     from functions.flying_func import flying_trigger, flying_v0, prepare_command, go_order
     from functions.goto_func import goto, distanceInMeters
     from functions.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence, set_fence_geofence, action_geofence
-    from functions.modify_parameters import modify_parameter, get_parameter, get_all_parameters
+    from functions.modify_parameters import modify_parameter, get_parameter, get_all_parameters, get_position
     from functions.mission import uploadFlightPlan, executeFlightPlan

@@ -143,7 +143,7 @@ class App(ctk.CTk):
 
         # Add a map to the main frame
         self.map_widget = tkmap.TkinterMapView(self.main_frame)
-        self.map_widget.grid(row=0, column=0, padx=10, pady=10, rowspan=5, columnspan=6, sticky="nswe")
+        self.map_widget.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=6, sticky="nswe")
         # Change the map style to satellite
         x = -35.3633515
         y = 149.1652412
@@ -152,10 +152,13 @@ class App(ctk.CTk):
         self.map_widget.set_position(x, y)
         #self.map_widget.place(relx=0.5, rely=0.5, anchor="center")
         # Add a right click menu to add mission waypoints
-        self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True)
+        #self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True) (commented for DashboardDirectMultiple)
         # Add a right click menu to add geofence points
-        self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True)
-
+        #self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True) (commented for DashboardDirectMultiple)
+                    
+        # Start the print drones on map thread
+        t2 = threading.Thread(target=self.print_drones_on_map)
+        t2.start()
 
         # Create the main_frame_telemetry (for telemetry info)
         self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=60)
@@ -347,6 +350,29 @@ class App(ctk.CTk):
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             time.sleep(0.5)
 
+    # PRINT DRONES ON THE MAP
+    def print_drones_on_map(self):
+        # Print the drones on the map
+        # Create a list of markers for the drones
+        self.drones_markers = []
+        while True:
+            # Delete the previous markers 
+            for marker in self.drones_markers:
+                marker.delete()
+
+            for dron in self.drones:
+                # Obtain the position of the drone
+                marker_lat, marker_lon, marker_alt = dron.get_position()
+                dron.get_position()
+                # Create a marker for every drone
+                print("Drone " + str(dron.ID) + " - Lat: " + str(marker_lat) + " - Lon: " + str(marker_lon))
+                marker = self.map_widget.set_marker(marker_lat, marker_lon, text="Drone " + str(dron.ID), marker_color_circle="red", marker_color_outside="black", text_color="red")
+                
+                # Add the marker to the list
+                self.drones_markers.append(marker)
+            
+            # Wait 1 second (crash prevention)
+            time.sleep(1)
 
     # FUNCTIONS (BACKEND)
         

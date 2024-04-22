@@ -68,3 +68,21 @@ def get_all_parameters_MAVLINK(self):
         parameters_id.append(response.param_id)
         parameters_value.append(response.param_value)
     return parameters_id, parameters_value
+
+
+# Función a determinar su ubicación:
+def get_position(self):
+    # Get the drone position, latitude, longitude and altitude
+    self.vehicle.mav.mission_request_send(self.vehicle.target_system, self.vehicle.target_component, 0)
+
+    # Wait for a response (blocking)
+    msg = self.vehicle.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+    # Return the value of the parameter
+
+
+    msg = msg.to_dict()
+    latitude = msg['latitude']*1e-7
+    longitude = msg['longitude']*1e-7
+    altitude = msg['altitude']*1e-3
+
+    return latitude, longitude, altitude
