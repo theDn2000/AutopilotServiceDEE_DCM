@@ -311,7 +311,7 @@ class App(ctk.CTk):
     # UPDATE CONTROL BUTTONS
     def update_control_buttons(self):
         while True:
-            print("Drone ID: " + str(self.drone_selector_id) + " - State: " + self.dron.state)
+            # print("Drone ID: " + str(self.drone_selector_id) + " - State: " + self.dron.state)
             # Update the control buttons depending on the state of the drone (for the selected drone)
             if self.dron.state == "connected":
                 # Change the color of the arm button to blue
@@ -353,26 +353,30 @@ class App(ctk.CTk):
     # PRINT DRONES ON THE MAP
     def print_drones_on_map(self):
         # Print the drones on the map
-        # Create a list of markers for the drones
-        self.drones_markers = []
+        # Create a list of markers for the drones, with the same length as the number of drones
+        drones_markers = [None] * len(self.drones)
+        first_time = True
         while True:
-            # Delete the previous markers 
-            for marker in self.drones_markers:
-                marker.delete()
-
             for dron in self.drones:
                 # Obtain the position of the drone
                 marker_lat, marker_lon, marker_alt = dron.get_position()
                 dron.get_position()
+
+                # Delete the previous marker
+                print (str(len(drones_markers)))
+                if first_time == False:
+                    drones_markers[dron.ID - 1].delete()
+
                 # Create a marker for every drone
                 print("Drone " + str(dron.ID) + " - Lat: " + str(marker_lat) + " - Lon: " + str(marker_lon))
                 marker = self.map_widget.set_marker(marker_lat, marker_lon, text="Drone " + str(dron.ID), marker_color_circle="red", marker_color_outside="black", text_color="red")
                 
                 # Add the marker to the list
-                self.drones_markers.append(marker)
+                drones_markers[dron.ID - 1] = marker
             
             # Wait 1 second (crash prevention)
-            time.sleep(1)
+            time.sleep(0.1)
+            first_time = False
 
     # FUNCTIONS (BACKEND)
         

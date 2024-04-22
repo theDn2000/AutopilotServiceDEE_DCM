@@ -81,8 +81,8 @@ def get_position(self):
 
 
     msg = msg.to_dict()
-    latitude = msg['latitude']*1e-7
-    longitude = msg['longitude']*1e-7
-    altitude = msg['altitude']*1e-3
+    latitude = msg['lat']*1e-7
+    longitude = msg['lon']*1e-7
+    altitude = msg['alt']*1e-3
 
     return latitude, longitude, altitude
