@@ -6,6 +6,7 @@ import sys
 import time
 import threading
 import json
+from PIL import Image, ImageTk
 
 # Import the Dron class
 from Dron import Dron
@@ -41,6 +42,10 @@ class App(ctk.CTk):
 
         # Drones
         self.drones = []
+
+        # Load images
+        current_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        self.plane_circle_1_image = ImageTk.PhotoImage(Image.open(os.path.join(current_path, "images", "drone_circle.png")).resize((35, 35)))
 
         # MAIN FRAME
         # Create the main frame
@@ -141,6 +146,11 @@ class App(ctk.CTk):
 
         # Create the main_frame with tabs for the functionalities of the dashboard
 
+        # Delete the previous elements
+        self.info_textbox2.grid_forget()
+        self.info_textbox.grid_forget()
+        self.connect_label.grid_forget()
+
         # Add a map to the main frame
         self.map_widget = tkmap.TkinterMapView(self.main_frame)
         self.map_widget.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=6, sticky="nswe")
@@ -155,12 +165,11 @@ class App(ctk.CTk):
         #self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True) (commented for DashboardDirectMultiple)
         # Add a right click menu to add geofence points
         #self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True) (commented for DashboardDirectMultiple)
-                    
-        # Start the print drones on map thread
-        t2 = threading.Thread(target=self.print_drones_on_map)
-        t2.start()
+                
+
 
         # Create the main_frame_telemetry (for telemetry info)
+        
         self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=60)
         self.frame_telemetry.grid(row=0, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
         # Color the frame
@@ -177,7 +186,6 @@ class App(ctk.CTk):
         self.frame_telemetry.rowconfigure(1, weight=1)
 
         # Create the labels for the telemetry info, 4 parameters (alt, heading, groundSpeed, battery)
-
         self.label_telemetry_alt = ctk.CTkLabel(self.frame_telemetry, text="Altitude: ",font=("TkDefaultFont", 11))
         self.label_telemetry_alt.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.label_telemetry_alt_value = ctk.CTkLabel(self.frame_telemetry, text="0.0", font=("TkDefaultFont", 11, "bold"))
@@ -201,6 +209,7 @@ class App(ctk.CTk):
 
 
         # Create a 1 row frame to select the drone that is being controlled
+
         self.frame_drone_selector = ctk.CTkFrame(self.main_frame, height=25)
         self.frame_drone_selector.grid(row=1, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
         # Color the frame
@@ -225,32 +234,6 @@ class App(ctk.CTk):
 
 
         
-        # Create the main_frame_control_buttons (for control buttons)
-        self.main_frame_control_buttons = ctk.CTkFrame(self.main_frame)
-        self.main_frame_control_buttons.grid(row=3, column=6, padx=10, pady=10, rowspan=7, columnspan=2, sticky="swe")
-        # Color the frame
-        self.main_frame_control_buttons.configure(fg_color="#1f1f1f")
-        # frame_telemetry can't be resized
-        self.main_frame_control_buttons.grid_propagate(False)
-
-        # Separate the frame_telemetry into 3 vertical sections
-        self.main_frame_control_buttons.columnconfigure(0, weight=1)
-        self.main_frame_control_buttons.columnconfigure(1, weight=1)
-        self.main_frame_control_buttons.columnconfigure(2, weight=1)
-
-        # Create the control buttons
-        
-        self.control_button_arm = ctk.CTkButton(self.main_frame_control_buttons, text="Arm", command=self.arm, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_arm.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
-
-        self.control_button_take_off = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off", command=self.take_off, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_take_off.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
-
-        self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_RTL.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
-        
-
-
         # Create the main_frame_control_pad (for control pad)
         
         self.main_frame_control_pad = ctk.CTkFrame(self.main_frame)
@@ -271,8 +254,8 @@ class App(ctk.CTk):
         self.main_frame_control_pad.rowconfigure(2, weight=1)
         
 
-        # Create the control pad buttons
-        
+
+        # Create the control pad buttons 
         self.control_pad_button_nw = ctk.CTkButton(self.main_frame_control_pad, text="NW", command=lambda : self.go("NorthWest"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_nw.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
@@ -301,6 +284,57 @@ class App(ctk.CTk):
         self.control_pad_button_se.grid(row=2, column=2, padx=5, pady=5, sticky="we", ipady=10)
         
         
+        
+        # Create the main_frame_control_buttons (for control buttons)
+        
+        self.main_frame_control_buttons = ctk.CTkFrame(self.main_frame, height=120)
+        self.main_frame_control_buttons.grid(row=3, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
+        # Color the frame
+        self.main_frame_control_buttons.configure(fg_color="#1f1f1f")
+        # frame_telemetry can't be resized
+        self.main_frame_control_buttons.grid_propagate(False)
+
+        # Separate the frame_telemetry into 3 vertical sections
+        self.main_frame_control_buttons.columnconfigure(0, weight=1)
+        self.main_frame_control_buttons.columnconfigure(1, weight=1)
+        self.main_frame_control_buttons.columnconfigure(2, weight=1)
+
+        # Separate the frame_telemetry into 2 horizontal section
+        self.main_frame_control_buttons.rowconfigure(0, weight=1)
+        self.main_frame_control_buttons.rowconfigure(1, weight=1)
+        self.main_frame_control_buttons.rowconfigure(2, weight=1)
+
+        # Create the control buttons
+        self.control_button_arm = ctk.CTkButton(self.main_frame_control_buttons, text="Arm", command=self.arm, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_arm.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_take_off = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off", command=self.take_off, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_take_off.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_RTL.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
+        
+        self.control_button_disconnect = ctk.CTkButton(self.main_frame_control_buttons, text="Disconnect", fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_disconnect.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_arm_all = ctk.CTkButton(self.main_frame_control_buttons, text="Arm All", command=self.arm_all, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_arm_all.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_take_off_all = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off All", command=self.take_off_all, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_take_off_all.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
+
+
+
+        # Create the info_textbox_drones (textbox that displays the info of the drones)
+
+        self.info_textbox_drones = ctk.CTkTextbox(self.main_frame, height=60)
+        self.info_textbox_drones.grid(row=4, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
+        self.info_textbox_drones.configure(state="disabled", fg_color="#1f1f1f")
+        self.info_textbox_drones.insert("1.0", "Drone info will be displayed here.")
+        
+        
+
+
     def create_table(self): # Incomplete
         columns = ("ID", "Value")
         self.table = ttk.Treeview(self.main_tabview.tab("Parameters"), columns=columns, show="headings")
@@ -321,7 +355,7 @@ class App(ctk.CTk):
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.dron.state == "armed":
                 # Change the color of the arm button to green
-                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen")
+                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 # The take off button is enabled and the RTL button is disabled
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
@@ -348,9 +382,33 @@ class App(ctk.CTk):
                 self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+
+            # Also check if all the drones are armed and flying and change the color of the arm all and take off all buttons
+            armed = True
+            flying = True
+            for dron in self.drones:
+                if dron.state != "armed":
+                    armed = False
+                if dron.state != "flying":
+                    flying = False
+
+            if armed:
+                self.control_button_arm_all.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+            else:
+                self.control_button_arm_all.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+
+            if flying:
+                self.control_button_take_off_all.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_arm_all.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+            else:
+                self.control_button_take_off_all.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+
             time.sleep(0.5)
 
+        
+
     # PRINT DRONES ON THE MAP
+    '''
     def print_drones_on_map(self):
         # Print the drones on the map
         # Create a list of markers for the drones, with the same length as the number of drones
@@ -377,6 +435,9 @@ class App(ctk.CTk):
             # Wait 1 second (crash prevention)
             time.sleep(0.1)
             first_time = False
+    '''
+
+
 
     # FUNCTIONS (BACKEND)
         
@@ -425,6 +486,9 @@ class App(ctk.CTk):
             t = threading.Thread(target=self.update_control_buttons)
             t.start()
 
+            # Create a list for the markers of the drones
+            self.drones_markers = [None] * len(self.drones)
+
             # Start the telemetry info for every drone
             for dron in self.drones:
                 dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
@@ -453,17 +517,40 @@ class App(ctk.CTk):
             self.label_telemetry_gs_value.configure(text=telemetry_info['groundSpeed'])
             self.label_telemetry_bat_value.configure(text=telemetry_info['battery'])
 
+        # Check if a marker for the drone has been created previously
+        if self.drones_markers[drone_id - 1] != None:
+            # Delete the previous marker
+            self.drones_markers[drone_id - 1].delete()
+
+        # Print the drone on the map
+        marker = self.map_widget.set_marker(telemetry_info['lat'], telemetry_info['lon'], text="Drone " + str(drone_id), icon=self.plane_circle_1_image, marker_color_circle="green", marker_color_outside="black", text_color="black")
+
+        # Add the marker to the list
+        self.drones_markers[drone_id - 1] = marker
+
+
+
     def arm(self):
         # Change the arm button color to orange
         self.control_button_arm.configure(fg_color="orange", hover_color="darkorange")
         # Arm the drone
         self.dron.arm(False)
 
+    def arm_all(self):
+        # Arm all the drones
+        for dron in self.drones:
+            dron.arm(False)
+
     def take_off(self):
         # Change the take off button color to orange
         self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
         # Take off the drone
         self.dron.take_off(10, False)
+
+    def take_off_all(self):
+        # Take off all the drones
+        for dron in self.drones:
+            dron.take_off(10, False)
 
     def go(self, direction):
         # Go to a direction
