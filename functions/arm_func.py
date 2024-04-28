@@ -12,6 +12,14 @@ def arm_MAVLINK(self):
     self.vehicle.motors_armed_wait()
     self.state = "armed"
 
+    # Create a cyclic thread to check if the vehicle is armed, if not, change the state to disarmed´
+    time.sleep(3)
+    while True:
+        self.check_armed()
+        if self.state == 'connected':
+            break
+        time.sleep(1)
+
 # Arm trigger function (for blocking and non-blocking)
 def arm(self, blocking):
     if blocking:
@@ -36,3 +44,19 @@ def disarm(self):
     while self.vehicle.armed:
         time.sleep(1)
     self.state = 'disarmed'
+
+
+def check_armed(self):
+    # Check if the vehicle is armed using a hearthbeat message
+    msg = self.vehicle.recv_match(type='HEARTBEAT', blocking=False)
+    if msg:
+        if msg.base_mode:
+            self.state = 'armed'
+            print('armed')
+        else:
+            self.state = 'connected'
+            print('disarmed')
+    else:
+        self.state = 'connected'
+        print('disarmed')
+
