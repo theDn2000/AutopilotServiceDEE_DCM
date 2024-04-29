@@ -15,7 +15,7 @@ class Dron(object):
             flying
             returning
         '''
-
+        self.sending_telemetry_info = False
         self.going = False  # se usa en dron_nav
         self.reaching_waypoint = False
         self.direction = "init"

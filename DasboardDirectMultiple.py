@@ -314,8 +314,8 @@ class App(ctk.CTk):
         self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_RTL.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
         
-        self.control_button_disconnect = ctk.CTkButton(self.main_frame_control_buttons, text="Disconnect", fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_disconnect.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
+        self.control_button_goto = ctk.CTkButton(self.main_frame_control_buttons, text="Goto", fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_goto.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
         self.control_button_arm_all = ctk.CTkButton(self.main_frame_control_buttons, text="Arm All", command=self.arm_all, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_arm_all.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
@@ -325,12 +325,11 @@ class App(ctk.CTk):
 
 
 
-        # Create the info_textbox_drones (textbox that displays the info of the drones)
+        # Create the disconnect button (Red)
 
-        self.info_textbox_drones = ctk.CTkTextbox(self.main_frame, height=60)
+        self.info_textbox_drones = ctk.CTkButton(self.main_frame, height=60 , text="Disconnect", command=self.disconnect, fg_color="red", hover_color="darkred")
         self.info_textbox_drones.grid(row=4, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
-        self.info_textbox_drones.configure(state="disabled", fg_color="#1f1f1f")
-        self.info_textbox_drones.insert("1.0", "Drone info will be displayed here.")
+
         
         
 
@@ -496,6 +495,17 @@ class App(ctk.CTk):
             self.info_textbox.configure(state="disabled")
             # The message should be in red
             self.info_textbox.configure(text_color="red")
+
+    # Disconnect
+    def disconnect(self):
+        # Disconnect every drone
+        for dron in self.drones:
+            dron.disconnect()
+
+        # Restart the application
+        python = sys.executable
+        os.execl(python, python, * sys.argv)
+
 
     def telemetry(self, telemetry_info, drone_id):
         # Callback function to update the telemetry info in the main page view

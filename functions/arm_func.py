@@ -15,8 +15,8 @@ def arm_MAVLINK(self):
     # Create a cyclic thread to check if the vehicle is armed, if not, change the state to disarmed´
     time.sleep(3)
     while True:
-        self.check_armed()
-        if self.state == 'connected':
+        if not self.check_armed():
+            self.state = 'connected'
             break
         time.sleep(1)
 
@@ -27,6 +27,14 @@ def arm(self, blocking):
     else:
         t = threading.Thread(target=arm_MAVLINK, args=(self,))
         t.start()
+
+def check_armed(self):
+    # Check if the vehicle is armed using a hearthbeat message
+    if self.vehicle.motors_armed():
+        return True
+    else:
+        return False
+
 
 
 # Dev:
@@ -45,9 +53,7 @@ def disarm(self):
         time.sleep(1)
     self.state = 'disarmed'
 
-
-def check_armed(self):
-    # Check if the vehicle is armed using a hearthbeat message
+    '''
     msg = self.vehicle.recv_match(type='HEARTBEAT', blocking=False)
     if msg:
         if msg.base_mode:
@@ -59,4 +65,4 @@ def check_armed(self):
     else:
         self.state = 'connected'
         print('disarmed')
-
+    '''

@@ -63,6 +63,11 @@ def connect(self, origin, op_mode, external_client, internal_client, sending_top
 
 # Disconnect function
 def disconnect(self):
-    self.vehicle.close()
-    self.sending_telemetry_info = False
-    self.state = 'disconnected'
+    # Close the connection
+    if self.state != 'disconnected':
+        # Set the state to disconnected
+        self.state = 'disconnected'
+        self.sending_telemetry_info = False
+        # Close the connection
+        self.vehicle.close()
+        
