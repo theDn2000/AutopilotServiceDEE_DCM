@@ -259,7 +259,7 @@ class App(ctk.CTk):
 
 
         # Create the main_frame_telemetry (for telemetry info)
-        self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=60)
+        self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=80)
         self.frame_telemetry.grid(row=0, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
         # Color the frame
         self.frame_telemetry.configure(fg_color="#1f1f1f")
@@ -295,39 +295,21 @@ class App(ctk.CTk):
         self.label_telemetry_bat.grid(row=1, column=1, padx=5, pady=5, sticky="w")
         self.label_telemetry_bat_value = ctk.CTkLabel(self.frame_telemetry, text="0.0", font=("TkDefaultFont", 11, "bold"))
         self.label_telemetry_bat_value.grid(row=1, column=1, padx=5, pady=5, sticky="e")
-        
 
 
-        # Create the main_frame_control_buttons (for control buttons)
-        self.main_frame_control_buttons = ctk.CTkFrame(self.main_frame)
-        self.main_frame_control_buttons.grid(row=2, column=6, padx=10, pady=10, rowspan=7, columnspan=2, sticky="nswe")
+        # Create a frame for the video stream
+
+        self.frame_stream = ctk.CTkFrame(self.main_frame, height=250)
+        self.frame_stream.grid(row=1, column=6, padx=10, pady=10, rowspan=3, columnspan=2, sticky="we")
         # Color the frame
-        self.main_frame_control_buttons.configure(fg_color="#1f1f1f")
+        self.frame_stream.configure(fg_color="#1f1f1f")
         # frame_telemetry can't be resized
-        self.main_frame_control_buttons.grid_propagate(False)
-
-        # Separate the frame_telemetry into 3 vertical sections
-        self.main_frame_control_buttons.columnconfigure(0, weight=1)
-        self.main_frame_control_buttons.columnconfigure(1, weight=1)
-        self.main_frame_control_buttons.columnconfigure(2, weight=1)
-
-        # Create the control buttons
-        
-        self.control_button_arm = ctk.CTkButton(self.main_frame_control_buttons, text="Arm", command=self.arm, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_arm.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
-
-        self.control_button_take_off = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off", command=self.take_off, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_take_off.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
-
-        self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_RTL.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
-        
-
+        self.frame_stream.grid_propagate(False)
 
         # Create the main_frame_control_pad (for control pad)
         
         self.main_frame_control_pad = ctk.CTkFrame(self.main_frame)
-        self.main_frame_control_pad.grid(row=1, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
+        self.main_frame_control_pad.grid(row=4, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
         # Color the frame
         self.main_frame_control_pad.configure(fg_color="#1f1f1f")
         # frame_telemetry can't be resized
@@ -373,7 +355,53 @@ class App(ctk.CTk):
         self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", command=lambda : self.go("SouthEast"), fg_color="#3117ea", hover_color="#190b95")
         self.control_pad_button_se.grid(row=2, column=2, padx=5, pady=5, sticky="we", ipady=10)
         
+
+
+        # Create the main_frame_control_buttons (for control buttons)
+        self.main_frame_control_buttons = ctk.CTkFrame(self.main_frame, height=120)
+        self.main_frame_control_buttons.grid(row=5, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
+        # Color the frame
+        self.main_frame_control_buttons.configure(fg_color="#1f1f1f")
+        # frame_telemetry can't be resized
+        self.main_frame_control_buttons.grid_propagate(False)
+
+        # Separate the frame_telemetry into 3 vertical sections
+        self.main_frame_control_buttons.columnconfigure(0, weight=1)
+        self.main_frame_control_buttons.columnconfigure(1, weight=1)
+        self.main_frame_control_buttons.columnconfigure(2, weight=1)
+
+        # Separate the frame_telemetry into 2 horizontal section
+        self.main_frame_control_buttons.rowconfigure(0, weight=1)
+        self.main_frame_control_buttons.rowconfigure(1, weight=1)
+        self.main_frame_control_buttons.rowconfigure(2, weight=1)
+
+        # Create the control buttons
         
+        self.control_button_arm = ctk.CTkButton(self.main_frame_control_buttons, text="Arm", command=self.arm, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_arm.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_take_off = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off", command=self.take_off, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_take_off.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_RTL.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
+        
+        self.control_button_goto = ctk.CTkButton(self.main_frame_control_buttons, text="Goto", fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_goto.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_arm_all = ctk.CTkButton(self.main_frame_control_buttons, text="Arm All", fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_arm_all.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
+
+        self.control_button_take_off_all = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off All", fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_take_off_all.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
+
+        # Create the disconnect button (Red)
+
+        self.info_textbox_drones = ctk.CTkButton(self.main_frame, height=60 , text="Disconnect", command=self.disconnect, fg_color="red", hover_color="darkred")
+        self.info_textbox_drones.grid(row=6, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
+        
+
+
     def create_table(self): # Incomplete
         columns = ("ID", "Value")
         self.table = ttk.Treeview(self.main_tabview.tab("Parameters"), columns=columns, show="headings")
@@ -477,6 +505,15 @@ class App(ctk.CTk):
             self.info_textbox.configure(state="disabled")
             # The message should be in red
             self.info_textbox.configure(text_color="red")
+
+    # Disconnect
+    def disconnect(self):
+        # Disconnect every drone
+        self.dron.disconnect()
+
+        # Restart the application
+        python = sys.executable
+        os.execl(python, python, * sys.argv)
 
     def telemetry(self, telemetry_info, drone_id):
         # Callback function to update the telemetry info in the main page view
