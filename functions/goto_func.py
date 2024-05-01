@@ -24,6 +24,7 @@ def goto_MAVLINK(self, lat, lon, alt):
                                                                        int(0b110111111000), int(lat * 10 ** 7),
                                                                        int(lon * 10 ** 7), alt, 0, 0, 0, 0, 0, 0, 0,
                                                                        0))
+    '''
     dist = self._distanceToDestinationInMeters(lat ,lon)
     distanceThreshold = 0.5
     while dist > distanceThreshold:
@@ -33,7 +34,7 @@ def goto_MAVLINK(self, lat, lon, alt):
     #self.lock.acquire()
     #self.client.publish(sending_topic + '/arrivedToPoint')
     #self.lock.release()
-
+    '''
 
 
 def distanceInMeters(aLocation1, aLocation2):
