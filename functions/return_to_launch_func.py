@@ -23,7 +23,7 @@ def returnToLaunch_MAVLINK(self):
     arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=True, timeout=3)
     print('- Autopilot Service: Returning to launch')
     self.vehicle.motors_disarmed_wait()
-    self.state = "onHearth"
+    self.state = "connected"
 
 # Return to launch trigger function (for blocking and non-blocking)
 def return_to_launch(self, blocking):

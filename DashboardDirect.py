@@ -6,6 +6,7 @@ import sys
 import time
 import threading
 import json
+from PIL import Image, ImageTk
 
 # Import the Dron class
 from Dron import Dron
@@ -32,6 +33,16 @@ class App(ctk.CTk):
         self.geofence_points = []
         self.geofence_markers = []
         self.geofence_enabled = False
+
+        # Dron marker variable
+        self.dron_marker = None
+
+        # Load images
+        current_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        self.plane_circle_1_image = ImageTk.PhotoImage(Image.open(os.path.join(current_path, "images", "drone_circle.png")).resize((35, 35)))
+
+        # Go to point
+        self.go_to_point_coords = None
 
 
         # MAIN FRAME
@@ -141,6 +152,8 @@ class App(ctk.CTk):
         self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True)
         # Add a right click menu to add geofence points
         self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True)
+        # Add a right click menu to add a GO TO point
+        self.map_widget.add_right_click_menu_command(label="Go to", command=self.go_to_point_event, pass_coords=True)
 
 
         # Insert tabview
@@ -524,6 +537,16 @@ class App(ctk.CTk):
         self.label_telemetry_gs_value.configure(text=telemetry_info['groundSpeed'])
         self.label_telemetry_bat_value.configure(text=telemetry_info['battery'])
 
+        # Check if a marker for the drone has been created previously
+        if self.dron_marker is not None:
+            # Delete the marker
+            self.dron_marker.delete()
+
+        # Create a marker for the drone
+        marker = self.map_widget.set_marker(telemetry_info['lat'], telemetry_info['lon'], text="Drone ", icon=self.plane_circle_1_image, marker_color_circle="green", marker_color_outside="black", text_color="black")
+        # Update the marker
+        self.dron_marker = marker
+
     def arm(self):
         # Change the arm button color to orange
         self.control_button_arm.configure(fg_color="orange", hover_color="darkorange")
@@ -698,7 +721,10 @@ class App(ctk.CTk):
         self.geofence_markers.append(new_marker)
 
 
-
+    def go_to_point_event(self, coords):
+        print("Go to:", coords)
+        # Go to a point
+        self.dron.goto(coords[0], coords[1], 10, False)
  
 
 

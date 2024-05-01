@@ -7,15 +7,15 @@ from pymavlink import mavutil
 from dronekit import connect, Command, VehicleMode  # noqa: F401
 
 
-def goto(self, internal_client, external_client, sending_topic, lat, lon, blocking=False):
+def goto(self, lat, lon, alt, blocking=False):
     print('- Autopilot Service: Going to the waypoint')
     if blocking:
-        goto_MAVLINK(self, lat, lon, internal_client, external_client, sending_topic)
+        goto_MAVLINK(self, lat, lon, alt)
     else:
-        w = threading.Thread(target=self.goto_MAVLINK, args=[lat, lon, internal_client, external_client, sending_topic])
+        w = threading.Thread(target=self.goto_MAVLINK, args=[lat, lon, alt])
         w.start()
 
-def goto_MAVLINK(self, lat, lon, alt, sending_topic):
+def goto_MAVLINK(self, lat, lon, alt):
     self.reaching_waypoint = True
     self.vehicle.mav.send(
         mavutil.mavlink.MAVLink_set_position_target_global_int_message(10, self.vehicle.target_system,
