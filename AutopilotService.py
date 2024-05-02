@@ -64,7 +64,7 @@ def process_message(message, client):
     if command == "armDrone":
 
         if dron.state == 'connected' or 'onHearth' or 'disarmed':
-            dron.arm(True)
+            dron.arm(False)
             print("- Autopilot Service: Vehicle armed")
         else:
             print('- Autopilot Service: The vehicle is not armable as it is not connected')
@@ -78,7 +78,7 @@ def process_message(message, client):
 
         if dron.state == 'armed' or 'onHearth':
             print("- Autopilot Service: Vehicle taking off")
-            dron.take_off(10, True)
+            dron.take_off(10, False)
             print("- Autopilot Service: Vehicle reached target altitude")
             # The script waits for the take_off to finish
 
