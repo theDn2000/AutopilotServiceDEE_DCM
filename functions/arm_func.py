@@ -4,7 +4,7 @@ from pymavlink import mavutil
 import threading
 
 
-# Arm maiun function
+# Arm main function
 def arm_MAVLINK(self):
 
     self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component,

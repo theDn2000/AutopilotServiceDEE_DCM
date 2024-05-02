@@ -45,8 +45,8 @@ def process_message(message, client):
         print("Position: ", message.payload)
 
     if command == "connect":
-
-        dron.connect(origin, op_mode, external_client, internal_client, sending_topic, True)
+        connection_string = "tcp:127.0.0.1:5763"
+        dron.connect(origin, op_mode, external_client, internal_client, connection_string, sending_topic, True)
 
         # If connect is OK, initialize the telemetry data
         if dron.state == 'connected':
@@ -57,6 +57,19 @@ def process_message(message, client):
             dron.disconnect()
         else:
             print('Vehicle is not connected')
+
+    if command == "armDrone":
+
+        if dron.state == 'connected' or 'onHearth' or 'disarmed':
+            dron.arm(True)
+            print("- Autopilot Service: Vehicle armed")
+        else:
+            print('- Autopilot Service: The vehicle is not armable as it is not connected')
+
+        # the vehicle will disarm automatically is takeOff does not come soon
+        # when attribute 'armed' changes run function armed_change
+
+        # dron.vehicle.add_attribute_listener('armed', dron.armed_change())
 
     if command == "takeOff":
 
@@ -73,18 +86,6 @@ def process_message(message, client):
         # stop the process of getting positions
         dron.return_to_launch(False)
 
-    if command == "armDrone":
-
-        if dron.state == 'connected' or 'onHearth' or 'disarmed':
-            dron.arm(True)
-            print("- Autopilot Service: Vehicle armed")
-        else:
-            print('- Autopilot Service: The vehicle is not armable as it is not connected')
-
-        # the vehicle will disarm automatically is takeOff does not come soon
-        # when attribute 'armed' changes run function armed_change
-
-        # dron.vehicle.add_attribute_listener('armed', dron.armed_change())
 
     if command == "disarmDrone":
         if dron.state == 'armed':
