@@ -8,6 +8,10 @@ import threading
 import json
 import base64
 import io
+from paho.mqtt.client import ssl
+from paho.mqtt import client as mqtt
+import cv2 as cv
+import numpy as np
 from PIL import Image, ImageTk
 
 # Import the Dron class
@@ -27,7 +31,7 @@ class App(ctk.CTk):
         super().__init__(*args, **kwargs)
         # Create the app
         self.geometry("900x600")
-        self.title("Dashboard Direct")
+        self.title("Dashboard Remote")
         self.resizable(False, False)
 
         # CLASS VARIABLES
@@ -37,6 +41,9 @@ class App(ctk.CTk):
         self.geofence_points = []
         self.geofence_markers = []
         self.geofence_enabled = False
+
+        # Dashboard State
+        self.connected = False
 
         # Dron marker variable
         self.dron_marker = None
@@ -87,7 +94,7 @@ class App(ctk.CTk):
         # Create the info_textbox (read-only)
         self.info_textbox = ctk.CTkTextbox(self.main_frame)
         self.info_textbox.grid(row=0, column=6, padx=10, pady=10, rowspan=6, columnspan=2, sticky="nswe")
-        self.info_textbox.insert("1.0", "Welcome to DashboardDirect.\nThis tool allows you to interact with the\nautopilot functions directly without using any\nbroker.\n\nPlease, click the 'Connect' button to start.")
+        self.info_textbox.insert("1.0", "Welcome to DashboardRemote.\nThis tool allows you to interact with the\nautopilot functions using a\nbroker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
         self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info added.\n\n- Version: 0.1.2: Control and pad buttons added.")
 
@@ -99,14 +106,16 @@ class App(ctk.CTk):
         self.info_textbox2.insert("1.0", "Space reserved for the logo or image.")
         self.info_textbox2.configure(state="disabled")
 
-        # Create the ID input textbox with a shadow text inside
-        self.id_input = ctk.CTkEntry(self.main_frame, border_color="#3117ea", text_color="gray", width=130, placeholder_text="type drone ID...")
-        self.id_input.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
+        # Create a option selector for the broker selection
+        self.broker_selector = ctk.CTkOptionMenu(self.main_frame, values=["Select External Broker...", "hivemq","hivemq (certificate)", "classpip (certificate)"], width=130)
+        self.broker_selector.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
         # Create a option selector for the mode (real or simulation)
         self.mode_selector = ctk.CTkOptionMenu(self.main_frame, values=["Simulation", "Real"], width=130)
         self.mode_selector.grid(row=6, column=7, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
+
+        # 
 
 
 
@@ -115,24 +124,23 @@ class App(ctk.CTk):
 
     # FUNCTIONS (FRONTEND)
     def on_button_connect_click(self):
-        # If it is not a integer, show an error message in the textbox, in red
-        if not self.id_input.get().isdigit():
+        # If the broker is not selected, show an error message
+        if  self.broker_selector.get() == "Select External Broker...":
             self.info_textbox.configure(state="normal")
             self.info_textbox.delete("1.0", "end")
-            self.info_textbox.insert("1.0", "Error: The ID must be a number.")
+            self.info_textbox.insert("1.0", "Error: Please select broker")
             self.info_textbox.configure(state="disabled")
             self.info_textbox.configure(text_color="red")
             return
         else:
-            # Create the Dron object
-            self.dron = Dron(int(self.id_input.get()))
+            # Execute configuration
+            self.configure()
 
-            # Create Camera object
-            self.camera = Camera()
+            # The drone and camera objects are created by their respective services
             
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
-            self.id_input.grid_forget()
+            self.broker_selector.grid_forget()
             self.mode_selector.grid_forget()
             self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
             self.connect_label.grid(row=7, column=6, padx=10, pady=0, sticky="nswe", columnspan=2)
@@ -481,29 +489,9 @@ class App(ctk.CTk):
     # Connect
     def connect(self):
 
-        # Depending if real time or simulation mode is selected, the connection string will be different
-        mode_selector = self.mode_selector.get()
-        mode_selector = "simulation" # This variable will change depending on the user's selection when connecting
+        self.client.publish("DashboardRemote/AutopilotService/connect")
 
-        if mode_selector == "simulation":
-            print('Simulation mode selected')
-            if self.dron.ID == 1:
-                connection_string = "tcp:127.0.0.1:5763"
-            if self.dron.ID == 2:
-                connection_string = "tcp:127.0.0.1:5773"
-            else:
-                connection_string = "tcp:127.0.0.1:5763" # Default connection string
-        
-        else:
-            print ('Real mode selected')
-            # connection_string = "/dev/ttyS0"
-            connection_string = "com7"
-            # connection_string = "udp:127.0.0.1:14550"
-
-        # Connect to the autopilot
-        self.dron.connect("DashboardDirect", "simulation", None, None, None, connection_string, True)
-
-        if self.dron.state == "connected":
+        if self.connected == True:
             # Delete every element and start the main page view
             self.connect_label.grid_forget()
             self.info_textbox.grid_forget()
@@ -512,12 +500,11 @@ class App(ctk.CTk):
             # Create the main page view
             self.set_main_page()
 
-            # Start the update control buttons thread
+            '''
+            # Start the update control buttons thread [Disabled for now, it is not working properly]
             t = threading.Thread(target=self.update_control_buttons)
             t.start()
-
-            # Start the telemetry info
-            self.dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
+            '''
 
         else:
             # Make the label invisible and show the button again
@@ -770,6 +757,92 @@ class App(ctk.CTk):
 
         # Show the image in the image label
         self.label_photo.configure(image=image_tk)
+
+
+
+    # CONNECTIONS
+
+    def configure(self):
+        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "DashboardRemote", transport="websockets")
+        self.client.on_connect = self.on_connect # Define the callback function for the connection
+        self.client.on_message = self.on_message # Define the callback function for the message
+
+        # Configure the external broker
+        if self.broker_selector.get() == "hivemq":
+            self.client.connect("broker.hivemq.com", 8000)
+            print("Connected to broker.hivemq.com:8000")
+
+        elif self.broker_selector.get() == "hivemq (certificate)":
+            self.client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+            self.client.connect("broker.hivemq.com", 8884)
+            print("Connected to broker.hivemq.com:8884")
+
+        elif self.broker_selector.get() == "classpip (certificate)":
+            self.client.username_pw_set("classpip", "classpip") # Input? not the real credentials
+            self.client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+            self.client.connect("classpip.upc.edu", 8883)
+            print("Connected to classpip.upc.edu:8883")
+
+        else:
+            print("Please, select a broker.")
+
+
+        # Start the loop
+        self.client.loop_start()
+        self.client.subscribe("+/DashboardRemote/#")
+
+
+    def on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            print("Connection OK")
+            self.connected = True
+
+        else:
+            print("Bad connection")
+
+
+
+    def on_message(self, client, userdata, message):
+        # Process the message
+        splitted = message.topic.split("/")
+        # Extract the information of the message
+        origin = splitted[0]
+        destination = splitted[1]
+        command = splitted[2]
+
+        # If origin is CameraService:
+        if origin == "CameraService":
+            # Process the message from the camera [LA FORMA DE QUE ESTE MESSAGE LLEGUE AQUÍ SE DEBE REALIZAR POR BROKER Y POR SOCKET]
+            if command == "picture":
+                # Process the frame
+                self.process_frame(message.payload)
+            
+            if command == "videoFrame":
+                # Extract the jpg as text
+                img = base64.b64decode(message.payload)
+                # Convert into numpy array from buffer
+                npimg = np.frombuffer(img, dtype=np.uint8)
+                # Decode the image to Original Frame
+                img = cv.imdecode(npimg, 1)
+                # Show the image
+                img = cv.resize(img, (280, 135))
+                cv.imshow('Stream', img)
+                cv.waitKey(1)
+
+        # If origin is AutopilotService:
+        if origin == "AutopilotService":
+            # Process the message from the autopilot
+            if command == "telemetryInfo":
+                # Extract the telemetry info
+                telemetry_info = json.loads(message.payload)
+                # Call the telemetry function
+                self.telemetry(telemetry_info, 1)
+
+
+
+
+
+
 
 
 

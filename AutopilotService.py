@@ -38,7 +38,7 @@ def process_message(message, client):
     splited = message.topic.split("/")
     origin = splited[0]
     command = splited[2]
-    sending_topic = "autopilotService/" + origin
+    sending_topic = "AutopilotService/" + origin
     print('- Autopilot Service: Received "' + command +'".')
 
     if command == "position":
@@ -46,10 +46,13 @@ def process_message(message, client):
 
     if command == "connect":
         connection_string = "tcp:127.0.0.1:5763"
-        dron.connect(origin, op_mode, external_client, internal_client, connection_string, sending_topic, True)
+        dron.connect(origin, op_mode, external_client, internal_client, sending_topic, connection_string, True)
+        print (str(dron.state))
 
         # If connect is OK, initialize the telemetry data
         if dron.state == 'connected':
+            print('- Autopilot Service: Starting to send telemetry info')
+            print ('- Autopilot Service: Vehicle connected' + origin)
             dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
 
     if command == "disconnect":
@@ -132,13 +135,12 @@ def on_connect(external_client, userdata, flags, rc):
         print("Bad connection")
 
 
-def process_output(telemetry_info):
+def process_output(telemetry_info, drone_id):
     # Callback function to send the telemetry_info packet
     external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
 
 
-def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client,
-                     external_client):
+def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client, external_client):
     global op_mode
     global state
 
@@ -152,8 +154,7 @@ def AutopilotService(connection_mode, operation_mode, external_broker, username,
             print('Connected to broker.hivemq.com:8000')
 
         elif external_broker == "hivemq_cert":
-            external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
-                                    tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+            external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
             external_client.connect("broker.hivemq.com", 8884)
             print('Connected to broker.hivemq.com:8884')
 
@@ -187,9 +188,9 @@ def AutopilotService(connection_mode, operation_mode, external_broker, username,
             print('Connected to 10.10.10.1:8000')
 
     print("Waiting....")
-    external_client.subscribe("+/autopilotService/#", 2)
+    external_client.subscribe("+/AutopilotService/#", 2)
     external_client.subscribe("cameraService/+/#", 2)
-    internal_client.subscribe("+/autopilotService/#")
+    internal_client.subscribe("+/AutopilotService/#")
     internal_client.loop_start()
     if operation_mode == 'simulation':
         external_client.loop_forever()
@@ -214,13 +215,13 @@ if __name__ == '__main__':
         external_broker = None
 
     # Broker interno:
-    internal_client = mqtt.Client("Autopilot_internal")
+    internal_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Autopilot_internal")
     internal_client.on_message = on_internal_message
     # internal_client.connect("192.168.208.2", 1884)
     internal_client.connect("localhost", 1884)
 
     # Broker externo:
-    external_client = mqtt.Client("Autopilot_external", transport="websockets")
+    external_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Autopilot_external", transport="websockets")
     external_client.on_message = on_external_message
     external_client.on_connect = on_connect
 
