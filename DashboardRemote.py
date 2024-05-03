@@ -524,7 +524,7 @@ class App(ctk.CTk):
     # Disconnect
     def disconnect(self):
         # Disconnect every drone
-        self.dron.disconnect()
+        self.client.publish("DashboardRemote/AutopilotService/disconnect")
 
         # Restart the application
         python = sys.executable
@@ -561,29 +561,19 @@ class App(ctk.CTk):
 
         self.client.publish("DashboardRemote/AutopilotService/takeOff")
 
-
     def go(self, direction):
         # Go to a direction
-        if self.dron.state == "flying":
-            self.dron.go_order(direction)
+        if self.state == "flying":
+            self.client.publish("DashboardRemote/AutopilotService/go", str(direction))
         else:
             print("The vehicle is not flying.")
 
     def rtl(self):
         # Return to launch
-        if self.dron.state == "flying":
-            self.dron.return_to_launch(False)
+        if self.state == "flying":
+            self.client.publish("DashboardRemote/AutopilotService/returnToLaunch")
 
-    def wait_take_off(self):
-        # Wait until the vehicle reaches the target altitude
-        while self.dron.state != "flying":
-            if self.dron.state == "flying":
-                break
-            else:
-                # Wait 0.5 seconds
-                time.sleep(0.5)
-        self.dron.flying_trigger()
-        print("Vehicle reached target altitude.")
+
 
     def get_all_parameters(self):
         # Get all parameters
@@ -733,16 +723,13 @@ class App(ctk.CTk):
     def take_picture(self):
         # Take a picture
         print("Taking picture...")
-        jpg_as_text = self.camera.take_picture()
-
-        # Process the frame
-        self.process_frame(jpg_as_text)
+        self.client.publish("DashboardRemote/CameraService/takePicture")
 
 
     def start_stream(self):
         # Start the video stream
         print("Starting stream...")
-        self.camera.start_video_stream(None, None, self.process_frame)
+        self.client.publish("DashboardRemote/CameraService/startVideoStream")
 
 
     def process_frame(self, jpg_as_text):

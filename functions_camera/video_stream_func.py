@@ -13,7 +13,7 @@ def send_video_stream(self, origin, client, callback): # Parecido a telemetry_in
         if ret:
             _, image_buffer = cv.imencode(".jpg", frame)
             jpg_as_text = base64.b64encode(image_buffer)
-            callback(jpg_as_text) # Se necesita pasarle ORIGEN / SENDING TOPIC??? PENDIENTE para broker
+            callback(jpg_as_text)
 
 
 def start_video_stream(self, origin, client, callback):

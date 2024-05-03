@@ -56,7 +56,7 @@ def process_message(message, client):
             dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
 
     if command == "disconnect":
-        if dron.state == 'connected':
+        if dron.state != 'disconnected':
             dron.disconnect()
         else:
             print('Vehicle is not connected')

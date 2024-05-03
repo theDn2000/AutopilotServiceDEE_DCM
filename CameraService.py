@@ -9,13 +9,11 @@ import time
 
 import json
 
-from ColorDetector import ColorDetector
-
 
 def send_video_stream(origin, client):
     global sending_video_stream
     global cap
-    topic_to_publish = f"cameraService/{origin}/videoFrame"
+    topic_to_publish = f"CameraService/{origin}/videoFrame"
 
     while sending_video_stream:
         # Read Frame
@@ -27,50 +25,13 @@ def send_video_stream(origin, client):
             time.sleep(0.2)
 
 
-def send_video_for_calibration(origin, client):
-    global sending_video_for_calibration
-    global cap
-    global colorDetector
-    topic_to_publish = f"cameraService/{origin}/videoFrame"
-
-    while sending_video_for_calibration:
-        # Read Frame
-        ret, frame = cap.read()
-        if ret:
-            frame = colorDetector.MarkFrameForCalibration(frame)
-            _, image_buffer = cv.imencode(".jpg", frame)
-            jpg_as_text = base64.b64encode(image_buffer)
-            client.publish(topic_to_publish, jpg_as_text)
-            time.sleep(0.2)
-
-
-def send_video_with_colors(origin, client):
-    global finding_colors
-    global cap
-    global colorDetector
-    topic_to_publish = f"cameraService/{origin}/videoFrameWithColor"
-
-    while finding_colors:
-        # Read Frame
-        ret, frame = cap.read()
-        if ret:
-            frame, color = colorDetector.DetectColor(frame)
-            _, image_buffer = cv.imencode(".jpg", frame)
-            frame_as_text = base64.b64encode(image_buffer)
-            base64_string = frame_as_text.decode("utf-8")
-            frame_with_colorJson = {"frame": base64_string, "color": color}
-            frame_with_color = json.dumps(frame_with_colorJson)
-            client.publish(topic_to_publish, frame_with_color)
-            time.sleep(0.2)
-
-
-def process_message(message, client):
+def process_message(message,   client):
 
     global sending_video_stream
     global sending_video_for_calibration
     global finding_colors
+    global origin
     global cap
-    global colorDetector
 
     splited = message.topic.split("/")
     origin = splited[0]
@@ -80,72 +41,20 @@ def process_message(message, client):
     if command == "takePicture":
 
         jpg_as_text = camera.take_picture()
-        client.publish("cameraService/" + origin + "/picture", jpg_as_text)
+        client.publish("CameraService/" + origin + "/picture", jpg_as_text)
 
     if command == "startVideoStream":
-        camera.start_video_stream(origin, client)
+        camera.start_video_stream(origin, client, callback_broker)
 
     if command == "stopVideoStream":
         camera.stop_video_stream()
 
-    if command == "markFrameForCalibration":
-        print("markFrameForCalibration")
-        sending_video_for_calibration = True
-        w = threading.Thread(
-            target=send_video_for_calibration,
-            args=(origin, client),
-        )
-        w.start()
-   
-    if command == "stopCalibration":
-        print("stop calibration")
-        sending_video_for_calibration = False
-    
-    if command == "getDefaultColorValues":
-        yellow, green, blueS, blueL, pink, purple = colorDetector.DameValores()
-        colorsJson = {
-            "yellow": yellow,
-            "green": green,
-            "blueS": blueS,
-            "blueL": blueL,
-            "pink": pink,
-            "purple": purple,
-        }
-        colors = json.dumps(colorsJson)
-        print("envio: ", colorsJson)
-        client.publish("cameraService/" + origin + "/colorValues", colors)
-  
-    if command == "getColorValues":
-        colorDetector.TomaValores()
-        print("ya he tomado los valroe")
-        yellow, green, blueS, blueL, pink, purple = colorDetector.DameValores()
-        colorsJson = {
-            "yellow": yellow,
-            "green": green,
-            "blueS": blueS,
-            "blueL": blueL,
-            "pink": pink,
-            "purple": purple,
-        }
-        print("voy a enviar: ", colorsJson)
-        colors = json.dumps(colorsJson)
-        print("envio: ", colorsJson)
-        client.publish("cameraService/" + origin + "/colorValues", colors)
 
-    if command == "takeValues":
-        colorDetector.TomaValores()
 
-    if command == "startFindingColor":
-        finding_colors = True
-        w = threading.Thread(
-            target=send_video_with_colors,
-            args=(origin, client),
-        )
-        w.start()
-   
-    if command == "stopFindingColor":
-        finding_colors = False
 
+def callback_broker(jpg_as_text):
+    # Publish the image to the broker (for video streaming)
+    external_client.publish("CameraService/" + origin + "/picture", jpg_as_text)
 
 def on_internal_message(client, userdata, message):
     print("recibo internal ", message.topic)
@@ -179,17 +88,11 @@ def CameraService(connection_mode, operation_mode, external_broker, username, pa
 
     cap = cv.VideoCapture(0)  # video capture source camera (Here webcam of lap>
 
-    colorDetector = ColorDetector()
-
     print("Camera ready")
 
     print("Connection mode: ", connection_mode)
     print("Operation mode: ", operation_mode)
     op_mode = operation_mode
-
-    internal_client = mqtt.Client("Autopilot_internal")
-    internal_client.on_message = on_internal_message
-    internal_client.connect("localhost", 1884)
 
     state = "disconnected"
 
@@ -197,13 +100,7 @@ def CameraService(connection_mode, operation_mode, external_broker, username, pa
     print("Operation mode: ", operation_mode)
     op_mode = operation_mode
 
-    internal_client = mqtt.Client("Camera_internal")
-    internal_client.on_message = on_internal_message
-    internal_client.connect("localhost", 1884)
 
-    external_client = mqtt.Client("Camera_external", transport="websockets")
-    external_client.on_message = on_external_message
-    external_client.on_connect = on_connect
 
     if connection_mode == "global":
         if external_broker == "hivemq":
@@ -254,15 +151,15 @@ def CameraService(connection_mode, operation_mode, external_broker, username, pa
             print("Connected to 10.10.10.1:8000")
 
     print("Waiting....")
-    external_client.subscribe("+/cameraService/#", 2)
-    internal_client.subscribe("+/cameraService/#")
+    external_client.subscribe("+/CameraService/#", 2)
+    internal_client.subscribe("+/CameraService/#")
     internal_client.loop_start()
     external_client.loop_forever()
 
 
 def process_output_video_stream(origin, data): # Callback function that publishes data to the broker
     
-    topic_to_publish = f"cameraService/{origin}/videoFrame"
+    topic_to_publish = f"CameraService/{origin}/videoFrame"
     external_client.publish(topic_to_publish, data)
     time.sleep(0.2)
 
@@ -283,7 +180,19 @@ if __name__ == "__main__":
     else:
         external_broker = None
 
+    internal_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Autopilot_internal")
+    internal_client.on_message = on_internal_message
+    internal_client.connect("localhost", 1884)
+    
+    internal_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Camera_internal")
+    internal_client.on_message = on_internal_message
+    internal_client.connect("localhost", 1884)
+
+    external_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Camera_external", transport="websockets")
+    external_client.on_message = on_external_message
+    external_client.on_connect = on_connect
+
     # Create object Camera
-    camera = Camera(None)
+    camera = Camera()
 
     CameraService(connection_mode, operation_mode, external_broker, username, password)
