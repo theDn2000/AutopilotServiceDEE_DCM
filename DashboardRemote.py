@@ -8,6 +8,8 @@ import threading
 import json
 import base64
 import io
+import asyncio
+import websockets
 from paho.mqtt.client import ssl
 from paho.mqtt import client as mqtt
 import cv2 as cv
@@ -790,8 +792,6 @@ class App(ctk.CTk):
         else:
             print("Bad connection")
 
-
-
     def on_message(self, client, userdata, message):
         # Process the message
         splitted = message.topic.split("/")
@@ -829,7 +829,7 @@ class App(ctk.CTk):
                 self.telemetry(telemetry_info, 1)
 
 
-
+    # WEB SOCKET 
 
 
 
