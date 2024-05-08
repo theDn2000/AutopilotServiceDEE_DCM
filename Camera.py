@@ -1,7 +1,8 @@
 import cv2 as cv # OpenCV 
 
 class Camera(object):
-    def __init__(self):
+    def __init__(self, ID):
+        self.ID = ID # ID of the camera
         self.cap = cv.VideoCapture(0) # video capture source camera (Here webcam of lap>
 
         # Camera state

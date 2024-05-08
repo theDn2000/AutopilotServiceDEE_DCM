@@ -38,14 +38,22 @@ def process_message(message, client):
     splited = message.topic.split("/")
     origin = splited[0]
     command = splited[2]
+    drone_id = int(splited[3])
     sending_topic = "AutopilotService/" + origin
-    print('- Autopilot Service: Received "' + command +'".')
+    print('- Autopilot Service: Received "' + command +'".') # A MODIFICAR
 
     if command == "position":
         print("Position: ", message.payload)
 
     if command == "connect":
-        connection_string = "tcp:127.0.0.1:5763"
+        # The connection ports are the following [10 possible drones]:
+        ports = [5763, 5773, 5783, 5793, 5803, 5813, 5823, 5833, 5843, 5853]
+        # Create the drone object
+        dron = Dron(drone_id)
+        # depending on the drone_id, the port will be different
+        print('Drone ID: ', drone_id)
+        connection_string = "tcp:127.0.0.1:" + str(ports[int(drone_id) - 1])
+        # Connect the drone
         dron.connect(origin, op_mode, external_client, internal_client, sending_topic, connection_string, True)
         print (str(dron.state))
 
@@ -53,7 +61,7 @@ def process_message(message, client):
         if dron.state == 'connected':
             print('- Autopilot Service: Starting to send telemetry info')
             print ('- Autopilot Service: Vehicle connected' + origin)
-            dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
+            # dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
 
     if command == "disconnect":
         if dron.state != 'disconnected':
@@ -88,7 +96,6 @@ def process_message(message, client):
     if command == "returnToLaunch":
         # stop the process of getting positions
         dron.return_to_launch(False)
-
 
     if command == "disarmDrone":
         if dron.state == 'armed':
@@ -202,6 +209,9 @@ def AutopilotService(connection_mode, operation_mode, external_broker, username,
 if __name__ == '__main__':
     import sys
 
+    # Inicialize the drone object (defined in the connect function)
+    dron = None
+
     connection_mode = sys.argv[1]  # global or local
     operation_mode = sys.argv[2]  # simulation or production
     username = None
@@ -224,10 +234,6 @@ if __name__ == '__main__':
     external_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Autopilot_external", transport="websockets")
     external_client.on_message = on_external_message
     external_client.on_connect = on_connect
-
-    # Una vez definidos el broker interno y el externo, inicializamos el objeto Dron:
-    ID = 1
-    dron = Dron(ID)
 
     AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client,
                      external_client)

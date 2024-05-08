@@ -39,7 +39,6 @@ def process_message(message,   client):
     print("recibo ", command, "de ", origin)
 
     if command == "takePicture":
-
         jpg_as_text = camera.take_picture()
         client.publish("CameraService/" + origin + "/picture", jpg_as_text)
 
@@ -193,6 +192,7 @@ if __name__ == "__main__":
     external_client.on_connect = on_connect
 
     # Create object Camera
-    camera = Camera()
+    ID = 1 # A MODIFICAR
+    camera = Camera(ID)
 
     CameraService(connection_mode, operation_mode, external_broker, username, password)

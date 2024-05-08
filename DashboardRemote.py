@@ -44,6 +44,9 @@ class App(ctk.CTk):
         self.geofence_markers = []
         self.geofence_enabled = False
 
+        # Initialize the drone id variable (1 by default)
+        self.drone_id = 1 # A MODIFICAR
+
         # Dashboard State
         self.connected = False
 
@@ -494,7 +497,7 @@ class App(ctk.CTk):
     # Connect
     def connect(self):
 
-        self.client.publish("DashboardRemote/AutopilotService/connect")
+        self.client.publish("DashboardRemote/AutopilotService/connect/" + str(self.drone_id))
 
         if self.connected == True:
             # Delete every element and start the main page view
