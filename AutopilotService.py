@@ -34,6 +34,7 @@ def process_message(message, client):
     global op_mode
     global sending_topic
     global state
+    global dron
 
     splited = message.topic.split("/")
     origin = splited[0]
@@ -50,9 +51,14 @@ def process_message(message, client):
         ports = [5763, 5773, 5783, 5793, 5803, 5813, 5823, 5833, 5843, 5853]
         # Create the drone object
         dron = Dron(drone_id)
-        # depending on the drone_id, the port will be different
+        # depending on the drone_id and operation mode, the port will be different
         print('Drone ID: ', drone_id)
-        connection_string = "tcp:127.0.0.1:" + str(ports[int(drone_id) - 1])
+        if operation_mode == 'simulation':
+            connection_string = "tcp:127.0.0.1:" + str(ports[int(drone_id) - 1])
+        elif operation_mode == 'production':
+            connection_string = "tcp:127.0.0.1:" + str(ports[int(drone_id) - 1]) # A MODIFICAR
+        else:
+            print('Operation mode not recognized')
         # Connect the drone
         dron.connect(origin, op_mode, external_client, internal_client, sending_topic, connection_string, True)
         print (str(dron.state))
@@ -61,21 +67,29 @@ def process_message(message, client):
         if dron.state == 'connected':
             print('- Autopilot Service: Starting to send telemetry info')
             print ('- Autopilot Service: Vehicle connected' + origin)
-            # dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
+            dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
 
     if command == "disconnect":
-        if dron.state != 'disconnected':
-            dron.disconnect()
-        else:
-            print('Vehicle is not connected')
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Disconnect the drone
+            if dron.state != 'disconnected':
+                dron.disconnect()
+            else:
+                print('Vehicle is not connected')
 
     if command == "armDrone":
-
-        if dron.state == 'connected' or 'onHearth' or 'disarmed':
-            dron.arm(False)
-            print("- Autopilot Service: Vehicle armed")
-        else:
-            print('- Autopilot Service: The vehicle is not armable as it is not connected')
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        print (drone_id, service_id)
+        if service_id == drone_id:
+            # Arm the drone
+            if dron.state == 'connected' or 'onHearth' or 'disarmed':
+                dron.arm(False)
+                print("- Autopilot Service: Vehicle armed")
+            else:
+                print('- Autopilot Service: The vehicle is not armable as it is not connected')
 
         # the vehicle will disarm automatically is takeOff does not come soon
         # when attribute 'armed' changes run function armed_change
@@ -83,47 +97,137 @@ def process_message(message, client):
         # dron.vehicle.add_attribute_listener('armed', dron.armed_change())
 
     if command == "takeOff":
-
-        if dron.state == 'armed' or 'onHearth':
-            print("- Autopilot Service: Vehicle taking off")
-            dron.take_off(10, False)
-            print("- Autopilot Service: Vehicle reached target altitude")
-            # The script waits for the take_off to finish
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            if dron.state == 'armed' or 'onHearth':
+                print("- Autopilot Service: Vehicle taking off")
+                dron.take_off(10, False)
+                print("- Autopilot Service: Vehicle reached target altitude")
+                # The script waits for the take_off to finish
 
         if dron.state == 'flying':
             dron.flying_trigger()
 
     if command == "returnToLaunch":
-        # stop the process of getting positions
-        dron.return_to_launch(False)
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # stop the process of getting positions # A MODIFICAR
+            dron.return_to_launch(False)
 
     if command == "disarmDrone":
-        if dron.state == 'armed':
-            dron.disarm()
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Disarm the drone
+            if dron.state == 'armed':
+                dron.disarm()
 
+    if command == "getParameter":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Get the parameter value
+            if dron.state != 'disconnected':
+                parameter_value = dron.get_parameter(message.payload.decode("utf-8"), True)
+                # Publish the parameter value to return it to the client
+                client.publish(sending_topic + '/getParameterResponse/' + str(drone_id), parameter_value)
+                print('Message sent')
+            else:
+                print('Vehicle not connected')
+
+    if command == "setParameter":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Set the parameter value
+            if dron.state != 'disconnected':
+                message_splited = message.payload.decode("utf-8").split("/")
+                parameter_id = message_splited[0]
+                parameter_value = float(message_splited[1])
+                dron.modify_parameter(parameter_id, parameter_value, True)
+                print("Parameter " + parameter_id + " set to " + str(parameter_value))
+            else:
+                print('Vehicle not connected')
+    
     if command == "goto":
-        if dron.state == 'flying':
-            dron.goto(internal_client, external_client, sending_topic, lat=1, lon=1, blocking=True) # TEST
-        else:
-            print('Vehicle not flying')
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            if dron.state == 'flying':
+                dron.goto(internal_client, external_client, sending_topic, lat=1, lon=1, blocking=True) # TEST
+            else:
+                print('Vehicle not flying')
 
     if command == "land":
-        if dron.state == 'flying':
-            # TEST MODIFY PARAMETERS
-            print(dron.get_parameter_MAVLINK('RTL_ALT'))
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            if dron.state == 'flying':
+                # Land the drone
+                print(dron.get_parameter_MAVLINK('RTL_ALT')) # A MODIFICAR
 
-            # TEST GEOFENCE
-            #dron.geofence_trigger("enable")
-
-        else:
-            print('Vehicle not flying')
+            else:
+                print('Vehicle not flying')
 
     if command == "go":
-        if dron.state == 'flying':
-            dron.go_order(message.payload.decode("utf-8"))
-        else:
-            print('Vehicle is not flying')
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Go to the specified direction
+            if dron.state == 'flying':
+                dron.go_order(message.payload.decode("utf-8"))
+            else:
+                print('Vehicle is not flying')
 
+    if command == "disableGeofence":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Disable the geofence
+            if dron.state != 'disconnected':
+                dron.disable_geofence()
+                print('- AutopilotService: Geofence disabled')
+            else:
+                print('Vehicle not connected')
+
+    if command == "enableGeofence":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Enable the geofence
+            if dron.state != 'disconnected':
+                dron.enable_geofence()
+                print('- AutopilotService: Geofence enabled')
+            else:
+                print('Vehicle not connected')
+
+    if command == "uploadGeofence":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Upload the geofence
+            if dron.state != 'disconnected':
+                # message is a json string, convert it to a dictionary
+
+                message = json.loads(message.payload.decode("utf-8"))
+
+                dron.set_fence_geofence(message)
+                print('- AutopilotService: Geofence uploaded')
+            else:
+                print('Vehicle not connected')
+
+    if command == "actionGeofence":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Action the geofence
+            if dron.state != 'disconnected':
+                dron.action_geofence(int(message.payload.decode("utf-8")))
+                print('- AutopilotService: Geofence action changed to ' + message.payload.decode("utf-8"))
+            else:
+                print('Vehicle not connected')
 
 def on_internal_message(client, userdata, message):
     global internal_client
@@ -144,7 +248,7 @@ def on_connect(external_client, userdata, flags, rc):
 
 def process_output(telemetry_info, drone_id):
     # Callback function to send the telemetry_info packet
-    external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
+    external_client.publish(sending_topic + '/telemetryInfo/' + str(drone_id), json.dumps(telemetry_info))
 
 
 def AutopilotService(connection_mode, operation_mode, external_broker, username, password, internal_client, external_client):
@@ -212,15 +316,19 @@ if __name__ == '__main__':
     # Inicialize the drone object (defined in the connect function)
     dron = None
 
-    connection_mode = sys.argv[1]  # global or local
-    operation_mode = sys.argv[2]  # simulation or production
+    # Initialization variables
+    service_id = int(sys.argv[1]) # ID of the drone in which the service is running
+    connection_mode = sys.argv[2]  # global or local
+    operation_mode = sys.argv[3]  # simulation or production
+    
+
     username = None
     password = None
     if connection_mode == 'global':
-        external_broker = sys.argv[3]
+        external_broker = sys.argv[4]
         if external_broker == 'classpip_cred' or external_broker == 'classpip_cert':
-            username = sys.argv[4]
-            password = sys.argv[5]
+            username = sys.argv[5]
+            password = sys.argv[6]
     else:
         external_broker = None
 

@@ -223,7 +223,7 @@ class App(ctk.CTk):
         # Create a frame for set a parameter, with grey background
         
         self.set_parameter_frame2 = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
-        self.set_parameter_frame2.grid(row=1, column=0, padx=10, pady=5, sticky="we", columnspan=2)
+        self.set_parameter_frame2.grid(row=0, column=1, padx=10, pady=5, sticky="we", columnspan=2)
         self.set_parameter_frame2.configure(fg_color="#1f1f1f")
         # Separate the frame into 2 vertical sections
         self.set_parameter_frame2.columnconfigure(0, weight=1)
@@ -529,7 +529,7 @@ class App(ctk.CTk):
     # Disconnect
     def disconnect(self):
         # Disconnect every drone
-        self.client.publish("DashboardRemote/AutopilotService/disconnect")
+        self.client.publish("DashboardRemote/AutopilotService/disconnect/" + str(self.drone_id))
 
         # Restart the application
         python = sys.executable
@@ -558,25 +558,25 @@ class App(ctk.CTk):
         # Change the arm button color to orange
         self.control_button_arm.configure(fg_color="orange", hover_color="darkorange")
         # Arm the drone
-        self.client.publish("DashboardRemote/AutopilotService/armDrone")
+        self.client.publish("DashboardRemote/AutopilotService/armDrone/" + str(self.drone_id))
 
     def take_off(self):
         # Change the take off button color to orange
         self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
 
-        self.client.publish("DashboardRemote/AutopilotService/takeOff")
+        self.client.publish("DashboardRemote/AutopilotService/takeOff/" + str(self.drone_id))
 
     def go(self, direction):
         # Go to a direction
         if self.state == "flying":
-            self.client.publish("DashboardRemote/AutopilotService/go", str(direction))
+            self.client.publish("DashboardRemote/AutopilotService/go/" + str(self.drone_id), str(direction))
         else:
             print("The vehicle is not flying.")
 
     def rtl(self):
         # Return to launch
         if self.state == "flying":
-            self.client.publish("DashboardRemote/AutopilotService/returnToLaunch")
+            self.client.publish("DashboardRemote/AutopilotService/returnToLaunch/" + str(self.drone_id))
 
 
 
@@ -590,19 +590,23 @@ class App(ctk.CTk):
         # Get a parameter and show it in the label
         parameter_id = self.parameter_id_input.get()
         if parameter_id != "":
-            parameter_value = self.dron.get_parameter(parameter_id, True)
-            self.parameter_value_label.configure(text="Value: " + str(parameter_value))
+            # Publish the message to get the parameter
+            self.client.publish("DashboardRemote/AutopilotService/getParameter/" + str(self.drone_id), str(parameter_id))
+            # Display that the parameter is being retrieved
+            self.parameter_value_label.configure(text="Value: Loading...")
         else:
             self.parameter_value_label.configure(text="Value: ")
 
     def set_parameter(self):
         # Set a parameter
-        parameter_id = self.parameter_id_input_set.get()
-        parameter_value = float(self.parameter_value_input.get())
+        parameter_id = str(self.parameter_id_input_set.get())
+        parameter_value = str(self.parameter_value_input.get())
+        message = parameter_id + "/" + parameter_value
+
         if parameter_id != "" and parameter_value != "":
             # Try to set the parameter, if it is not possible, show an error message
             try:
-                self.dron.modify_parameter(parameter_id, parameter_value, True)
+                self.client.publish("DashboardRemote/AutopilotService/setParameter/" + str(self.drone_id), str(message))
                 print("Parameter set.")
             except:
                 print("Error setting the parameter.")
@@ -640,7 +644,8 @@ class App(ctk.CTk):
         if self.geofence_enabled:
             # Disable the geofence
             print("Disabling geofence...")
-            self.dron.disable_geofence() # Disable the geofence
+            # Publish the message to disable the geofence
+            self.client.publish("DashboardRemote/AutopilotService/disableGeofence/" + str(self.drone_id))
             self.geofence_enabled = False
 
             # Make the button blue and change the text to "Enable Geofence"
@@ -648,8 +653,8 @@ class App(ctk.CTk):
         else:
             # Enable the geofence
             print("Enabling geofence...")
-
-            self.dron.enable_geofence() # Enable the geofence
+            # Publish the message to enable the geofence
+            self.client.publish("DashboardRemote/AutopilotService/enableGeofence/" + str(self.drone_id))
             self.geofence_enabled = True
 
             # Make the button red and change the text to "Disable Geofence"
@@ -668,10 +673,12 @@ class App(ctk.CTk):
             fencelist = [(point["lat"], point["lon"]) for point in self.geofence_points]
 
             print(fencelist)
+            # Convert the list fencelist to a JSON string
+            fencelist = json.dumps(fencelist)
 
-            # Call the function to upload the geofence
+            # Publish the message to upload the geofence
+            self.client.publish("DashboardRemote/AutopilotService/uploadGeofence/" + str(self.drone_id), fencelist)
             print("Uploading geofence...")
-            self.dron.set_fence_geofence(fencelist)
         
     def set_geofence_action(self, action):
         # Set the geofence action
@@ -684,7 +691,9 @@ class App(ctk.CTk):
             action_id = 3
         else:
             action_id = 1
-        self.dron.action_geofence(action_id)
+        
+        # Publish the message to upload the geofence
+        self.client.publish("DashboardRemote/AutopilotService/actionGeofence/" + str(self.drone_id), str(action_id))
     
     def clear_geofence(self):
         # Clear the geofence
@@ -826,10 +835,19 @@ class App(ctk.CTk):
         if origin == "AutopilotService":
             # Process the message from the autopilot
             if command == "telemetryInfo":
-                # Extract the telemetry info
-                telemetry_info = json.loads(message.payload)
-                # Call the telemetry function
-                self.telemetry(telemetry_info, 1)
+                # Check the drone id
+                drone_id = splitted[3]
+                if drone_id == str(self.drone_id):
+                    # Extract the telemetry info
+                    telemetry_info = json.loads(message.payload)
+                    # Call the telemetry function
+                    self.telemetry(telemetry_info, self.drone_id)
+            
+            if command == "getParameterResponse":
+                # Extract the parameter value
+                parameter_value = message.payload.decode("utf-8")
+                # Show the parameter value in the label
+                self.parameter_value_label.configure(text="Value: " + str(parameter_value))
 
 
     # WEB SOCKET 
