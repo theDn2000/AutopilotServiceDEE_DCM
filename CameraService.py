@@ -36,24 +36,35 @@ def process_message(message,   client):
     splited = message.topic.split("/")
     origin = splited[0]
     command = splited[2]
+    camera_id = splited[3]
     print("recibo ", command, "de ", origin)
 
     if command == "takePicture":
-        jpg_as_text = camera.take_picture()
-        client.publish("CameraService/" + origin + "/picture", jpg_as_text)
+        # Check if the camera is the requested one
+        if service_id == camera_id:
+            # Take a picture
+            jpg_as_text = camera.take_picture()
+            # Publish the image to the broker
+            client.publish("CameraService/" + origin + "/picture/" + str(camera_id), jpg_as_text)
 
     if command == "startVideoStream":
-        camera.start_video_stream(origin, client, callback_broker)
+        # Check if the camera is the requested one
+        if service_id == camera_id:
+            # Start the video stream
+            camera.start_video_stream(origin, client, callback_broker)
 
     if command == "stopVideoStream":
-        camera.stop_video_stream()
+        # Check if the camera is the requested one
+        if service_id == camera_id:
+            # Stop the video stream
+            camera.stop_video_stream()
 
 
 
 
 def callback_broker(jpg_as_text):
     # Publish the image to the broker (for video streaming)
-    external_client.publish("CameraService/" + origin + "/picture", jpg_as_text)
+    external_client.publish("CameraService/" + origin + "/picture/" + str(service_id), jpg_as_text)
 
 def on_internal_message(client, userdata, message):
     print("recibo internal ", message.topic)
@@ -167,15 +178,16 @@ import cv2 as cv
 if __name__ == "__main__":
     import sys
 
-    connection_mode = sys.argv[1]  # global or local
-    operation_mode = sys.argv[2]  # simulation or production
+    service_id = sys.argv[1]
+    connection_mode = sys.argv[2]  # global or local
+    operation_mode = sys.argv[3]  # simulation or production
     username = None
     password = None
     if connection_mode == "global":
-        external_broker = sys.argv[3]
+        external_broker = sys.argv[4]
         if external_broker == "classpip_cred" or external_broker == "classpip_cert":
-            username = sys.argv[4]
-            password = sys.argv[5]
+            username = sys.argv[5]
+            password = sys.argv[6]
     else:
         external_broker = None
 

@@ -44,8 +44,9 @@ class App(ctk.CTk):
         self.geofence_markers = []
         self.geofence_enabled = False
 
-        # Initialize the drone id variable (1 by default)
-        self.drone_id = 1 # A MODIFICAR
+        # Initialize the drone and camera id variables (1 by default)
+        self.drone_id = 1 # A MODIFICAR (debe escogerlo el usuario)
+        self.camera_id = 1 # A MODIFICAR (debe escogerlo el usuario)
 
         # Dashboard State
         self.connected = False
@@ -737,13 +738,13 @@ class App(ctk.CTk):
     def take_picture(self):
         # Take a picture
         print("Taking picture...")
-        self.client.publish("DashboardRemote/CameraService/takePicture")
+        self.client.publish("DashboardRemote/CameraService/takePicture/" + str(self.camera_id))
 
 
     def start_stream(self):
         # Start the video stream
         print("Starting stream...")
-        self.client.publish("DashboardRemote/CameraService/startVideoStream")
+        self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
 
 
     def process_frame(self, jpg_as_text):
@@ -814,40 +815,43 @@ class App(ctk.CTk):
 
         # If origin is CameraService:
         if origin == "CameraService":
-            # Process the message from the camera [LA FORMA DE QUE ESTE MESSAGE LLEGUE AQUÍ SE DEBE REALIZAR POR BROKER Y POR SOCKET]
-            if command == "picture":
-                # Process the frame
-                self.process_frame(message.payload)
-            
-            if command == "videoFrame":
-                # Extract the jpg as text
-                img = base64.b64decode(message.payload)
-                # Convert into numpy array from buffer
-                npimg = np.frombuffer(img, dtype=np.uint8)
-                # Decode the image to Original Frame
-                img = cv.imdecode(npimg, 1)
-                # Show the image
-                img = cv.resize(img, (280, 135))
-                cv.imshow('Stream', img)
-                cv.waitKey(1)
+            # Check the camera id
+            camera_id = splitted[3]
+            if camera_id == str(self.camera_id):
+                # Process the message from the camera [LA FORMA DE QUE ESTE MESSAGE LLEGUE AQUÍ SE DEBE REALIZAR POR BROKER Y POR SOCKET]
+                if command == "picture":
+                    # Process the frame
+                    self.process_frame(message.payload)
+                
+                if command == "videoFrame":
+                    # Extract the jpg as text
+                    img = base64.b64decode(message.payload)
+                    # Convert into numpy array from buffer
+                    npimg = np.frombuffer(img, dtype=np.uint8)
+                    # Decode the image to Original Frame
+                    img = cv.imdecode(npimg, 1)
+                    # Show the image
+                    img = cv.resize(img, (280, 135))
+                    cv.imshow('Stream', img)
+                    cv.waitKey(1)
 
         # If origin is AutopilotService:
         if origin == "AutopilotService":
-            # Process the message from the autopilot
-            if command == "telemetryInfo":
-                # Check the drone id
-                drone_id = splitted[3]
-                if drone_id == str(self.drone_id):
+            # Check the drone id
+            drone_id = splitted[3]
+            if drone_id == str(self.drone_id):
+                # Process the message from the autopilot
+                if command == "telemetryInfo":
                     # Extract the telemetry info
                     telemetry_info = json.loads(message.payload)
                     # Call the telemetry function
                     self.telemetry(telemetry_info, self.drone_id)
-            
-            if command == "getParameterResponse":
-                # Extract the parameter value
-                parameter_value = message.payload.decode("utf-8")
-                # Show the parameter value in the label
-                self.parameter_value_label.configure(text="Value: " + str(parameter_value))
+                
+                if command == "getParameterResponse":
+                    # Extract the parameter value
+                    parameter_value = message.payload.decode("utf-8")
+                    # Show the parameter value in the label
+                    self.parameter_value_label.configure(text="Value: " + str(parameter_value))
 
 
     # WEB SOCKET 
