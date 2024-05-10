@@ -6,6 +6,7 @@ import paho.mqtt.client as mqtt
 import base64
 import threading
 import time
+import websocket
 
 import json
 
@@ -65,6 +66,9 @@ def process_message(message,   client):
 def callback_broker(jpg_as_text):
     # Publish the image to the broker (for video streaming)
     external_client.publish("CameraService/" + origin + "/picture/" + str(service_id), jpg_as_text)
+
+def callback_websocket(jpg_as_text):
+    ws.send(jpg_as_text)
 
 def on_internal_message(client, userdata, message):
     print("recibo internal ", message.topic)
@@ -178,11 +182,13 @@ import cv2 as cv
 if __name__ == "__main__":
     import sys
 
+    # Inicialize variables
     service_id = sys.argv[1]
     connection_mode = sys.argv[2]  # global or local
     operation_mode = sys.argv[3]  # simulation or production
     username = None
     password = None
+
     if connection_mode == "global":
         external_broker = sys.argv[4]
         if external_broker == "classpip_cred" or external_broker == "classpip_cert":
@@ -206,5 +212,9 @@ if __name__ == "__main__":
     # Create object Camera
     ID = 1 # A MODIFICAR
     camera = Camera(ID)
+
+    # Inicialize web socket
+    uri = "ws://localhost:8765" # A MODIFICAR (puerto???)
+    ws = websocket.create_connection(uri)
 
     CameraService(connection_mode, operation_mode, external_broker, username, password)
