@@ -742,9 +742,24 @@ class App(ctk.CTk):
 
 
     def start_stream(self):
-        # Start the video stream
+        '''
+        # Start the video stream [via broker]
         print("Starting stream...")
         self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
+        '''
+        # Start the video stream [via socket]
+        print("Starting stream...")
+        asyncio.get_event_loop().run_until_complete(self.listen())
+    
+    async def listen(self):
+        url = "ws://localhost:8765"
+
+        async with websockets.connect(url) as websocket:
+            await websocket.send("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
+            while True:
+                message = await websocket.recv()
+                print(message)
+                self.process_frame(message)
 
 
     def process_frame(self, jpg_as_text):

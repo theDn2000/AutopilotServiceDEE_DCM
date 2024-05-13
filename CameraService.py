@@ -6,24 +6,10 @@ import paho.mqtt.client as mqtt
 import base64
 import threading
 import time
-import websocket
+import websockets
+import asyncio
 
 import json
-
-
-def send_video_stream(origin, client):
-    global sending_video_stream
-    global cap
-    topic_to_publish = f"CameraService/{origin}/videoFrame"
-
-    while sending_video_stream:
-        # Read Frame
-        ret, frame = cap.read()
-        if ret:
-            _, image_buffer = cv.imencode(".jpg", frame)
-            jpg_as_text = base64.b64encode(image_buffer)
-            client.publish(topic_to_publish, jpg_as_text)
-            time.sleep(0.2)
 
 
 def process_message(message,   client):
@@ -52,7 +38,7 @@ def process_message(message,   client):
         # Check if the camera is the requested one
         if service_id == camera_id:
             # Start the video stream
-            camera.start_video_stream(origin, client, callback_broker)
+            camera.start_video_stream(callback_broker)
 
     if command == "stopVideoStream":
         # Check if the camera is the requested one
@@ -66,9 +52,6 @@ def process_message(message,   client):
 def callback_broker(jpg_as_text):
     # Publish the image to the broker (for video streaming)
     external_client.publish("CameraService/" + origin + "/picture/" + str(service_id), jpg_as_text)
-
-def callback_websocket(jpg_as_text):
-    ws.send(jpg_as_text)
 
 def on_internal_message(client, userdata, message):
     print("recibo internal ", message.topic)
@@ -177,6 +160,50 @@ def process_output_video_stream(origin, data): # Callback function that publishe
     external_client.publish(topic_to_publish, data)
     time.sleep(0.2)
 
+
+# WEB SOCKETS
+async def send_video_stream(websocket, path):
+    # Callback function that sends the video stream to the client
+    async def callback_websocket(jpg_as_text):
+        # Send the frame to the client through the websocket
+        await websocket.send(jpg_as_text)
+    
+    # Function that recieves the client message and processes it to start or stop sending video stream
+    print("Starting video stream via Websocket")
+    async for message in websocket:
+        # Split the message
+        splited = message.split("/")
+        origin = splited[0]
+        command = splited[2]
+        camera_id = splited[3]
+
+        # Check if the ID of the camera is the same as the requested one
+        if service_id == camera_id:
+            if command == "startVideoStream":
+                # Start the video stream
+                camera.start_video_stream(callback_websocket)
+            elif command == "stopVideoStream":
+                # Stop the video stream
+                camera.stop_video_stream()
+
+
+async def start_websocket_server():
+    global ws
+    # Start the websocket server
+    port = 8765
+    print("- CameraService: Websocket server listening on port:", port)
+    ws = websockets.serve(send_video_stream, "localhost", port)
+    await ws
+
+
+def start_websocket_server_in_thread():
+    # Function to call when starting the thread
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    asyncio.get_event_loop().run_until_complete(start_websocket_server())
+    asyncio.get_event_loop().run_forever()
+
+
+
 import cv2 as cv
 
 if __name__ == "__main__":
@@ -213,8 +240,8 @@ if __name__ == "__main__":
     ID = 1 # A MODIFICAR
     camera = Camera(ID)
 
-    # Inicialize web socket
-    uri = "ws://localhost:8765" # A MODIFICAR (puerto???)
-    ws = websocket.create_connection(uri)
+    # Thread to inicialize web socket
+    wst = threading.Thread(target=start_websocket_server_in_thread)
+    wst.start()
 
     CameraService(connection_mode, operation_mode, external_broker, username, password)
