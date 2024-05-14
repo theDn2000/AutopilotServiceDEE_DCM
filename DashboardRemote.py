@@ -61,6 +61,8 @@ class App(ctk.CTk):
         # Go to point
         self.go_to_point_coords = None
 
+        # WebSocket client parameters
+        self.ws_connected = False
 
         # MAIN FRAME
         # Create the main frame
@@ -748,17 +750,40 @@ class App(ctk.CTk):
         self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
         '''
         # Start the video stream [via socket]
-        print("Starting stream...")
-        asyncio.get_event_loop().run_until_complete(self.listen())
+        if self.ws_connected == False:
+            print("Starting stream...")
+
+            # Function to start the loop
+            def start_loop(loop):
+                asyncio.set_event_loop(loop)
+                loop.run_forever()
+
+            # Create the loop
+            loop = asyncio.get_event_loop()
+            loop.create_task(self.listen())
+
+            # Start the loop in a new thread
+            t = threading.Thread(target=start_loop, args=(loop,))
+            t.start()
+
+            self.ws_connected = True
+
+        else:
+            print("Stream already started.")
+
     
     async def listen(self):
+        print("Sending message...")
         url = "ws://localhost:8765"
 
         async with websockets.connect(url) as websocket:
             await websocket.send("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
+            # Receive the message
+            print("Receiving message...")
             while True:
+                print("Waiting for message...")
                 message = await websocket.recv()
-                print(message)
+                print("Received message: " + str(message))
                 self.process_frame(message)
 
 

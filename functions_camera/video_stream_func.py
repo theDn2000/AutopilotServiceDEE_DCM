@@ -5,7 +5,7 @@ import time
 
 
 
-async def send_video_stream(self, callback): # Parecido a telemetry_info (hay que pasarle una función de callback)
+def send_video_stream(self, callback): # Parecido a telemetry_info (hay que pasarle una función de callback)
 
     while self.sending_video_stream:
         # Read Frame
@@ -13,7 +13,8 @@ async def send_video_stream(self, callback): # Parecido a telemetry_info (hay qu
         if ret:
             _, image_buffer = cv.imencode(".jpg", frame)
             jpg_as_text = base64.b64encode(image_buffer)
-            await callback(jpg_as_text)
+            callback(jpg_as_text)
+            #print ("envio frame") # A MODIFICAR
 
 
 def start_video_stream(self, callback):

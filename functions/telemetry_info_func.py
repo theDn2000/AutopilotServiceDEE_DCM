@@ -43,7 +43,7 @@ def send_telemetry_info_MAVLINK(self, sending_topic, callback):
         0, # Target address of message stream (if message has target address fields). 0: Flight-stack default (recommended), 1: address of requestor, 2: broadcast.
     )
 
-    while self.state != 'desconectado' and self.sending_telemetry_info:
+    while self.state != 'disconnected' and self.sending_telemetry_info:
     #msg = self.vehicle.recv_match(type='AHRS2', blocking= True).to_dict()
         msg = self.vehicle.recv_match(type='GLOBAL_POSITION_INT', blocking= False)
         # Get battery information

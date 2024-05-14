@@ -163,10 +163,17 @@ def process_output_video_stream(origin, data): # Callback function that publishe
 
 # WEB SOCKETS
 async def send_video_stream(websocket, path):
+    queue = asyncio.Queue()
     # Callback function that sends the video stream to the client
-    async def callback_websocket(jpg_as_text):
+    
+    async def send_jpg_as_text(jpg_as_text):
         # Send the frame to the client through the websocket
+        print ("envio frame: "+ str(len(jpg_as_text)) + " bytes")
         await websocket.send(jpg_as_text)
+    
+    def callback_websocket(jpg_as_text):
+        queue.put_nowait(jpg_as_text)
+        # asyncio.run_coroutine_threadsafe(send_jpg_as_text(jpg_as_text), loop)
     
     # Function that recieves the client message and processes it to start or stop sending video stream
     print("Starting video stream via Websocket")
@@ -181,19 +188,29 @@ async def send_video_stream(websocket, path):
         if service_id == camera_id:
             if command == "startVideoStream":
                 # Start the video stream
+                #jpg_as_text = camera.take_picture()
                 camera.start_video_stream(callback_websocket)
+                # Once the video stream is started, send the frames to the client
+                while sending_video_stream == True:
+                    jpg_as_text = await queue.get()
+                    if jpg_as_text is None:
+                        print("No more frames")
+                        break
+                    await websocket.send(jpg_as_text)
+                    #await websocket.send(jpg_as_text)
+                #await websocket.send(jpg_as_text)
+                
             elif command == "stopVideoStream":
                 # Stop the video stream
                 camera.stop_video_stream()
 
 
 async def start_websocket_server():
-    global ws
     # Start the websocket server
     port = 8765
     print("- CameraService: Websocket server listening on port:", port)
-    ws = websockets.serve(send_video_stream, "localhost", port)
-    await ws
+    websocket = websockets.serve(send_video_stream, "localhost", port)
+    await websocket
 
 
 def start_websocket_server_in_thread():
@@ -239,6 +256,9 @@ if __name__ == "__main__":
     # Create object Camera
     ID = 1 # A MODIFICAR
     camera = Camera(ID)
+
+    # WebSockets parameters
+    loop = asyncio.new_event_loop()
 
     # Thread to inicialize web socket
     wst = threading.Thread(target=start_websocket_server_in_thread)
