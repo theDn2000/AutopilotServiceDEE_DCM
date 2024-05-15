@@ -924,9 +924,7 @@ class App(ctk.CTk):
         async for message in self.websocket:
             # Receive the message
             if self.streaming == True:
-                print("Waiting for message...")
                 message = await self.websocket.recv()
-                print ("Received: ", message)
                 self.process_frame(message)
 
     async def send_message(self, message):

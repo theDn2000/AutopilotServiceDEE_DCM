@@ -189,11 +189,17 @@ async def send_video_stream(websocket, path):
                     jpg_as_text = frames_queue.get()
                     if jpg_as_text is None:
                         print("No frame to send")
-                        time.sleep(0.03333333333333333)  # 30 frames per second
+                        #await asyncio.sleep(0.03333333333333333)  # 30 frames per second
+                        await asyncio.sleep(0.01666666666666667)  # 60 frames per second
                     else:
-                        await websocket.send(jpg_as_text)
-                        print("envio frame")
-                        time.sleep(0.03333333333333333)  # 30 frames per second
+                        try:
+                            await websocket.send(jpg_as_text)
+                            print(len(frames_queue.queue))
+                            #await asyncio.sleep(0.03333333333333333)  # 30 frames per second
+                            await asyncio.sleep(0.01666666666666667)  # 60 frames per second
+                        except Exception as e:
+                            print("Error sending frame: ", e)
+
 
                 
             elif command == "stopVideoStream":
