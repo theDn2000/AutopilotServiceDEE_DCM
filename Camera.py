@@ -9,7 +9,7 @@ class Camera(object):
         self.state = "disconnected"
 
         
-        sending_video_stream = False
+        self.sending_video_stream = False
 
 
     # aqui se importan los métodos de la clase "Camera", que están organizados en ficheros.

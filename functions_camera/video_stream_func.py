@@ -14,6 +14,7 @@ def send_video_stream(self, callback): # Parecido a telemetry_info (hay que pasa
             _, image_buffer = cv.imencode(".jpg", frame)
             jpg_as_text = base64.b64encode(image_buffer)
             callback(jpg_as_text)
+            time.sleep(0.03333333333333333)  # 30 frames per second
             #print ("envio frame") # A MODIFICAR
 
 

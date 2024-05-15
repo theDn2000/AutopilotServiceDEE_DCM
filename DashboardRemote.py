@@ -61,8 +61,15 @@ class App(ctk.CTk):
         # Go to point
         self.go_to_point_coords = None
 
+        # Video stream parameters
+        self.streaming = False
+        self.video_connection_type = "websocket" # "websocket" or "broker"
+
         # WebSocket client parameters
+        self.websocket = None
+        self.url = "ws://localhost:8765"
         self.ws_connected = False
+        self.loop = None
 
         # MAIN FRAME
         # Create the main frame
@@ -156,6 +163,11 @@ class App(ctk.CTk):
 
             # Connect to the autopilot 1000ms later
             self.after(1000, self.connect)
+
+            # Start the websocket
+            self.start_websocket()
+
+
 
     def set_main_page(self):
         # Create the main page view
@@ -744,47 +756,43 @@ class App(ctk.CTk):
 
 
     def start_stream(self):
-        '''
-        # Start the video stream [via broker]
-        print("Starting stream...")
-        self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
-        '''
-        # Start the video stream [via socket]
-        if self.ws_connected == False:
-            print("Starting stream...")
+        # Start the video stream depending on the connection type (broker or socket)
+        if self.video_connection_type == "broker":
 
-            # Function to start the loop
-            def start_loop(loop):
-                asyncio.set_event_loop(loop)
-                loop.run_forever()
+            if self.streaming == False:
 
-            # Create the loop
-            loop = asyncio.get_event_loop()
-            loop.create_task(self.listen())
+                # Start the video stream [via broker]
+                self.control_button_take_off_all.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
+                print("Starting stream...")
+                self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
+                self.streaming = True
 
-            # Start the loop in a new thread
-            t = threading.Thread(target=start_loop, args=(loop,))
-            t.start()
+            else:
+                # Stop the video stream [via broker]
+                self.control_button_take_off_all.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                print("Stopping stream...")
+                self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
+                self.streaming = False
 
-            self.ws_connected = True
+        elif self.video_connection_type == "websocket":
 
-        else:
-            print("Stream already started.")
+            # Start the video stream [via socket]
+            if self.streaming == False:
+                self.trigger_send_message(self.websocket, "DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
+                self.control_button_take_off_all.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
+                print("Starting stream...")
 
-    
-    async def listen(self):
-        print("Sending message...")
-        url = "ws://localhost:8765"
+                self.streaming = True
 
-        async with websockets.connect(url) as websocket:
-            await websocket.send("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
-            # Receive the message
-            print("Receiving message...")
-            while True:
-                print("Waiting for message...")
-                message = await websocket.recv()
-                print("Received message: " + str(message))
-                self.process_frame(message)
+            else:
+                # Stop the video stream [via websocket]
+                self.control_button_take_off_all.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                # Stop the loop
+                self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
+
+                self.streaming = False
+
+
 
 
     def process_frame(self, jpg_as_text):
@@ -896,13 +904,37 @@ class App(ctk.CTk):
 
     # WEB SOCKET 
 
+    def start_websocket(self):
+        # Function to start the loop
+        def start_loop(loop):
+            asyncio.set_event_loop(loop)
+            loop.run_forever()
 
+        # Create the loop
+        self.loop = asyncio.new_event_loop()
+        self.loop.create_task(self.listen(self.url))
 
+        # Start the loop in a new thread
+        t = threading.Thread(target=start_loop, args=(self.loop,))
+        t.start()
 
+    async def listen(self, url):
+        # Listen to the websocket of the server
+        self.websocket = await websockets.connect(url)
+        async for message in self.websocket:
+            # Receive the message
+            if self.streaming == True:
+                print("Waiting for message...")
+                message = await self.websocket.recv()
+                print ("Received: ", message)
+                self.process_frame(message)
 
+    async def send_message(self, message):
+        print("Sending: ", message)
+        await self.websocket.send(message)
 
-
-
+    def trigger_send_message(self, websocket, message):
+        asyncio.run_coroutine_threadsafe(self.send_message(message), self.loop)
 
 # Run the app
 app = App()
