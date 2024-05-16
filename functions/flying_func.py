@@ -18,7 +18,7 @@ def flying_v0(self):
                 self.vehicle.mav.send(cmd)
                 time.sleep(1)
         # a new go command has been received. Check direction
-        # print('salgo del bucle por ', self.direction)
+        print('Voy ', self.direction)
         if self.direction == "North":
             cmd = self.prepare_command(speed, 0, 0)  # NORTH
         if self.direction == "South":

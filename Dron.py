@@ -7,6 +7,7 @@ import pymavlink.dialects.v20.all as dialect
 class Dron(object):
     def __init__(self, ID):
         self.ID = ID # ID del dron
+        self.vehicle = None # objeto MAVLink (se inicia en el método connect)
         self.lock = threading.Lock()  # para evitar que se solapen las publicaciones de los dos hilos
         self.state = "disconnected"
         ''' os otros estados son:

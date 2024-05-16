@@ -128,7 +128,7 @@ class App(ctk.CTk):
             self.dron = Dron(int(self.id_input.get()))
 
             # Create Camera object
-            self.camera = Camera()
+            self.camera = Camera(int(self.id_input.get()))
             
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
@@ -440,6 +440,10 @@ class App(ctk.CTk):
     def update_control_buttons(self):
         while True:
             if self.dron.state == "connected":
+                # Change the colors of the buttons to blue and enable the arm button
+                self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+                self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95")
+                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95")
                 # The other buttons are disabled
                 self.control_button_take_off.configure(state="disabled")
                 self.control_button_RTL.configure(state="disabled")
@@ -752,7 +756,7 @@ class App(ctk.CTk):
     def start_stream(self):
         # Start the video stream
         print("Starting stream...")
-        self.camera.start_video_stream(None, None, self.process_frame)
+        self.camera.start_video_stream(self.process_frame)
 
 
     def process_frame(self, jpg_as_text):
