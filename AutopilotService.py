@@ -69,6 +69,11 @@ def process_message(message, client):
             print ('- Autopilot Service: Vehicle connected' + origin)
             dron.send_telemetry_info_trigger(external_client, internal_client, sending_topic, process_output)
 
+            # Check if the vehicle is armed
+            dron.check_armed()
+            # Check if the vehicle is flying
+            dron.check_flying_trigger()
+
     if command == "disconnect":
         # Check if the drone is the requested one
         drone_id = int(splited[3])

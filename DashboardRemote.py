@@ -515,6 +515,7 @@ class App(ctk.CTk):
         self.client.publish("DashboardRemote/AutopilotService/connect/" + str(self.drone_id))
 
         if self.connected == True:
+            time.sleep(1.5) # Wait for the connection to be established
             # Delete every element and start the main page view
             self.connect_label.grid_forget()
             self.info_textbox.grid_forget()

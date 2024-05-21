@@ -73,3 +73,31 @@ def go_order(self, direction):
     self.direction = direction
     print("- Autopilot Service: Going ", self.direction)
     self.going = True
+
+
+def check_flying_trigger(self):
+    w = threading.Thread(target=self.check_flying)
+    w.start()
+
+def check_flying(self):
+    # Check if the vehicle is flying
+    time.sleep(0.1) # Wait for telemetry info
+    print ('Altitud: ', self.alt)
+    if self.alt > 0.5:
+        current_alt = self.alt
+        while True:
+            # Then, check if the vehicle is not taking off
+            if self.alt > current_alt + 0.0125*current_alt:
+                print('Altitud actual: ', self.alt, 'Altitud anterior: ', current_alt, 'Diferencia: ', self.alt - current_alt)
+                # The vehicle is taking off
+                if self.state == 'armed' or self.state == 'connected':
+                    self.state = 'takingOff'
+            else:
+                # The vehicle is flying
+                if self.state == 'armed' or self.state == 'connected':
+                    self.state = 'flying'
+                    self.flying_trigger()
+                break
+        return True
+    else:
+        return False

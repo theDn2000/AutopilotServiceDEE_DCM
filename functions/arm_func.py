@@ -31,6 +31,9 @@ def arm(self, blocking):
 def check_armed(self):
     # Check if the vehicle is armed using a hearthbeat message
     if self.vehicle.motors_armed():
+        # Update the state to armed if the vehicle is connected
+        if self.state == 'connected':
+            self.state = 'armed'
         return True
     else:
         return False
