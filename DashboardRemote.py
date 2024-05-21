@@ -63,7 +63,7 @@ class App(ctk.CTk):
 
         # Video stream parameters
         self.streaming = False
-        self.video_connection_type = "websocket" # "websocket" or "broker"
+        self.video_connection_type = "broker" # "websocket" or "broker"
 
         # WebSocket client parameters
         self.websocket = None
