@@ -186,6 +186,28 @@ def process_message(message, client):
             else:
                 print('Vehicle is not flying')
 
+    if command == "uploadFlightPlan":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Upload the flight plan
+            if dron.state == 'connected':
+                # message is a json string, convert it to a dictionary
+                message = str(message.payload.decode("utf-8"))
+                dron.uploadFlightPlan((message))
+            else:
+                print('Vehicle should be connected and disarmed to upload a flight plan')
+
+    if command == "executeFlightPlan":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Execute the flight plan
+            if dron.state == 'connected' or 'onMission':
+                dron.executeFlightPlan_trigger(False)
+            else:
+                print('Vehicle should be connected and disarmed to execute a flight plan')
+
     if command == "disableGeofence":
         # Check if the drone is the requested one
         drone_id = int(splited[3])

@@ -277,6 +277,12 @@ class App(ctk.CTk):
         # Add a button to execute the flight plan
         self.execute_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Execute Flight Plan", command=self.execute_flight_plan, fg_color="#3117ea", hover_color="#190b95")
         self.execute_flight_plan_button.grid(row=0, column=1, padx=10, pady=10, sticky="we", ipady=10)
+        # This button is disabled by default
+        self.execute_flight_plan_button.configure(state="disabled")
+
+        # Add a button to clear the flight plan
+        self.clear_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Clear", command=self.clear_flight_plan, fg_color="#3117ea", hover_color="#190b95")
+        self.clear_flight_plan_button.grid(row=0, column=2, padx=10, pady=10, sticky="we", ipady=10)
 
 
 
@@ -503,6 +509,11 @@ class App(ctk.CTk):
                 self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+            if self.state == "onMission":
+                # The arm button, flying button and RTL buttons are disabled
+                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_RTL.configure(fg_color="green", hover_color="darkgreen", state="disabled")
             time.sleep(0.5)
 
 
@@ -630,28 +641,48 @@ class App(ctk.CTk):
     # FLIGHT PLAN:
 
     def upload_flight_plan(self):
-        # Upload the flight plan
-        print("Uploading flight plan...")
-        # Create a JSON string with the mission waypoints, with the following format:
-        '''
-        {
-        "coordinates": [
-            {"lat": 47.6205, "lon": -122.3493, "alt": 100},  // Coordinate 1
-            {"lat": 47.6153, "lon": -122.3448, "alt": 150},  // Coordinate 2
-            {"lat": 47.6102, "lon": -122.3425, "alt": 200}   // Coordinate 3
-        ]
-        }
-        '''
-        waypoints = {"coordinates": self.mission_waypoints}
-        waypoints_json = json.dumps(waypoints)
-        print(waypoints_json)
-        
-        self.dron.uploadFlightPlan(waypoints_json)
+        if self.state == "connected" and len(self.mission_waypoints) > 0:
+            # This button enables the execute flight plan button
+            self.execute_flight_plan_button.configure(state="normal")
+
+            # Upload the flight plan
+            print("Uploading flight plan...")
+            # Create a JSON string with the mission waypoints, with the following format:
+            '''
+            {
+            "coordinates": [
+                {"lat": 47.6205, "lon": -122.3493, "alt": 100},  // Coordinate 1
+                {"lat": 47.6153, "lon": -122.3448, "alt": 150},  // Coordinate 2
+                {"lat": 47.6102, "lon": -122.3425, "alt": 200}   // Coordinate 3
+            ]
+            }
+            '''
+            waypoints = {"coordinates": self.mission_waypoints}
+            waypoints_json = json.dumps(waypoints)
+            print(waypoints_json)
+            
+            self.client.publish("DashboardRemote/AutopilotService/uploadFlightPlan/" + str(self.drone_id), waypoints_json)
 
     def execute_flight_plan(self):
         # Execute the flight plan
         print("Executing flight plan...")
-        self.dron.executeFlightPlan()
+        self.client.publish("DashboardRemote/AutopilotService/executeFlightPlan/" + str(self.drone_id))
+
+    def clear_flight_plan(self):
+        # This button disables the execute flight plan button
+        self.execute_flight_plan_button.configure(state="disabled")
+
+        # Clear the flight plan
+        print("Clearing flight plan...")
+        # Delete every element from the mission waypoints list
+        self.mission_waypoints = []
+        # Delete every element from the mission markers list
+        for marker in self.mission_markers:
+            marker.delete()
+        # Delete every element from the mission markers list
+        self.mission_markers = []
+
+
 
     # GEOFENCE:
 
@@ -702,9 +733,9 @@ class App(ctk.CTk):
         if action == "RTL":
             action_id = 1
         elif action == "Report":
-            action_id = 2
+            action_id = 0
         elif action == "Brake":
-            action_id = 3
+            action_id = 4
         else:
             action_id = 1
         
@@ -732,7 +763,10 @@ class App(ctk.CTk):
         entry = {"lat": coords[0], "lon": coords[1], "alt": 6}
         self.mission_waypoints.append(entry)
         new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.mission_waypoints)), marker_color_circle="red", marker_color_outside="black", text_color="red")
-    
+        # Add the new marker to the list
+        self.mission_markers.append(new_marker)
+
+
     def add_geofence_point_event(self, coords):
         print("Add Geofence Point:", coords)
         # Add the point to the geofence points list

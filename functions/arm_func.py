@@ -12,13 +12,12 @@ def arm_MAVLINK(self):
     self.vehicle.motors_armed_wait()
     self.state = "armed"
 
-    # Create a cyclic thread to check if the vehicle is armed, if not, change the state to disarmed´
     time.sleep(3)
-    while True:
-        if not self.check_armed():
-            self.state = 'connected'
-            break
-        time.sleep(1)
+    # Create a cyclic thread to check if the vehicle is armed, if not, change the state to disarmed
+    t = threading.Thread(target=self.check_armed_on_loop)
+    t.start()
+
+
 
 # Arm trigger function (for blocking and non-blocking)
 def arm(self, blocking):
@@ -38,8 +37,32 @@ def check_armed(self):
     else:
         return False
 
+def check_armed_on_loop(self):
+    
+    while True:
+        if not self.check_armed():
+            self.state = 'connected'
+
+            # Set the vehicle to stabilize mode
+            mode = 'STABILIZE'
+            # Check if mode is available
+            if mode not in self.vehicle.mode_mapping():
+                print('Unknown mode : {}'.format(mode))
+                print('Try:', list(self.vehicle.mode_mapping().keys()))
+
+            # Get mode ID
+            mode_id = self.vehicle.mode_mapping()[mode]
+            self.vehicle.mav.set_mode_send(
+                self.vehicle.target_system,
+                mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
+                mode_id)
+            arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=False, timeout=3)
+            print('- Autopilot Service: Mode changed to STABILIZE')
+            break
+        time.sleep(1)
 
 
+        
 # Dev:
 def armed_change(self):
     print('cambio a ', )
