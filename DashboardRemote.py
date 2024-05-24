@@ -189,7 +189,7 @@ class App(ctk.CTk):
         # Add a right click menu to add geofence points
         self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True)
         # Add a right click menu to add a GO TO point
-        self.map_widget.add_right_click_menu_command(label="Go to", command=self.go_to_point_event, pass_coords=True)
+        self.map_widget.add_right_click_menu_command(label="Go to", command=self.land, pass_coords=True)
 
 
         # Insert tabview
@@ -445,8 +445,8 @@ class App(ctk.CTk):
         self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_RTL.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
         
-        self.control_button_goto = ctk.CTkButton(self.main_frame_control_buttons, text="Goto", fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_goto.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
+        self.control_button_land = ctk.CTkButton(self.main_frame_control_buttons, text="Land", command=self.land, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_land.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
         self.control_button_picture = ctk.CTkButton(self.main_frame_control_buttons, text="Take Picture", command=self.take_picture, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_picture.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
@@ -480,27 +480,32 @@ class App(ctk.CTk):
                 # The other buttons are disabled
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.state == "armed":
                 # Change the color of the arm button to green
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 # The take off button is enabled and the RTL button is disabled
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.state == "takingOff":
                 # Change the color of the take off button to orange
                 self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange", state="disabled")
                 # The arm button is disabled and the RTL button is disabled
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.state == "flying":
                 # Change the color of the take off button to green
                 self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                # The arm button is disabled and the RTL button is enabled
+                # The arm button is disabled and the RTL and Land buttons are enabled
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-            if self.state == "returningHome":
-                # Change the color of the RTL button to orange
-                self.control_button_RTL.configure(fg_color="orange", hover_color="darkorange")
+                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+            if self.state == "returningHome" or self.state == "landing":
+                # Change the color of the RTL and land buttons to orange, and disable them
+                self.control_button_RTL.configure(fg_color="orange", hover_color="darkorange", state="disabled")
+                self.control_button_land.configure(fg_color="orange", hover_color="darkorange", state="disabled")
                 # The arm button is disabled and the take off button is disabled
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
@@ -509,11 +514,13 @@ class App(ctk.CTk):
                 self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.state == "onMission":
                 # The arm button, flying button and RTL buttons are disabled
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_RTL.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_land.configure(fg_color="green", hover_color="darkgreen", state="disabled")
             time.sleep(0.5)
 
 
@@ -605,7 +612,11 @@ class App(ctk.CTk):
         if self.state == "flying":
             self.client.publish("DashboardRemote/AutopilotService/returnToLaunch/" + str(self.drone_id))
 
-
+    def land(self):
+        # Land the drone
+        if self.state == "flying":
+            print("Landing...")
+            self.client.publish("DashboardRemote/AutopilotService/land/" + str(self.drone_id))
 
     def get_all_parameters(self):
         # Get all parameters

@@ -171,7 +171,7 @@ def process_message(message, client):
         if service_id == drone_id:
             if dron.state == 'flying':
                 # Land the drone
-                print(dron.get_parameter_MAVLINK('RTL_ALT')) # A MODIFICAR
+                dron.land_trigger(False)
 
             else:
                 print('Vehicle not flying')
@@ -203,7 +203,7 @@ def process_message(message, client):
         drone_id = int(splited[3])
         if service_id == drone_id:
             # Execute the flight plan
-            if dron.state == 'connected' or 'onMission':
+            if dron.state == 'connected':
                 dron.executeFlightPlan_trigger(False)
             else:
                 print('Vehicle should be connected and disarmed to execute a flight plan')
