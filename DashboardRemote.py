@@ -107,7 +107,7 @@ class App(ctk.CTk):
 
         # TEXTBOXES
         # Create the info_textbox (read-only)
-        self.info_textbox = ctk.CTkTextbox(self.main_frame)
+        self.info_textbox = ctk.CTkTextbox(self.main_frame, width=350)
         self.info_textbox.grid(row=0, column=6, padx=10, pady=10, rowspan=6, columnspan=2, sticky="nswe")
         self.info_textbox.insert("1.0", "Welcome to DashboardRemote.\nThis tool allows you to interact with the\nautopilot functions using a\nbroker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
@@ -116,7 +116,7 @@ class App(ctk.CTk):
         self.info_textbox.configure(state="disabled")
 
         # Create the info_textbox2 (read-only)
-        self.info_textbox2 = ctk.CTkTextbox(self.main_frame)
+        self.info_textbox2 = ctk.CTkTextbox(self.main_frame, width=350)
         self.info_textbox2.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=6, sticky="nswe")
         self.info_textbox2.insert("1.0", "Space reserved for the logo or image.")
         self.info_textbox2.configure(state="disabled")
@@ -128,12 +128,6 @@ class App(ctk.CTk):
         # Create a option selector for the mode (real or simulation)
         self.mode_selector = ctk.CTkOptionMenu(self.main_frame, values=["Simulation", "Real"], width=130)
         self.mode_selector.grid(row=6, column=7, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
-
-
-        # 
-
-
-
 
 
 
@@ -188,14 +182,12 @@ class App(ctk.CTk):
         self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True)
         # Add a right click menu to add geofence points
         self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True)
-        # Add a separator
-        self.map_widget.add_right_click_menu_separator()
         # Add a right click menu to add a GO TO point
         self.map_widget.add_right_click_menu_command(label="Fly Here", command=self.go_to_point_event, pass_coords=True)
 
 
         # Insert tabview
-        self.main_tabview = ctk.CTkTabview(self.main_frame)
+        self.main_tabview = ctk.CTkTabview(self.main_frame, width=580)
         self.main_tabview.grid(row=5, column=0, padx=10, pady=10, rowspan=3, columnspan=6, sticky="nswe")
         # Create the tabs
         self.main_tabview.add("Parameters")
@@ -203,15 +195,10 @@ class App(ctk.CTk):
         self.main_tabview.add("Geofence")
 
         # Parameters tab
-        # Add a table to see the parameters using treeview
-        ####
-        # Add a TEST button to get all the parameters
-        #self.get_parameters_button = ctk.CTkButton(self.main_tabview.tab("Parameters"), text="Get parameters", command=self.get_all_parameters, fg_color="#3117ea", hover_color="#190b95")
-        #self.get_parameters_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
-        
-        # Create a frame for the table
-        #self.table_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
-        #self.table_frame.grid(row=1, column=0, padx=10, pady=10, sticky="we")
+
+        # Separate the tab into 2 vertical sections
+        self.main_tabview.tab("Parameters").columnconfigure(0, weight=1)
+        self.main_tabview.tab("Parameters").columnconfigure(1, weight=1)
 
         # Create a frame for get a parameter, with grey background
         self.get_parameter_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), height=80, width=265)
@@ -266,25 +253,24 @@ class App(ctk.CTk):
         self.main_tabview.tab("Mission").rowconfigure(0, weight=1)
         self.main_tabview.tab("Mission").rowconfigure(1, weight=1)
 
-        # Separate the tab into 4 vertical sections
+        # Separate the tab into 3 vertical sections
         self.main_tabview.tab("Mission").columnconfigure(0, weight=1)
         self.main_tabview.tab("Mission").columnconfigure(1, weight=1)
         self.main_tabview.tab("Mission").columnconfigure(2, weight=1)
-        self.main_tabview.tab("Mission").columnconfigure(3, weight=1)
         
         # Add a button to upload the flight plan
         self.upload_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Upload Flight Plan", command=self.upload_flight_plan, fg_color="#3117ea", hover_color="#190b95")
-        self.upload_flight_plan_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
+        self.upload_flight_plan_button.grid(row=0, column=0, padx=10, pady=10, sticky="we")
 
         # Add a button to execute the flight plan
         self.execute_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Execute Flight Plan", command=self.execute_flight_plan, fg_color="#3117ea", hover_color="#190b95")
-        self.execute_flight_plan_button.grid(row=0, column=1, padx=10, pady=10, sticky="we", ipady=10)
+        self.execute_flight_plan_button.grid(row=0, column=1, padx=10, pady=10, sticky="we")
         # This button is disabled by default
         self.execute_flight_plan_button.configure(state="disabled")
 
         # Add a button to clear the flight plan
         self.clear_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Clear", command=self.clear_flight_plan, fg_color="#3117ea", hover_color="#190b95")
-        self.clear_flight_plan_button.grid(row=0, column=2, padx=10, pady=10, sticky="we", ipady=10)
+        self.clear_flight_plan_button.grid(row=0, column=2, padx=10, pady=10, sticky="we")
 
 
 
