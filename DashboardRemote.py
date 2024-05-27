@@ -45,8 +45,8 @@ class App(ctk.CTk):
         self.geofence_enabled = False
 
         # Initialize the drone and camera id variables (1 by default)
-        self.drone_id = 1 # A MODIFICAR (debe escogerlo el usuario)
-        self.camera_id = 1 # A MODIFICAR (debe escogerlo el usuario)
+        self.drone_id = 1
+        self.camera_id = 1
 
         # Dashboard State
         self.connected = False
@@ -63,7 +63,7 @@ class App(ctk.CTk):
 
         # Video stream parameters
         self.streaming = False
-        self.video_connection_type = "broker" # "websocket" or "broker"
+        self.video_connection_type = "broker" # Broker is the default option
 
         # WebSocket client parameters
         self.websocket = None
@@ -125,9 +125,9 @@ class App(ctk.CTk):
         self.broker_selector = ctk.CTkOptionMenu(self.main_frame, values=["Select External Broker...", "hivemq","hivemq (certificate)", "classpip (certificate)"], width=130)
         self.broker_selector.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
-        # Create a option selector for the mode (real or simulation)
-        self.mode_selector = ctk.CTkOptionMenu(self.main_frame, values=["Simulation", "Real"], width=130)
-        self.mode_selector.grid(row=6, column=7, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
+        # Create a option selector for the id of the drone
+        self.drone_id_selector = ctk.CTkOptionMenu(self.main_frame, values=["Drone ID...", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], width=130)
+        self.drone_id_selector.grid(row=6, column=7, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
 
 
@@ -141,6 +141,13 @@ class App(ctk.CTk):
             self.info_textbox.configure(state="disabled")
             self.info_textbox.configure(text_color="red")
             return
+        if self.drone_id_selector.get() == "Drone ID...":
+            self.info_textbox.configure(state="normal")
+            self.info_textbox.delete("1.0", "end")
+            self.info_textbox.insert("1.0", "Error: Please select drone ID")
+            self.info_textbox.configure(state="disabled")
+            self.info_textbox.configure(text_color="red")
+            return
         else:
             # Execute configuration
             self.configure()
@@ -150,7 +157,7 @@ class App(ctk.CTk):
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
             self.broker_selector.grid_forget()
-            self.mode_selector.grid_forget()
+            self.drone_id_selector.grid_forget()
             self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
             self.connect_label.grid(row=7, column=6, padx=10, pady=0, sticky="nswe", columnspan=2)
 
@@ -170,7 +177,7 @@ class App(ctk.CTk):
 
         # Add a map to the main frame
         self.map_widget = tkmap.TkinterMapView(self.main_frame)
-        self.map_widget.grid(row=0, column=0, padx=10, pady=10, rowspan=5, columnspan=6, sticky="nswe")
+        self.map_widget.grid(row=0, column=0, padx=10, pady=10, rowspan=6, columnspan=6, sticky="nswe")
         # Change the map style to satellite
         x = -35.3633515
         y = 149.1652412
@@ -188,7 +195,7 @@ class App(ctk.CTk):
 
         # Insert tabview
         self.main_tabview = ctk.CTkTabview(self.main_frame, width=580)
-        self.main_tabview.grid(row=5, column=0, padx=10, pady=10, rowspan=3, columnspan=6, sticky="nswe")
+        self.main_tabview.grid(row=6, column=0, padx=10, pady=10, rowspan=2, columnspan=6, sticky="nswe")
         # Create the tabs
         self.main_tabview.add("Parameters")
         self.main_tabview.add("Mission")
@@ -317,7 +324,7 @@ class App(ctk.CTk):
         self.frame_telemetry.rowconfigure(0, weight=1)
         self.frame_telemetry.rowconfigure(1, weight=1)
 
-        # Create the labels for the telemetry info, 6 parameters (lat, lon, alt, heading, groundSpeed, battery) inide every frame
+        # Create the labels for the telemetry info, 4 parameters (alt, heading, groundSpeed, battery)
 
         self.label_telemetry_alt = ctk.CTkLabel(self.frame_telemetry, text="Altitude: ",font=("TkDefaultFont", 11))
         self.label_telemetry_alt.grid(row=0, column=0, padx=5, pady=5, sticky="w")
@@ -355,8 +362,8 @@ class App(ctk.CTk):
 
         # Create the main_frame_control_pad (for control pad)
         
-        self.main_frame_control_pad = ctk.CTkFrame(self.main_frame)
-        self.main_frame_control_pad.grid(row=4, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
+        self.main_frame_control_pad = ctk.CTkFrame(self.main_frame, height=150)
+        self.main_frame_control_pad.grid(row=5, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
         # Color the frame
         self.main_frame_control_pad.configure(fg_color="#1f1f1f")
         # frame_telemetry can't be resized
@@ -406,7 +413,7 @@ class App(ctk.CTk):
 
         # Create the main_frame_control_buttons (for control buttons)
         self.main_frame_control_buttons = ctk.CTkFrame(self.main_frame, height=120)
-        self.main_frame_control_buttons.grid(row=5, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
+        self.main_frame_control_buttons.grid(row=6, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
         # Color the frame
         self.main_frame_control_buttons.configure(fg_color="#1f1f1f")
         # frame_telemetry can't be resized
@@ -436,25 +443,39 @@ class App(ctk.CTk):
         self.control_button_land = ctk.CTkButton(self.main_frame_control_buttons, text="Land", command=self.land, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_land.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_button_picture = ctk.CTkButton(self.main_frame_control_buttons, text="Take Picture", command=self.take_picture, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_picture = ctk.CTkButton(self.main_frame_control_buttons, text="Picture", command=self.take_picture, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_picture.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_button_take_off_all = ctk.CTkButton(self.main_frame_control_buttons, text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_take_off_all = ctk.CTkButton(self.main_frame_control_buttons, text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_take_off_all.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
+        
+        # Create a frame for the camera functions (take picture, start stream, broker/websocket)
+        self.frame_camera_buttons = ctk.CTkFrame(self.main_frame, height=75, width=265)
+        self.frame_camera_buttons.grid(row=4, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
+        # Color the frame
+        self.frame_camera_buttons.configure(fg_color="#1f1f1f")
+        # frame_telemetry can't be resized
+        self.frame_camera_buttons.grid_propagate(False)
+        
+        # Separate the frame_camera_buttons into 3 vertical sections
+        self.frame_camera_buttons.columnconfigure(0, weight=1)
+        self.frame_camera_buttons.columnconfigure(1, weight=1)
+        self.frame_camera_buttons.columnconfigure(2, weight=1)
+        
+        self.button_picture = ctk.CTkButton(self.frame_camera_buttons, text="Picture", command=self.take_picture, fg_color="#3117ea", hover_color="#190b95")
+        self.button_picture.grid(row=0, column=0, padx=5, pady=5, sticky="nswe")
+
+        self.button_stream = ctk.CTkButton(self.frame_camera_buttons, text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+        self.button_stream.grid(row=0, column=1, padx=5, pady=5, sticky="nswe")
+
+        self.button_broker = ctk.CTkButton(self.frame_camera_buttons, text="Broker", command=self.broker_websocket, fg_color="#3117ea", hover_color="#190b95")
+        self.button_broker.grid(row=0, column=2, padx=5, pady=5, sticky="nswe")
+        
         # Create the disconnect button (Red)
 
-        self.info_textbox_drones = ctk.CTkButton(self.main_frame, height=60 , text="Disconnect", command=self.disconnect, fg_color="red", hover_color="darkred")
-        self.info_textbox_drones.grid(row=6, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
-        
-
-
-    def create_table(self): # Incomplete
-        columns = ("ID", "Value")
-        self.table = ttk.Treeview(self.main_tabview.tab("Parameters"), columns=columns, show="headings")
-        self.table.heading("ID", text="ID")
-        self.table.heading("Value", text="Value")
-        self.table.grid(row=1, column=0, padx=10, pady=10, sticky="we", columnspan=2)
+        self.info_textbox_drones = ctk.CTkButton(self.main_frame, height=30 , text="Disconnect", command=self.disconnect, fg_color="red", hover_color="darkred")
+        self.info_textbox_drones.grid(row=7, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
 
 
 
@@ -798,14 +819,14 @@ class App(ctk.CTk):
             if self.streaming == False:
 
                 # Start the video stream [via broker]
-                self.control_button_take_off_all.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
+                self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
                 print("Starting stream...")
                 self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
                 self.streaming = True
 
             else:
                 # Stop the video stream [via broker]
-                self.control_button_take_off_all.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                self.button_stream.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
                 print("Stopping stream...")
                 self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
                 self.streaming = False
@@ -815,20 +836,28 @@ class App(ctk.CTk):
             # Start the video stream [via socket]
             if self.streaming == False:
                 self.trigger_send_message(self.websocket, "DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
-                self.control_button_take_off_all.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
+                self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
                 print("Starting stream...")
 
                 self.streaming = True
 
             else:
                 # Stop the video stream [via websocket]
-                self.control_button_take_off_all.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                self.button_stream.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
                 # Stop the loop
                 self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
 
                 self.streaming = False
 
 
+    def broker_websocket(self):
+        # Change the connection type
+        if self.video_connection_type == "broker":
+            self.video_connection_type = "websocket"
+            self.button_broker.configure(text="Broker", fg_color="red", hover_color="darkred")
+        else:
+            self.video_connection_type = "broker"
+            self.button_broker.configure(text="Websocket", fg_color="red", hover_color="darkred")
 
 
     def process_frame(self, jpg_as_text):
@@ -852,6 +881,11 @@ class App(ctk.CTk):
     # CONNECTIONS
 
     def configure(self):
+        # Configure the drone and camera ids
+        self.drone_id = int(self.drone_id_selector.get())
+        self.camera_id = int(self.drone_id_selector.get())
+
+        # Configure the connection to the broker
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "DashboardRemote", transport="websockets")
         self.client.on_connect = self.on_connect # Define the callback function for the connection
         self.client.on_message = self.on_message # Define the callback function for the message
