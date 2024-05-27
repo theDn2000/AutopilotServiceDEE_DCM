@@ -188,8 +188,10 @@ class App(ctk.CTk):
         self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True)
         # Add a right click menu to add geofence points
         self.map_widget.add_right_click_menu_command(label="Add Geofence Point", command=self.add_geofence_point_event, pass_coords=True)
+        # Add a separator
+        self.map_widget.add_right_click_menu_separator()
         # Add a right click menu to add a GO TO point
-        self.map_widget.add_right_click_menu_command(label="Go to", command=self.land, pass_coords=True)
+        self.map_widget.add_right_click_menu_command(label="Fly Here", command=self.go_to_point_event, pass_coords=True)
 
 
         # Insert tabview
@@ -790,9 +792,11 @@ class App(ctk.CTk):
 
     def go_to_point_event(self, coords):
         print("Go to:", coords)
+        # Create the message to send to the autopilot
+        message = str(coords[0]) + "/" + str(coords[1])
         # Go to a point
-        self.dron.goto(coords[0], coords[1], 10, False)
- 
+        self.client.publish("DashboardRemote/AutopilotService/goto/" + str(self.drone_id), str(message))
+         
  # CAMERA:
 
     def take_picture(self):

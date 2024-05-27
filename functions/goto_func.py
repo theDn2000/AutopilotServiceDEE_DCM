@@ -2,7 +2,6 @@ import json
 import math
 import threading
 import time
-import dronekit  # noqa: F401
 from pymavlink import mavutil
 from dronekit import connect, Command, VehicleMode  # noqa: F401
 
@@ -24,20 +23,23 @@ def goto_MAVLINK(self, lat, lon, alt):
                                                                        int(0b110111111000), int(lat * 10 ** 7),
                                                                        int(lon * 10 ** 7), alt, 0, 0, 0, 0, 0, 0, 0,
                                                                        0))
-    '''
-    dist = self._distanceToDestinationInMeters(lat ,lon)
+    
+    # Wait until the drone is close to the waypoint
+    
+    dist = self.distanceInMeters(self.lat, self.lon, lat ,lon)
     distanceThreshold = 0.5
     while dist > distanceThreshold:
         time.sleep(0.25)
-        dist = self._distanceToDestinationInMeters(lat, lon)
+        dist = self.distanceInMeters(self.lat, self.lon, lat ,lon)
     print('- Autopilot Service: Arrived to the waypoint')
+    self.reaching_waypoint = False
     #self.lock.acquire()
     #self.client.publish(sending_topic + '/arrivedToPoint')
     #self.lock.release()
-    '''
+    
 
 
-def distanceInMeters(aLocation1, aLocation2):
+def distanceInMeters(self, lat1, lon1, lat2, lon2):
     """
     Returns the ground distance in metres between two LocationGlobal objects.
 
@@ -45,6 +47,6 @@ def distanceInMeters(aLocation1, aLocation2):
     earth's poles. It comes from the ArduPilot test code:
     https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
     """
-    dlat = aLocation2.lat - aLocation1.lat
-    dlong = aLocation2.lon - aLocation1.lon
+    dlat = lat2 - lat1
+    dlong = lon2 - lon1
     return math.sqrt((dlat * dlat) + (dlong * dlong)) * 1.113195e5

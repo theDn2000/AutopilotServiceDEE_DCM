@@ -16,6 +16,8 @@ class Dron(object):
             flying
             returning
         '''
+        self.lat = 0
+        self.lon = 0
         self.alt = 0
 
         self.sending_telemetry_info = False
@@ -37,7 +39,7 @@ class Dron(object):
     from functions.land_func import land, land_trigger
     from functions.return_to_launch_func import return_to_launch, returnToLaunch_MAVLINK
     from functions.flying_func import flying_trigger, flying_v0, prepare_command, go_order, check_flying_trigger, check_flying
-    from functions.goto_func import goto, distanceInMeters, goto_MAVLINK
+    from functions.goto_func import goto, distanceInMeters, goto_MAVLINK, distanceInMeters
     from functions.geofence import clear_GEOFence, clear_Mission, geofence_trigger, enable_geofence, disable_geofence, set_fence_geofence, action_geofence
     from functions.modify_parameters import modify_parameter, get_parameter, get_all_parameters, get_position
     from functions.mission import uploadFlightPlan, executeFlightPlan, uploadFlightPlan_trigger, executeFlightPlan_trigger

@@ -161,7 +161,10 @@ def process_message(message, client):
         drone_id = int(splited[3])
         if service_id == drone_id:
             if dron.state == 'flying':
-                dron.goto(internal_client, external_client, sending_topic, lat=1, lon=1, blocking=True) # TEST
+                message_splited = message.payload.decode("utf-8").split("/")
+                coords = [float(message_splited[0]), float(message_splited[1])]
+                dron.goto(coords[0], coords[1], dron.alt, False)
+                print('- AutopilotService: Going to the waypoint')
             else:
                 print('Vehicle not flying')
 
