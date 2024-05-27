@@ -54,11 +54,11 @@ def callback_broker(jpg_as_text):
     # Publish the image to the broker (for video streaming)
     external_client.publish("CameraService/" + origin + "/picture/" + str(service_id), jpg_as_text)
 
+
 def on_internal_message(client, userdata, message):
     print("recibo internal ", message.topic)
     global internal_client
     process_message(message, internal_client)
-
 
 def on_external_message(client, userdata, message):
     print("recibo external ", message.topic)
@@ -66,12 +66,12 @@ def on_external_message(client, userdata, message):
     global external_client
     process_message(message, external_client)
 
-
 def on_connect(external_client, userdata, flags, rc):
     if rc == 0:
         print("Connection OK")
     else:
         print("Bad connection")
+
 
 
 def CameraService(connection_mode, operation_mode, external_broker, username, password):
@@ -155,12 +155,6 @@ def CameraService(connection_mode, operation_mode, external_broker, username, pa
     external_client.loop_forever()
 
 
-def process_output_video_stream(origin, data): # Callback function that publishes data to the broker
-    
-    topic_to_publish = f"CameraService/{origin}/videoFrame"
-    external_client.publish(topic_to_publish, data)
-    time.sleep(0.2)
-
 
 # WEB SOCKETS
 async def send_video_stream(websocket, path):
@@ -194,7 +188,6 @@ async def send_video_stream(websocket, path):
                     else:
                         try:
                             await websocket.send(jpg_as_text)
-                            print(len(frames_queue.queue))
                             #await asyncio.sleep(0.03333333333333333)  # 30 frames per second
                             await asyncio.sleep(0.01666666666666667)  # 60 frames per second
                         except Exception as e:
@@ -257,8 +250,7 @@ if __name__ == "__main__":
     external_client.on_connect = on_connect
 
     # Create object Camera
-    ID = 1 # A MODIFICAR
-    camera = Camera(ID)
+    camera = Camera(service_id)
 
     # WebSockets parameters
     loop = asyncio.new_event_loop()

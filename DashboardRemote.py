@@ -358,7 +358,7 @@ class App(ctk.CTk):
 
         # Create label for photo (no text, just the photo)
         self.label_photo = ctk.CTkLabel(self.frame_stream, text="", font=("TkDefaultFont", 11))
-        self.label_photo.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        self.label_photo.grid(row=0, column=0, padx=15, pady=3, sticky="w")
 
         # Create the main_frame_control_pad (for control pad)
         
@@ -443,12 +443,11 @@ class App(ctk.CTk):
         self.control_button_land = ctk.CTkButton(self.main_frame_control_buttons, text="Land", command=self.land, fg_color="#3117ea", hover_color="#190b95")
         self.control_button_land.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_button_picture = ctk.CTkButton(self.main_frame_control_buttons, text="Picture", command=self.take_picture, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_picture.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
+        self.control_input_altitude = ctk.CTkEntry(self.main_frame_control_buttons, border_color="#3117ea", text_color="gray", placeholder_text="Altitude...", width=130)
+        self.control_input_altitude.grid(row=1, column=0, padx=5, pady=5, sticky="we")
 
-        self.control_button_take_off_all = ctk.CTkButton(self.main_frame_control_buttons, text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
-        self.control_button_take_off_all.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
-
+        self.control_button_change_altitude = ctk.CTkButton(self.main_frame_control_buttons, text="Change\nAltitude", command=self.change_altitude, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_change_altitude.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
         
         # Create a frame for the camera functions (take picture, start stream, broker/websocket)
         self.frame_camera_buttons = ctk.CTkFrame(self.main_frame, height=75, width=265)
@@ -490,6 +489,7 @@ class App(ctk.CTk):
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.state == "armed":
                 # Change the color of the arm button to green
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
@@ -497,13 +497,15 @@ class App(ctk.CTk):
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-            if self.state == "takingOff":
+                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+            if self.state == "takingOff" or self.state == "changingAltitude":
                 # Change the color of the take off button to orange
                 self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange", state="disabled")
                 # The arm button is disabled and the RTL button is disabled
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="orange", hover_color="darkorange", state="disabled")
             if self.state == "flying":
                 # Change the color of the take off button to green
                 self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
@@ -511,6 +513,7 @@ class App(ctk.CTk):
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
             if self.state == "returningHome" or self.state == "landing":
                 # Change the color of the RTL and land buttons to orange, and disable them
                 self.control_button_RTL.configure(fg_color="orange", hover_color="darkorange", state="disabled")
@@ -518,18 +521,21 @@ class App(ctk.CTk):
                 # The arm button is disabled and the take off button is disabled
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.state == "onHearth":
                 # Reset the colors of the buttons
                 self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
                 self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
                 self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
             if self.state == "onMission":
                 # The arm button, flying button and RTL buttons are disabled
                 self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_RTL.configure(fg_color="green", hover_color="darkgreen", state="disabled")
                 self.control_button_land.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="green", hover_color="darkgreen", state="disabled")
             time.sleep(0.5)
 
 
@@ -608,6 +614,14 @@ class App(ctk.CTk):
         self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
 
         self.client.publish("DashboardRemote/AutopilotService/takeOff/" + str(self.drone_id))
+
+    def change_altitude(self):
+        # Change the altitude of the drone
+        altitude = self.control_input_altitude.get()
+        if altitude != "" and int(altitude) > 0:
+            self.client.publish("DashboardRemote/AutopilotService/changeAltitude/" + str(self.drone_id), str(altitude))
+        else:
+            print("Error: The altitude must be a positive number.")
 
     def go(self, direction):
         # Go to a direction
@@ -823,13 +837,17 @@ class App(ctk.CTk):
                 print("Starting stream...")
                 self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
                 self.streaming = True
+                # Disable the broker_websocket button
+                self.button_broker.configure(state="disabled")
 
             else:
                 # Stop the video stream [via broker]
-                self.button_stream.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                self.button_stream.configure(text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
                 print("Stopping stream...")
                 self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
                 self.streaming = False
+                # Enable the broker_websocket button
+                self.button_broker.configure(state="normal")
 
         elif self.video_connection_type == "websocket":
 
@@ -841,23 +859,30 @@ class App(ctk.CTk):
 
                 self.streaming = True
 
+                # Disable the broker_websocket button
+                self.button_broker.configure(state="disabled")
+
             else:
                 # Stop the video stream [via websocket]
-                self.button_stream.configure(text="Start Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                self.button_stream.configure(text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
                 # Stop the loop
                 self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
 
                 self.streaming = False
+
+                # Enable the broker_websocket button
+                self.button_broker.configure(state="normal")
 
 
     def broker_websocket(self):
         # Change the connection type
         if self.video_connection_type == "broker":
             self.video_connection_type = "websocket"
-            self.button_broker.configure(text="Broker", fg_color="red", hover_color="darkred")
+            # Change the button text to "Websocket"
+            self.button_broker.configure(text="Websocket")
         else:
             self.video_connection_type = "broker"
-            self.button_broker.configure(text="Websocket", fg_color="red", hover_color="darkred")
+            self.button_broker.configure(text="Broker")
 
 
     def process_frame(self, jpg_as_text):
@@ -868,7 +893,7 @@ class App(ctk.CTk):
         # Create image PIL with the bytes
         image_pil = Image.open(io.BytesIO(image_bytes))
         # Resize the image
-        image_pil = image_pil.resize((280, 135), Image.ANTIALIAS)
+        image_pil = image_pil.resize((240, 130), Image.ANTIALIAS)
 
         # Convert to custom tkinter image
         image_tk = ImageTk.PhotoImage(image_pil)

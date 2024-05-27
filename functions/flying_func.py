@@ -37,7 +37,8 @@ def flying_v0(self):
             cmd = self.prepare_command(-speed, speed, 0)  # SOUTHEST
         if self.direction == "Stop":
             cmd = self.prepare_command(0, 0, 0)  # STOP
-        if self.direction == "RTL" or self.direction == "Land":
+        if self.direction == "RTL" or self.direction == "Land" or self.direction == "changingAltitude":
+            print("Doing action: ", self.direction)
             end = True
 
 

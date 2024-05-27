@@ -114,6 +114,18 @@ def process_message(message, client):
         if dron.state == 'flying':
             dron.flying_trigger()
 
+    if command == "changeAltitude":
+        # Check if the drone is the requested one
+        drone_id = int(splited[3])
+        if service_id == drone_id:
+            # Change the altitude
+            if dron.state == 'flying':
+                climb_rate = 1
+                dron.change_altitude_trigger(int(message.payload.decode("utf-8")), 1, False)
+                print('- AutopilotService: Altitude changing to ' + message.payload.decode("utf-8"))
+            else:
+                print('Vehicle not flying')
+
     if command == "returnToLaunch":
         # Check if the drone is the requested one
         drone_id = int(splited[3])
