@@ -25,8 +25,6 @@ from Camera import Camera
 # Night mode
 ctk.set_appearance_mode("dark")
 
-
-
 # Create App class
 class App(ctk.CTk):
     def __init__(self, *args, **kwargs):
@@ -87,8 +85,6 @@ class App(ctk.CTk):
         self.column6 = self.main_frame.columnconfigure(6, weight=1)
         self.column7 = self.main_frame.columnconfigure(7, weight=1)
 
-
-
         # Separate the main_frame into 8 horizontal sections
         self.main_frame.rowconfigure(0, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
@@ -103,16 +99,16 @@ class App(ctk.CTk):
 
         # BUTTONS
         # Create the connect_button
-        self.connect_button = ctk.CTkButton(self.main_frame, text="Connect", command=self.on_button_connect_click, fg_color="#3117ea", hover_color="#190b95")
+        self.connect_button = ctk.CTkButton(self.main_frame, text="Connect", command=self.on_button_connect_click, fg_color="#457b9d", hover_color="#3a5f7d")
         self.connect_button.grid(row=7, column=6, padx=10, pady=10, sticky="nswe", ipady=0, columnspan=2)
 
         # TEXTBOXES
         # Create the info_textbox (read-only)
         self.info_textbox = ctk.CTkTextbox(self.main_frame, width=350)
         self.info_textbox.grid(row=0, column=6, padx=10, pady=10, rowspan=6, columnspan=2, sticky="nswe")
-        self.info_textbox.insert("1.0", "Welcome to DashboardRemote.\nThis tool allows you to interact with the\nautopilot functions using a\nbroker.\n\nPlease, click the 'Connect' button to start.")
+        self.info_textbox.insert("1.0", "Welcome to DashboardRemote. This tool allows you to\ninteract with the autopilot functions using a broker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
-        self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info added.\n\n- Version: 0.1.2: Control and pad buttons added.")
+        self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info added.\n\n- Version: 0.1.2: Control and pad buttons added.\n\n- Version: 1.0.0: All basic functions operative.\n\n- Version: 1.0.1: Map with basic functions added.\n\n- Version: 1.0.2: Geofence functions added.\n\n- Version: 1.0.3: Mission functions added.\n\n- Version: 1.0.4: Parameters functions added.\n\n- Version: 2.0.0: Video stream added (via broker).\n\n- Version: 2.0.1: Video stream added (via websocket).\n\n- Version: 2.0.1: Bug fixes.\n\n- Version: 3.0.0: Visual update.\n\n- Version: 3.0.1: Bug fixes.\n\n- Version: 3.1.0: Final release.")
 
         self.info_textbox.configure(state="disabled")
 
@@ -128,26 +124,18 @@ class App(ctk.CTk):
         # Insert image
         self.label_logo.configure(image=self.logo)
 
-        '''
-        self.info_textbox2 = ctk.CTkTextbox(self.main_frame, width=350)
-        self.info_textbox2.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=6, sticky="nswe")
-        self.info_textbox2.insert("1.0", "Space reserved for the logo or image.")
-        self.info_textbox2.configure(state="disabled")
-        # insert image
-        self.info_textbox2.image_create("1.0", image=self.logo)
-        '''
-
         # Create a option selector for the broker selection
-        self.broker_selector = ctk.CTkOptionMenu(self.main_frame, values=["Select External Broker...", "hivemq","hivemq (certificate)", "classpip (certificate)"], width=130)
+        self.broker_selector = ctk.CTkOptionMenu(self.main_frame, values=["Select External Broker...", "hivemq","hivemq (certificate)", "classpip (certificate)"],  width=130, fg_color="#457b9d", dropdown_fg_color="#457b9d", button_color="#457b9d")
         self.broker_selector.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
         # Create a option selector for the id of the drone
-        self.drone_id_selector = ctk.CTkOptionMenu(self.main_frame, values=["Drone ID...", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], width=130)
+        self.drone_id_selector = ctk.CTkOptionMenu(self.main_frame, values=["Drone ID...", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], width=130, fg_color="#457b9d", dropdown_fg_color="#457b9d", button_color="#457b9d")
         self.drone_id_selector.grid(row=6, column=7, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
 
 
     # FUNCTIONS (FRONTEND)
+
     def on_button_connect_click(self):
         # If the broker is not selected, show an error message
         if  self.broker_selector.get() == "Select External Broker...":
@@ -168,8 +156,6 @@ class App(ctk.CTk):
             # Execute configuration
             self.configure()
 
-            # The drone and camera objects are created by their respective services
-            
             # Make the button invisible and substitute it with a label
             self.connect_button.grid_forget()
             self.broker_selector.grid_forget()
@@ -177,19 +163,14 @@ class App(ctk.CTk):
             self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
             self.connect_label.grid(row=7, column=6, padx=10, pady=0, sticky="nswe", columnspan=2)
 
-
             # Connect to the autopilot 1000ms later
             self.after(1000, self.connect)
 
             # Start the websocket
             self.start_websocket()
 
-
-
     def set_main_page(self):
         # Create the main page view
-
-        # Create the main_frame with tabs for the functionalities of the dashboard
 
         # Add a map to the main frame
         self.map_widget = tkmap.TkinterMapView(self.main_frame)
@@ -208,17 +189,17 @@ class App(ctk.CTk):
         # Add a right click menu to add a GO TO point
         self.map_widget.add_right_click_menu_command(label="Fly Here", command=self.go_to_point_event, pass_coords=True)
 
-
         # Insert tabview
-        self.main_tabview = ctk.CTkTabview(self.main_frame, width=580)
+        self.main_tabview = ctk.CTkTabview(self.main_frame, width=580, segmented_button_selected_color="#457b9d", segmented_button_unselected_hover_color="#3a5f7d", segmented_button_selected_hover_color="#3a5f7d")
         self.main_tabview.grid(row=6, column=0, padx=10, pady=10, rowspan=2, columnspan=6, sticky="nswe")
         # Create the tabs
         self.main_tabview.add("Parameters")
         self.main_tabview.add("Mission")
         self.main_tabview.add("Geofence")
 
-        # Parameters tab
 
+
+        # Parameters tab:
         # Separate the tab into 2 vertical sections
         self.main_tabview.tab("Parameters").columnconfigure(0, weight=1)
         self.main_tabview.tab("Parameters").columnconfigure(1, weight=1)
@@ -237,18 +218,16 @@ class App(ctk.CTk):
         self.get_parameter_frame.rowconfigure(1, weight=1)
         
         # Add a button to get the value of a parameter
-        self.get_parameter_button = ctk.CTkButton(self.get_parameter_frame, text="Get parameter", command=self.get_parameter, fg_color="#3117ea", hover_color="#190b95", width=40)
+        self.get_parameter_button = ctk.CTkButton(self.get_parameter_frame, text="Get parameter", command=self.get_parameter, fg_color="#457b9d", hover_color="#3a5f7d", width=40)
         self.get_parameter_button.grid(row=0, column=1, padx=10, pady=5)
         # Add a entry to write the parameter ID
-        self.parameter_id_input = ctk.CTkEntry(self.get_parameter_frame, border_color="#3117ea", text_color="gray", width=130, placeholder_text="type parameter ID...")
+        self.parameter_id_input = ctk.CTkEntry(self.get_parameter_frame, border_color="#457b9d", text_color="gray", width=130, placeholder_text="type parameter ID...")
         self.parameter_id_input.grid(row=0, column=0, padx=10, pady=5)
         # Add a label to show the value of the parameter
         self.parameter_value_label = ctk.CTkLabel(self.get_parameter_frame, text="Value: ", font=("TkDefaultFont", 11))
         self.parameter_value_label.grid(row=3, column=0, padx=10, pady=5, sticky="w", columnspan=2)
-        
 
         # Create a frame for set a parameter, with grey background
-        
         self.set_parameter_frame2 = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
         self.set_parameter_frame2.grid(row=0, column=1, padx=10, pady=5, sticky="we", columnspan=2)
         self.set_parameter_frame2.configure(fg_color="#1f1f1f")
@@ -260,13 +239,13 @@ class App(ctk.CTk):
         self.set_parameter_frame2.rowconfigure(1, weight=1)
 
         # Add a button to set the value of a parameter
-        self.set_parameter_button = ctk.CTkButton(self.set_parameter_frame2, text="Set parameter", command=self.set_parameter, fg_color="#3117ea", hover_color="#190b95", width=40)
+        self.set_parameter_button = ctk.CTkButton(self.set_parameter_frame2, text="Set parameter", command=self.set_parameter, fg_color="#457b9d", hover_color="#3a5f7d", width=40)
         self.set_parameter_button.grid(row=1, column=0, padx=10, pady=5, columnspan=2, sticky="we")
         # Add a entry to write the parameter ID
-        self.parameter_id_input_set = ctk.CTkEntry(self.set_parameter_frame2, border_color="#3117ea", text_color="gray", placeholder_text="type ID...", width=120)
+        self.parameter_id_input_set = ctk.CTkEntry(self.set_parameter_frame2, border_color="#457b9d", text_color="gray", placeholder_text="type ID...", width=120)
         self.parameter_id_input_set.grid(row=0, column=0, padx=10, pady=5)
         # Add a entry to write the parameter value
-        self.parameter_value_input = ctk.CTkEntry(self.set_parameter_frame2, border_color="#3117ea", text_color="gray", placeholder_text="type value...", width=100)
+        self.parameter_value_input = ctk.CTkEntry(self.set_parameter_frame2, border_color="#457b9d", text_color="gray", placeholder_text="type value...", width=100)
         self.parameter_value_input.grid(row=0, column=1, padx=10, pady=5)
         
 
@@ -282,17 +261,17 @@ class App(ctk.CTk):
         self.main_tabview.tab("Mission").columnconfigure(2, weight=1)
         
         # Add a button to upload the flight plan
-        self.upload_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Upload Flight Plan", command=self.upload_flight_plan, fg_color="#3117ea", hover_color="#190b95")
+        self.upload_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Upload Flight Plan", command=self.upload_flight_plan, fg_color="#457b9d", hover_color="#3a5f7d")
         self.upload_flight_plan_button.grid(row=0, column=0, padx=10, pady=10, sticky="we")
 
         # Add a button to execute the flight plan
-        self.execute_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Execute Flight Plan", command=self.execute_flight_plan, fg_color="#3117ea", hover_color="#190b95")
+        self.execute_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Execute Flight Plan", command=self.execute_flight_plan, fg_color="#457b9d", hover_color="#3a5f7d")
         self.execute_flight_plan_button.grid(row=0, column=1, padx=10, pady=10, sticky="we")
         # This button is disabled by default
         self.execute_flight_plan_button.configure(state="disabled")
 
         # Add a button to clear the flight plan
-        self.clear_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Clear", command=self.clear_flight_plan, fg_color="#3117ea", hover_color="#190b95")
+        self.clear_flight_plan_button = ctk.CTkButton(self.main_tabview.tab("Mission"), text="Clear", command=self.clear_flight_plan, fg_color="#457b9d", hover_color="#3a5f7d")
         self.clear_flight_plan_button.grid(row=0, column=2, padx=10, pady=10, sticky="we")
 
 
@@ -308,24 +287,26 @@ class App(ctk.CTk):
         self.main_tabview.tab("Geofence").columnconfigure(2, weight=1)
 
         # Add a button to Enable the geofence
-        self.enable_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Enable Geofence", command=self.enable_disable_geofence, fg_color="#3117ea", hover_color="#190b95")
+        self.enable_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Enable Geofence", command=self.enable_disable_geofence, fg_color="#457b9d", hover_color="#3a5f7d")
         self.enable_geofence_button.grid(row=0, column=0, padx=10, pady=10, sticky="we")
 
         # Add a button to upload the geofence
-        self.upload_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Upload Fence", command=self.upload_geofence, fg_color="#3117ea", hover_color="#190b95")
+        self.upload_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Upload Fence", command=self.upload_geofence, fg_color="#457b9d", hover_color="#3a5f7d")
         self.upload_geofence_button.grid(row=0, column=1, padx=10, pady=10, sticky="we")
 
         # Add a selector to choose the geofence action
-        self.geofence_action_selector = ctk.CTkOptionMenu(self.main_tabview.tab("Geofence"), values=["RTL", "Report", "Brake"], width=130, command=self.set_geofence_action)
+        self.geofence_action_selector = ctk.CTkOptionMenu(self.main_tabview.tab("Geofence"), values=["RTL", "Report", "Brake"], width=130, command=self.set_geofence_action, fg_color="#457b9d", dropdown_fg_color="#457b9d", button_color="#457b9d")
         self.geofence_action_selector.grid(row=0, column=2, padx=10, pady=10, sticky="we")
 
         # Add a button to clear the geofence and map
-        self.clear_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Clear Geofence Points", command=self.clear_geofence, fg_color="#3117ea", hover_color="#190b95")
+        self.clear_geofence_button = ctk.CTkButton(self.main_tabview.tab("Geofence"), text="Clear Geofence Points", command=self.clear_geofence, fg_color="#457b9d", hover_color="#3a5f7d")
         self.clear_geofence_button.grid(row=1, column=0, padx=10, pady=10, sticky="we", columnspan=3)
 
 
+
+        # Right Panel
         # Create the main_frame_telemetry (for telemetry info)
-        self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=80)
+        self.frame_telemetry = ctk.CTkFrame(self.main_frame, height=90)
         self.frame_telemetry.grid(row=0, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
         # Color the frame
         self.frame_telemetry.configure(fg_color="#1f1f1f")
@@ -341,7 +322,6 @@ class App(ctk.CTk):
         self.frame_telemetry.rowconfigure(1, weight=1)
 
         # Create the labels for the telemetry info, 4 parameters (alt, heading, groundSpeed, battery)
-
         self.label_telemetry_alt = ctk.CTkLabel(self.frame_telemetry, text="Altitude: ",font=("TkDefaultFont", 11))
         self.label_telemetry_alt.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.label_telemetry_alt_value = ctk.CTkLabel(self.frame_telemetry, text="0.0", font=("TkDefaultFont", 11, "bold"))
@@ -364,8 +344,7 @@ class App(ctk.CTk):
 
 
         # Create a frame for the video stream
-
-        self.frame_stream = ctk.CTkFrame(self.main_frame, height=250)
+        self.frame_stream = ctk.CTkFrame(self.main_frame, height=255)
         self.frame_stream.grid(row=1, column=6, padx=10, pady=10, rowspan=3, columnspan=2, sticky="we")
         # Color the frame
         self.frame_stream.configure(fg_color="#1f1f1f")
@@ -377,7 +356,6 @@ class App(ctk.CTk):
         self.label_photo.grid(row=0, column=0, padx=15, pady=3, sticky="w")
 
         # Create the main_frame_control_pad (for control pad)
-        
         self.main_frame_control_pad = ctk.CTkFrame(self.main_frame, height=150)
         self.main_frame_control_pad.grid(row=5, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
         # Color the frame
@@ -397,34 +375,32 @@ class App(ctk.CTk):
         
 
         # Create the control pad buttons
-        
-        self.control_pad_button_nw = ctk.CTkButton(self.main_frame_control_pad, text="NW", command=lambda : self.go("NorthWest"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_nw = ctk.CTkButton(self.main_frame_control_pad, text="NW", command=lambda : self.go("NorthWest"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_nw.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_n = ctk.CTkButton(self.main_frame_control_pad, text="N", command=lambda : self.go("North"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_n = ctk.CTkButton(self.main_frame_control_pad, text="N", command=lambda : self.go("North"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_n.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_ne = ctk.CTkButton(self.main_frame_control_pad, text="NE", command=lambda : self.go("NorthEast"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_ne = ctk.CTkButton(self.main_frame_control_pad, text="NE", command=lambda : self.go("NorthEast"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_ne.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_w = ctk.CTkButton(self.main_frame_control_pad, text="W", command=lambda : self.go("West"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_w = ctk.CTkButton(self.main_frame_control_pad, text="W", command=lambda : self.go("West"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_w.grid(row=1, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_stop = ctk.CTkButton(self.main_frame_control_pad, text="STOP", command=lambda : self.go("Stop"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_stop = ctk.CTkButton(self.main_frame_control_pad, text="STOP", command=lambda : self.go("Stop"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_stop.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_e = ctk.CTkButton(self.main_frame_control_pad, text="E", command=lambda : self.go("East"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_e = ctk.CTkButton(self.main_frame_control_pad, text="E", command=lambda : self.go("East"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_e.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_sw = ctk.CTkButton(self.main_frame_control_pad, text="SW", command=lambda : self.go("SouthWest"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_sw = ctk.CTkButton(self.main_frame_control_pad, text="SW", command=lambda : self.go("SouthWest"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_sw.grid(row=2, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_s = ctk.CTkButton(self.main_frame_control_pad, text="S", command=lambda : self.go("South"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_s = ctk.CTkButton(self.main_frame_control_pad, text="S", command=lambda : self.go("South"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_s.grid(row=2, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", command=lambda : self.go("SouthEast"), fg_color="#3117ea", hover_color="#190b95")
+        self.control_pad_button_se = ctk.CTkButton(self.main_frame_control_pad, text="SE", command=lambda : self.go("SouthEast"), fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_pad_button_se.grid(row=2, column=2, padx=5, pady=5, sticky="we", ipady=10)
-        
 
 
         # Create the main_frame_control_buttons (for control buttons)
@@ -446,23 +422,22 @@ class App(ctk.CTk):
         self.main_frame_control_buttons.rowconfigure(2, weight=1)
 
         # Create the control buttons
-        
-        self.control_button_arm = ctk.CTkButton(self.main_frame_control_buttons, text="Arm", command=self.arm, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_arm = ctk.CTkButton(self.main_frame_control_buttons, text="Arm", command=self.arm, fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_button_arm.grid(row=0, column=0, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_button_take_off = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off", command=self.take_off, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_take_off = ctk.CTkButton(self.main_frame_control_buttons, text="Take Off", command=self.take_off, fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_button_take_off.grid(row=0, column=1, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_RTL = ctk.CTkButton(self.main_frame_control_buttons, text="RTL", command=self.rtl, fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_button_RTL.grid(row=0, column=2, padx=5, pady=5, sticky="we", ipady=10)
         
-        self.control_button_land = ctk.CTkButton(self.main_frame_control_buttons, text="Land", command=self.land, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_land = ctk.CTkButton(self.main_frame_control_buttons, text="Land", command=self.land, fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_button_land.grid(row=1, column=2, padx=5, pady=5, sticky="we", ipady=10)
 
-        self.control_input_altitude = ctk.CTkEntry(self.main_frame_control_buttons, border_color="#3117ea", text_color="gray", placeholder_text="Altitude...", width=130)
+        self.control_input_altitude = ctk.CTkEntry(self.main_frame_control_buttons, border_color="#457b9d", text_color="gray", placeholder_text="Altitude...", width=130)
         self.control_input_altitude.grid(row=1, column=0, padx=5, pady=5, sticky="we")
 
-        self.control_button_change_altitude = ctk.CTkButton(self.main_frame_control_buttons, text="Change\nAltitude", command=self.change_altitude, fg_color="#3117ea", hover_color="#190b95")
+        self.control_button_change_altitude = ctk.CTkButton(self.main_frame_control_buttons, text="Change\nAltitude", command=self.change_altitude, fg_color="#457b9d", hover_color="#3a5f7d")
         self.control_button_change_altitude.grid(row=1, column=1, padx=5, pady=5, sticky="we", ipady=10)
         
         # Create a frame for the camera functions (take picture, start stream, broker/websocket)
@@ -478,134 +453,69 @@ class App(ctk.CTk):
         self.frame_camera_buttons.columnconfigure(1, weight=1)
         self.frame_camera_buttons.columnconfigure(2, weight=1)
         
-        self.button_picture = ctk.CTkButton(self.frame_camera_buttons, text="Picture", command=self.take_picture, fg_color="#3117ea", hover_color="#190b95")
-        self.button_picture.grid(row=0, column=0, padx=5, pady=5, sticky="nswe")
+        self.button_picture = ctk.CTkButton(self.frame_camera_buttons, text="Picture", command=self.take_picture, fg_color="#457b9d", hover_color="#3a5f7d")
+        self.button_picture.grid(row=0, column=0, padx=5, pady=3, sticky="nswe")
 
-        self.button_stream = ctk.CTkButton(self.frame_camera_buttons, text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
-        self.button_stream.grid(row=0, column=1, padx=5, pady=5, sticky="nswe")
+        self.button_stream = ctk.CTkButton(self.frame_camera_buttons, text="Stream", command=self.start_stream, fg_color="#457b9d", hover_color="#3a5f7d")
+        self.button_stream.grid(row=0, column=1, padx=5, pady=3, sticky="nswe")
 
-        self.button_broker = ctk.CTkButton(self.frame_camera_buttons, text="Broker", command=self.broker_websocket, fg_color="#3117ea", hover_color="#190b95")
-        self.button_broker.grid(row=0, column=2, padx=5, pady=5, sticky="nswe")
+        self.button_broker = ctk.CTkButton(self.frame_camera_buttons, text="Broker", command=self.broker_websocket, fg_color="#457b9d", hover_color="#3a5f7d")
+        self.button_broker.grid(row=0, column=2, padx=5, pady=3, sticky="nswe")
         
         # Create the disconnect button (Red)
-
-        self.info_textbox_drones = ctk.CTkButton(self.main_frame, height=30 , text="Disconnect", command=self.disconnect, fg_color="red", hover_color="darkred")
+        self.info_textbox_drones = ctk.CTkButton(self.main_frame, height=30 , text="Disconnect", command=self.disconnect, fg_color="#c1121f", hover_color="#a00f1c")
         self.info_textbox_drones.grid(row=7, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
 
-
-
-    # UPDATE CONTROL BUTTONS
     def update_control_buttons(self):
+        # Update the control buttons according to the state of the drone
         while True:
             print(str(self.state))
             if self.state == "connected":
-                # Change the color of the arm button to blue
-                self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-                # The other buttons are disabled
-                self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                # connected: All buttons are disabled except for the arm button
+                self.control_button_arm.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="normal")
+                self.control_button_take_off.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
+                self.control_button_RTL.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
+                self.control_button_land.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
             if self.state == "armed":
-                # Change the color of the arm button to green
-                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                # The take off button is enabled and the RTL button is disabled
-                self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                # armed: All buttons are disabled except for the take off button
+                self.control_button_arm.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_take_off.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="normal")
+                self.control_button_RTL.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
+                self.control_button_land.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
             if self.state == "takingOff" or self.state == "changingAltitude":
-                # Change the color of the take off button to orange
-                self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange", state="disabled")
-                # The arm button is disabled and the RTL button is disabled
-                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_change_altitude.configure(fg_color="orange", hover_color="darkorange", state="disabled")
+                # takingOff or changingAltitude: All buttons are disabled
+                self.control_button_take_off.configure(fg_color="#fcbf49", hover_color="#fcbf49", state="disabled")
+                self.control_button_arm.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_RTL.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
+                self.control_button_land.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#fcbf49", hover_color="#fcbf49", state="disabled")
             if self.state == "flying":
-                # Change the color of the take off button to green
-                self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                # The arm button is disabled and the RTL and Land buttons are enabled
-                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
+                # flying: All buttons are disabled except for the RTL and land buttons
+                self.control_button_take_off.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_arm.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_RTL.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="normal")
+                self.control_button_land.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="normal")
+                self.control_button_change_altitude.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="normal")
             if self.state == "returningHome" or self.state == "landing":
-                # Change the color of the RTL and land buttons to orange, and disable them
-                self.control_button_RTL.configure(fg_color="orange", hover_color="darkorange", state="disabled")
-                self.control_button_land.configure(fg_color="orange", hover_color="darkorange", state="disabled")
-                # The arm button is disabled and the take off button is disabled
-                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-            if self.state == "onHearth":
-                # Reset the colors of the buttons
-                self.control_button_arm.configure(fg_color="#3117ea", hover_color="#190b95", state="normal")
-                self.control_button_take_off.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_RTL.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_land.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
-                self.control_button_change_altitude.configure(fg_color="#3117ea", hover_color="#190b95", state="disabled")
+                # returnHome or landing: All the buttons are disabled
+                self.control_button_RTL.configure(fg_color="#fcbf49", hover_color="#fcbf49", state="disabled")
+                self.control_button_land.configure(fg_color="#fcbf49", hover_color="#fcbf49", state="disabled")
+                self.control_button_arm.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_take_off.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="disabled")
             if self.state == "onMission":
-                # The arm button, flying button and RTL buttons are disabled
-                self.control_button_arm.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_take_off.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_RTL.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_land.configure(fg_color="green", hover_color="darkgreen", state="disabled")
-                self.control_button_change_altitude.configure(fg_color="green", hover_color="darkgreen", state="disabled")
+                # onMission: All buttons are disabled
+                self.control_button_arm.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_take_off.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_RTL.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_land.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
+                self.control_button_change_altitude.configure(fg_color="#80ed99", hover_color="#4ea167", state="disabled")
             time.sleep(0.5)
-
-
-
-    # FUNCTIONS (BACKEND)
-        
-    # Connect
-    def connect(self):
-
-        self.client.publish("DashboardRemote/AutopilotService/connect/" + str(self.drone_id))
-
-        if self.connected == True:
-            time.sleep(1.5) # Wait for the connection to be established
-            # Delete every element and start the main page view
-            self.connect_label.grid_forget()
-            self.info_textbox.grid_forget()
-            self.label_logo.grid_forget()
-            self.logo_frame.grid_forget()
-            
-
-            # Create the main page view
-            self.set_main_page()
-
-           
-            # Start the update control buttons thread 
-            t = threading.Thread(target=self.update_control_buttons)
-            t.start()
-            
-
-        else:
-            # Make the label invisible and show the button again
-            self.connect_label.grid_forget()
-            self.connect_button.grid(row=3, column=1, padx=10, pady=0, sticky="we", ipady=10)
-            # Show an error message in the textbox, in red
-            self.info_textbox.configure(state="normal")
-            self.info_textbox.delete("1.0", "end")
-            self.info_textbox.insert("1.0", "Error: Couldn't connect to the autopilot. Please, reset the application and try again.")
-            self.info_textbox.configure(state="disabled")
-            # The message should be in red
-            self.info_textbox.configure(text_color="red")
-
-    # Disconnect
-    def disconnect(self):
-        # Disconnect every drone
-        self.client.publish("DashboardRemote/AutopilotService/disconnect/" + str(self.drone_id))
-
-        # Restart the application
-        python = sys.executable
-        os.execl(python, python, * sys.argv)
 
     def telemetry(self, telemetry_info, drone_id):
         # Callback function to update the telemetry info in the main page view
-        #self.label_telemetry_lat_value.configure(text=telemetry_info['lat'])
-        #self.label_telemetry_lon_value.configure(text=telemetry_info['lon'])
         self.label_telemetry_alt_value.configure(text=telemetry_info['altitude'])
         self.label_telemetry_hea_value.configure(text=telemetry_info['heading'])
         self.label_telemetry_gs_value.configure(text=telemetry_info['groundSpeed'])
@@ -621,17 +531,55 @@ class App(ctk.CTk):
         # Update the marker
         self.dron_marker = marker
 
+    # FUNCTIONS (BACKEND)
+
+    def connect(self):
+        # Connect to the autopilot service and to the drone
+        self.client.publish("DashboardRemote/AutopilotService/connect/" + str(self.drone_id))
+
+        if self.connected == True:
+            time.sleep(1.5) # Wait for the connection to be established
+            # Delete every element and start the main page view
+            self.connect_label.grid_forget()
+            self.info_textbox.grid_forget()
+            self.label_logo.grid_forget()
+            self.logo_frame.grid_forget()
+            
+            # Create the main page view
+            self.set_main_page()
+
+            # Start the update control buttons thread 
+            t = threading.Thread(target=self.update_control_buttons)
+            t.start()
+            
+        else:
+            # Make the label invisible and show the button again
+            self.connect_label.grid_forget()
+            self.connect_button.grid(row=3, column=1, padx=10, pady=0, sticky="we", ipady=10)
+            # Show an error message in the textbox, in red
+            self.info_textbox.configure(state="normal")
+            self.info_textbox.delete("1.0", "end")
+            self.info_textbox.insert("1.0", "Error: Couldn't connect to the autopilot. Please, reset the application and try again.")
+            self.info_textbox.configure(state="disabled")
+            # The message should be in red
+            self.info_textbox.configure(text_color="red")
+    
+    def disconnect(self):
+        # Disconnect every drone
+        self.client.publish("DashboardRemote/AutopilotService/disconnect/" + str(self.drone_id))
+
+        # Restart the application
+        python = sys.executable
+        os.execl(python, python, * sys.argv)
+
     def arm(self):
-        # Change the arm button color to orange
-        self.control_button_arm.configure(fg_color="orange", hover_color="darkorange")
         # Arm the drone
         self.client.publish("DashboardRemote/AutopilotService/armDrone/" + str(self.drone_id))
 
     def take_off(self):
+        # Take off the drone
         # Make the border of the entry white
         self.control_input_altitude.configure(border_color="white")
-        # Change the take off button color to orange
-        self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
         # Take off the drone
         altitude = self.control_input_altitude.get()
         if altitude != "" and int(altitude) > 0:
@@ -642,6 +590,7 @@ class App(ctk.CTk):
             print("Error: The altitude must be a positive number.")
 
     def change_altitude(self):
+        # Change the altitude of the drone
         # Make the border of the entry white
         self.control_input_altitude.configure(border_color="white")
         # Change the altitude of the drone
@@ -671,40 +620,48 @@ class App(ctk.CTk):
             print("Landing...")
             self.client.publish("DashboardRemote/AutopilotService/land/" + str(self.drone_id))
 
-    def get_all_parameters(self):
-        # Get all parameters
-        parameters_id, parameters_value = self.dron.get_all_parameters(True)
-        print("Button pressed. Getting all parameters...")
-        print(parameters_id) # Ver como mostrarlo en la interfaz
+    # Parameters:
 
     def get_parameter(self):
         # Get a parameter and show it in the label
         parameter_id = self.parameter_id_input.get()
         if parameter_id != "":
+            # Make the border of the entry white
+            self.parameter_id_input.configure(border_color="white")
             # Publish the message to get the parameter
             self.client.publish("DashboardRemote/AutopilotService/getParameter/" + str(self.drone_id), str(parameter_id))
             # Display that the parameter is being retrieved
             self.parameter_value_label.configure(text="Value: Loading...")
         else:
+            # Make the border of the entry red
+            self.parameter_id_input.configure(border_color="red")
             self.parameter_value_label.configure(text="Value: ")
 
     def set_parameter(self):
-        # Set a parameter
+        # Set a parameter to a specific value
         parameter_id = str(self.parameter_id_input_set.get())
         parameter_value = str(self.parameter_value_input.get())
         message = parameter_id + "/" + parameter_value
 
         if parameter_id != "" and parameter_value != "":
+            # Make the border of the entries white
+            self.parameter_id_input_set.configure(border_color="white")
+            self.parameter_value_input.configure(border_color="white")
             # Try to set the parameter, if it is not possible, show an error message
             try:
                 self.client.publish("DashboardRemote/AutopilotService/setParameter/" + str(self.drone_id), str(message))
                 print("Parameter set.")
             except:
                 print("Error setting the parameter.")
+        else:
+            # Make the border of the entries red
+            self.parameter_id_input_set.configure(border_color="red")
+            self.parameter_value_input.configure(border_color="red")
 
-    # FLIGHT PLAN:
+    # Flight Plan:
 
     def upload_flight_plan(self):
+        # Upload the flight plan
         if self.state == "connected" and len(self.mission_waypoints) > 0:
             # This button enables the execute flight plan button
             self.execute_flight_plan_button.configure(state="normal")
@@ -733,6 +690,7 @@ class App(ctk.CTk):
         self.client.publish("DashboardRemote/AutopilotService/executeFlightPlan/" + str(self.drone_id))
 
     def clear_flight_plan(self):
+        # Clear the flight plan and the map
         # This button disables the execute flight plan button
         self.execute_flight_plan_button.configure(state="disabled")
 
@@ -746,11 +704,10 @@ class App(ctk.CTk):
         # Delete every element from the mission markers list
         self.mission_markers = []
 
-
-
-    # GEOFENCE:
+    # GeoFence:
 
     def enable_disable_geofence(self):
+        # Enable or disable the geofence
         # Check if the geofence is enabled or disabled
         if self.geofence_enabled:
             # Disable the geofence
@@ -760,7 +717,7 @@ class App(ctk.CTk):
             self.geofence_enabled = False
 
             # Make the button blue and change the text to "Enable Geofence"
-            self.enable_geofence_button.configure(text="Enable Geofence", fg_color="#3117ea", hover_color="#190b95")
+            self.enable_geofence_button.configure(text="Enable Geofence", fg_color="#457b9d", hover_color="#3a5f7d")
         else:
             # Enable the geofence
             print("Enabling geofence...")
@@ -769,9 +726,10 @@ class App(ctk.CTk):
             self.geofence_enabled = True
 
             # Make the button red and change the text to "Disable Geofence"
-            self.enable_geofence_button.configure(text="Disable Geofence", fg_color="red", hover_color="darkred")
+            self.enable_geofence_button.configure(text="Disable Geofence", fg_color="#c1121f", hover_color="#a00f1c")
 
     def upload_geofence(self):
+        # Upload the geofence
         if len(self.geofence_points) < 3:
             print("Error: You need at least 3 points to create a geofence.")
 
@@ -807,7 +765,7 @@ class App(ctk.CTk):
         self.client.publish("DashboardRemote/AutopilotService/actionGeofence/" + str(self.drone_id), str(action_id))
     
     def clear_geofence(self):
-        # Clear the geofence
+        # Clear the geofence points of the map
         print("Clearing geofence...")
         # Delete every element from the geofence points list
         self.geofence_points = []
@@ -817,10 +775,10 @@ class App(ctk.CTk):
         # Delete every element from the geofence markers list
         self.geofence_markers = []
 
-    # MAP:
+    # Map:
 
     def add_mission_waypoint_event(self, coords):
-        # Add altitude to the coords (6 meters)
+        # Add a mission waypoint to the map
         if self.control_input_altitude.get() == "" or int(self.control_input_altitude.get()) <= 0:
             # Make red the border of the entry
             self.control_input_altitude.configure(border_color="red")
@@ -837,8 +795,8 @@ class App(ctk.CTk):
             # Add the new marker to the list
             self.mission_markers.append(new_marker)
 
-
     def add_geofence_point_event(self, coords):
+        # Add a geofence point to the map
         print("Add Geofence Point:", coords)
         # Add the point to the geofence points list
         entry = {"lat": coords[0], "lon": coords[1]}
@@ -847,21 +805,22 @@ class App(ctk.CTk):
         # Add the new marker to the list
         self.geofence_markers.append(new_marker)
 
+    # Go to point:
 
     def go_to_point_event(self, coords):
+        # Go to a point
         print("Go to:", coords)
         # Create the message to send to the autopilot
         message = str(coords[0]) + "/" + str(coords[1])
         # Go to a point
         self.client.publish("DashboardRemote/AutopilotService/goto/" + str(self.drone_id), str(message))
          
- # CAMERA:
+    # Camera:
 
     def take_picture(self):
         # Take a picture
         print("Taking picture...")
         self.client.publish("DashboardRemote/CameraService/takePicture/" + str(self.camera_id))
-
 
     def start_stream(self):
         # Start the video stream depending on the connection type (broker or socket)
@@ -870,7 +829,7 @@ class App(ctk.CTk):
             if self.streaming == False:
 
                 # Start the video stream [via broker]
-                self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
+                self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="#c1121f", hover_color="#a00f1c")
                 print("Starting stream...")
                 self.client.publish("DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
                 self.streaming = True
@@ -879,7 +838,7 @@ class App(ctk.CTk):
 
             else:
                 # Stop the video stream [via broker]
-                self.button_stream.configure(text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                self.button_stream.configure(text="Stream", command=self.start_stream, fg_color="#457b9d", hover_color="#3a5f7d")
                 print("Stopping stream...")
                 self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
                 self.streaming = False
@@ -891,7 +850,7 @@ class App(ctk.CTk):
             # Start the video stream [via socket]
             if self.streaming == False:
                 self.trigger_send_message(self.websocket, "DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
-                self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="red", hover_color="darkred")
+                self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="#c1121f", hover_color="#a00f1c")
                 print("Starting stream...")
 
                 self.streaming = True
@@ -901,7 +860,7 @@ class App(ctk.CTk):
 
             else:
                 # Stop the video stream [via websocket]
-                self.button_stream.configure(text="Stream", command=self.start_stream, fg_color="#3117ea", hover_color="#190b95")
+                self.button_stream.configure(text="Stream", command=self.start_stream, fg_color="#457b9d", hover_color="#3a5f7d")
                 # Stop the loop
                 self.client.publish("DashboardRemote/CameraService/stopVideoStream/" + str(self.camera_id))
 
@@ -909,7 +868,6 @@ class App(ctk.CTk):
 
                 # Enable the broker_websocket button
                 self.button_broker.configure(state="normal")
-
 
     def broker_websocket(self):
         # Change the connection type
@@ -921,9 +879,8 @@ class App(ctk.CTk):
             self.video_connection_type = "broker"
             self.button_broker.configure(text="Broker")
 
-
     def process_frame(self, jpg_as_text):
-        
+        # Process the frame and show it in the image label
         # Convert to bytes
         image_bytes = base64.b64decode(jpg_as_text)
 
@@ -963,7 +920,7 @@ class App(ctk.CTk):
             print("Connected to broker.hivemq.com:8884")
 
         elif self.broker_selector.get() == "classpip (certificate)":
-            self.client.username_pw_set("classpip", "classpip") # Input? not the real credentials
+            self.client.username_pw_set("classpip", "mimara") # Input? not the real credentials
             self.client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
             self.client.connect("classpip.upc.edu", 8883)
             print("Connected to classpip.upc.edu:8883")
@@ -976,8 +933,8 @@ class App(ctk.CTk):
         self.client.loop_start()
         self.client.subscribe("+/DashboardRemote/#")
 
-
     def on_connect(self, client, userdata, flags, rc):
+        # Callback function for the connection
         if rc == 0:
             print("Connection OK")
             self.connected = True
@@ -986,6 +943,7 @@ class App(ctk.CTk):
             print("Bad connection")
 
     def on_message(self, client, userdata, message):
+        # Callback function for the message
         # Process the message
         splitted = message.topic.split("/")
         # Extract the information of the message
@@ -1034,6 +992,7 @@ class App(ctk.CTk):
                     self.parameter_value_label.configure(text="Value: " + str(parameter_value))
 
 
+
     # WEB SOCKET 
 
     def start_websocket(self):
@@ -1060,11 +1019,15 @@ class App(ctk.CTk):
                 self.process_frame(message)
 
     async def send_message(self, message):
+        # Send a message to the websocket
         print("Sending: ", message)
         await self.websocket.send(message)
 
     def trigger_send_message(self, websocket, message):
+        # Trigger the send message function
         asyncio.run_coroutine_threadsafe(self.send_message(message), self.loop)
+
+
 
 # Run the app
 app = App()
