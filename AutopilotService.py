@@ -106,10 +106,11 @@ def process_message(message, client):
         drone_id = int(splited[3])
         if service_id == drone_id:
             if dron.state == 'armed' or 'onHearth':
+                atargetAltitude = int(message.payload.decode("utf-8"))
                 print("- Autopilot Service: Vehicle taking off")
-                dron.take_off(10, False)
+                dron.take_off(atargetAltitude, False)
+                # The script will wait until the drone reaches the target altitude
                 print("- Autopilot Service: Vehicle reached target altitude")
-                # The script waits for the take_off to finish
 
         if dron.state == 'flying':
             dron.flying_trigger()

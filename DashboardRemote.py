@@ -57,6 +57,7 @@ class App(ctk.CTk):
         # Load images
         current_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
         self.plane_circle_1_image = ImageTk.PhotoImage(Image.open(os.path.join(current_path, "images", "drone_circle.png")).resize((35, 35)))
+        self.logo = ImageTk.PhotoImage(Image.open(os.path.join(current_path, "images", "logo.jpg")).resize((400, 400)))
 
         # Go to point
         self.go_to_point_coords = None
@@ -115,11 +116,26 @@ class App(ctk.CTk):
 
         self.info_textbox.configure(state="disabled")
 
-        # Create the info_textbox2 (read-only)
+        # Create the logo frame
+        self.logo_frame = ctk.CTkFrame(self.main_frame, height=250)
+        self.logo_frame.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=5, sticky="nswe")
+        # Color the frame
+        self.logo_frame.configure(fg_color="#fdf0d5")
+        # Create label for photo (no text, just the photo)
+        self.label_logo = ctk.CTkLabel(self.logo_frame, text="", font=("TkDefaultFont", 11))
+        # Center the label in the frame
+        self.label_logo.grid(row=0, column=0, padx=60, pady=75, sticky="nswe")
+        # Insert image
+        self.label_logo.configure(image=self.logo)
+
+        '''
         self.info_textbox2 = ctk.CTkTextbox(self.main_frame, width=350)
         self.info_textbox2.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=6, sticky="nswe")
         self.info_textbox2.insert("1.0", "Space reserved for the logo or image.")
         self.info_textbox2.configure(state="disabled")
+        # insert image
+        self.info_textbox2.image_create("1.0", image=self.logo)
+        '''
 
         # Create a option selector for the broker selection
         self.broker_selector = ctk.CTkOptionMenu(self.main_frame, values=["Select External Broker...", "hivemq","hivemq (certificate)", "classpip (certificate)"], width=130)
@@ -552,7 +568,9 @@ class App(ctk.CTk):
             # Delete every element and start the main page view
             self.connect_label.grid_forget()
             self.info_textbox.grid_forget()
-            self.info_textbox2.grid_forget()
+            self.label_logo.grid_forget()
+            self.logo_frame.grid_forget()
+            
 
             # Create the main page view
             self.set_main_page()
@@ -610,17 +628,29 @@ class App(ctk.CTk):
         self.client.publish("DashboardRemote/AutopilotService/armDrone/" + str(self.drone_id))
 
     def take_off(self):
+        # Make the border of the entry white
+        self.control_input_altitude.configure(border_color="white")
         # Change the take off button color to orange
         self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
-
-        self.client.publish("DashboardRemote/AutopilotService/takeOff/" + str(self.drone_id))
+        # Take off the drone
+        altitude = self.control_input_altitude.get()
+        if altitude != "" and int(altitude) > 0:
+            self.client.publish("DashboardRemote/AutopilotService/takeOff/" + str(self.drone_id), str(altitude))
+        else:
+            # Make the border of the entry red
+            self.control_input_altitude.configure(border_color="red")
+            print("Error: The altitude must be a positive number.")
 
     def change_altitude(self):
+        # Make the border of the entry white
+        self.control_input_altitude.configure(border_color="white")
         # Change the altitude of the drone
         altitude = self.control_input_altitude.get()
         if altitude != "" and int(altitude) > 0:
             self.client.publish("DashboardRemote/AutopilotService/changeAltitude/" + str(self.drone_id), str(altitude))
         else:
+            # Make the border of the entry red
+            self.control_input_altitude.configure(border_color="red")
             print("Error: The altitude must be a positive number.")
 
     def go(self, direction):
@@ -791,14 +821,21 @@ class App(ctk.CTk):
 
     def add_mission_waypoint_event(self, coords):
         # Add altitude to the coords (6 meters)
-        coords = (coords[0], coords[1], 6)
-        print("Add Mission Waypoint:", coords)
-        # Add the waypoint to the mission waypoints list with altitude 6
-        entry = {"lat": coords[0], "lon": coords[1], "alt": 6}
-        self.mission_waypoints.append(entry)
-        new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.mission_waypoints)), marker_color_circle="red", marker_color_outside="black", text_color="red")
-        # Add the new marker to the list
-        self.mission_markers.append(new_marker)
+        if self.control_input_altitude.get() == "" or int(self.control_input_altitude.get()) <= 0:
+            # Make red the border of the entry
+            self.control_input_altitude.configure(border_color="red")
+        else:
+            # Make the border color normal
+            self.control_input_altitude.configure(border_color="#3117ea")
+            # Add the altitude to the coords
+            coords = (coords[0], coords[1], int(self.control_input_altitude.get()))
+            print("Add Mission Waypoint:", coords)
+            # Add the waypoint to the mission waypoints list
+            entry = {"lat": coords[0], "lon": coords[1], "alt": int(self.control_input_altitude.get())}
+            self.mission_waypoints.append(entry)
+            new_marker = self.map_widget.set_marker(coords[0], coords[1], text=str(len(self.mission_waypoints)), marker_color_circle="red", marker_color_outside="black", text_color="red")
+            # Add the new marker to the list
+            self.mission_markers.append(new_marker)
 
 
     def add_geofence_point_event(self, coords):
