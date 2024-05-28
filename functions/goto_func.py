@@ -1,20 +1,21 @@
-import json
 import math
 import threading
 import time
 from pymavlink import mavutil
-from dronekit import connect, Command, VehicleMode  # noqa: F401
 
 
-def goto(self, lat, lon, alt, blocking=False):
+
+def goto_trigger(self, lat, lon, alt, blocking=False):
+    # Go to a waypoint trigger function (blocking or non-blocking)
     print('- Autopilot Service: Going to the waypoint')
     if blocking:
-        goto_MAVLINK(self, lat, lon, alt)
+        goto(self, lat, lon, alt)
     else:
-        w = threading.Thread(target=self.goto_MAVLINK, args=[lat, lon, alt])
+        w = threading.Thread(target=self.goto, args=[lat, lon, alt])
         w.start()
 
-def goto_MAVLINK(self, lat, lon, alt):
+def goto(self, lat, lon, alt):
+    # Go to a waypoint main function
     self.reaching_waypoint = True
     self.vehicle.mav.send(
         mavutil.mavlink.MAVLink_set_position_target_global_int_message(10, self.vehicle.target_system,
@@ -25,7 +26,6 @@ def goto_MAVLINK(self, lat, lon, alt):
                                                                        0))
     
     # Wait until the drone is close to the waypoint
-    
     dist = self.distanceInMeters(self.lat, self.lon, lat ,lon)
     distanceThreshold = 0.5
     while dist > distanceThreshold:
@@ -33,12 +33,7 @@ def goto_MAVLINK(self, lat, lon, alt):
         dist = self.distanceInMeters(self.lat, self.lon, lat ,lon)
     print('- Autopilot Service: Arrived to the waypoint')
     self.reaching_waypoint = False
-    #self.lock.acquire()
-    #self.client.publish(sending_topic + '/arrivedToPoint')
-    #self.lock.release()
     
-
-
 def distanceInMeters(self, lat1, lon1, lat2, lon2):
     """
     Returns the ground distance in metres between two LocationGlobal objects.

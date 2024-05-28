@@ -331,15 +331,6 @@ class App(ctk.CTk):
         self.info_textbox_drones.grid(row=4, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
 
         
-        
-
-
-    def create_table(self): # Incomplete
-        columns = ("ID", "Value")
-        self.table = ttk.Treeview(self.main_tabview.tab("Parameters"), columns=columns, show="headings")
-        self.table.heading("ID", text="ID")
-        self.table.heading("Value", text="Value")
-        self.table.grid(row=1, column=0, padx=10, pady=10, sticky="we", columnspan=2)
 
     # UPDATE CONTROL BUTTONS
     def update_control_buttons(self):

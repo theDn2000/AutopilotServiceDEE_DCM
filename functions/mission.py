@@ -4,10 +4,9 @@ import pymavlink.mavutil as utility
 
 import threading
 import json
-import time
-import math
 
 def uploadFlightPlan(self, waypoints_json):
+    # Upload a flight plan to the vehicle
     '''
     A mission is a set of waypoints that the vehicle will follow, from taking off to landing. 
     This function uploads a mission to the vehicle. 
@@ -152,6 +151,7 @@ def uploadFlightPlan(self, waypoints_json):
     print('Flight plan uploaded!')
     
 def uploadFlightPlan_trigger(self, waypoints_json, blocking=False):
+    # Upload flight plan trigger function (blocking or non-blocking)
     if blocking:
         uploadFlightPlan(self, waypoints_json)
     else:
@@ -162,26 +162,8 @@ def uploadFlightPlan_trigger(self, waypoints_json, blocking=False):
 
 
 def executeFlightPlan(self):
-    '''
-    Execute a flight plan uploaded previously
-    '''
-    # The vehicle should be in auto mode
-    '''
-    mode_id = self.vehicle.mode_mapping()['AUTO']
-    self.vehicle.mav.set_mode_send(
-        self.vehicle.target_system,
-        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
-        mode_id)
-    '''
+    # Execute a flight plan previously uploaded to the vehicle
 
-    # The vehicle should be already connected and armed
-    '''
-    if self.state != 'armed':
-        print('Vehicle is not armed')
-        return False
-
-    else:
-    '''
     # Set the vehicle to guided mode
     mode = 'GUIDED'
 
@@ -203,6 +185,7 @@ def executeFlightPlan(self):
     print('Mission started')
 
 def executeFlightPlan_trigger(self, blocking=False):
+    # Execute flight plan trigger function (blocking or non-blocking)
     if blocking:
         executeFlightPlan(self)
     else:

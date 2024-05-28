@@ -427,13 +427,6 @@ class App(ctk.CTk):
         
 
 
-    def create_table(self): # Incomplete
-        columns = ("ID", "Value")
-        self.table = ttk.Treeview(self.main_tabview.tab("Parameters"), columns=columns, show="headings")
-        self.table.heading("ID", text="ID")
-        self.table.heading("Value", text="Value")
-        self.table.grid(row=1, column=0, padx=10, pady=10, sticky="we", columnspan=2)
-
 
 
     # UPDATE CONTROL BUTTONS
@@ -740,7 +733,7 @@ class App(ctk.CTk):
     def go_to_point_event(self, coords):
         print("Go to:", coords)
         # Go to a point
-        self.dron.goto(coords[0], coords[1], 10, False)
+        self.dron.goto_trigger(coords[0], coords[1], 10, False)
  
  # CAMERA:
 

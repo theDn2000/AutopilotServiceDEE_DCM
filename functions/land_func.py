@@ -3,6 +3,7 @@ import time
 from pymavlink import mavutil
 
 
+
 def land(self):
     # Land the vehicle
     self.going = True
@@ -43,9 +44,8 @@ def land(self):
     self.reaching_waypoint = False
     self.direction = "init"
 
-
-
 def land_trigger(self, blocking=False):
+    # Trigger the land function (blocking or non-blocking)
     if blocking:
         self.land()
     else:
