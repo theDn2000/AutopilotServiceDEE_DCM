@@ -17,7 +17,7 @@ class Dron(object):
             takingOff
             changingAltitude
             flying
-            returning
+            returningHome
             landing
             onMission
         '''

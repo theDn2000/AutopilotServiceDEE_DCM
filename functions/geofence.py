@@ -9,12 +9,12 @@ def clear_Mission(self):
 
 def enable_geofence(self):
     # Enable the geofence
-    if self.get_parameter("FENCE_ENABLE", True) != 1:
+    if self.get_parameter_trigger("FENCE_ENABLE", True) != 1:
         while True:
             # Modify the parameter value
-            self.modify_parameter("FENCE_ENABLE", 1, True)
+            self.modify_parameter_trigger("FENCE_ENABLE", 1, True)
             # Get the parameter value
-            if self.get_parameter("FENCE_ENABLE", True) == 1:
+            if self.get_parameter_trigger("FENCE_ENABLE", True) == 1:
                 print("- Geofence Controller: Geofence enabled successfully")
                 # Break the loop
                 break
@@ -28,12 +28,12 @@ def enable_geofence(self):
 
 def disable_geofence(self):
     # Disable the geofence
-    if self.get_parameter("FENCE_ENABLE", True) != 0:
+    if self.get_parameter_trigger("FENCE_ENABLE", True) != 0:
         while True:
             # Modify the parameter value
-            self.modify_parameter("FENCE_ENABLE", 0, True)
+            self.modify_parameter_trigger("FENCE_ENABLE", 0, True)
             # Get the parameter value
-            if self.get_parameter("FENCE_ENABLE", True) == 0:
+            if self.get_parameter_trigger("FENCE_ENABLE", True) == 0:
                 print("- Geofence Controller: Geofence disabled successfully")
                 # Break the loop
                 break
@@ -53,9 +53,9 @@ def set_fence_geofence(self, fence_list):
     while True:
 
         # Modify the parameter value
-        self.modify_parameter("FENCE_TOTAL", len(fence_list), True)
+        self.modify_parameter_trigger("FENCE_TOTAL", len(fence_list), True)
         # Get the parameter value
-        if self.get_parameter("FENCE_TOTAL", True) == len(fence_list):
+        if self.get_parameter_trigger("FENCE_TOTAL", True) == len(fence_list):
             print("- Geofence Controller FENCE_TOTAL set to {0} successfully".format(len(fence_list)))
 
             # Break the loop
@@ -114,9 +114,9 @@ def action_geofence(self, action):
     # Set the geofence action (0: Report, 1: RTL or Land, 2: Always Land, 3: Smart RTL or RTL or Land, 4: Brake or Land, 5: Smart RTL or Land)
     while True:
         # Modify the parameter value
-        self.modify_parameter("FENCE_ACTION", int(action), True)
+        self.modify_parameter_trigger("FENCE_ACTION", int(action), True)
         # Get the parameter value
-        if self.get_parameter("FENCE_ACTION", True) == int(action):
+        if self.get_parameter_trigger("FENCE_ACTION", True) == int(action):
             print("- Geofence Controller: FENCE_ACTION set to value " + str(int(action)) + " successfully")
             # Break the loop
             break

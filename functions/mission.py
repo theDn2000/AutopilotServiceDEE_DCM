@@ -1,9 +1,10 @@
 import pymavlink.dialects.v20.all as dialect
 from pymavlink import mavutil
 import pymavlink.mavutil as utility
-
 import threading
 import json
+
+
 
 def uploadFlightPlan(self, waypoints_json):
     # Upload a flight plan to the vehicle
@@ -158,9 +159,6 @@ def uploadFlightPlan_trigger(self, waypoints_json, blocking=False):
         w = threading.Thread(target=uploadFlightPlan, args=[self, waypoints_json])
         w.start()
 
-
-
-
 def executeFlightPlan(self):
     # Execute a flight plan previously uploaded to the vehicle
 
@@ -175,7 +173,7 @@ def executeFlightPlan(self):
     arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=True)
 
     # Arm the vehicle
-    self.arm(True)
+    self.arm_trigger(True)
 
     # Set the state to "onMission"
     self.state = "onMission"

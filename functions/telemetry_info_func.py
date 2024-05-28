@@ -4,6 +4,7 @@ import time
 from pymavlink import mavutil
 
 
+
 def get_telemetry_info(self):
     # Get telemetry information
     telemetry_info = {

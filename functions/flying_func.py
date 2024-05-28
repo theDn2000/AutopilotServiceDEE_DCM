@@ -80,7 +80,7 @@ def check_flying_trigger(self):
 
 def check_flying(self):
     # Check if the vehicle is flying
-    time.sleep(0.1) # Wait for telemetry info
+    time.sleep(1) # Wait for telemetry info
     print ('Altitud: ', self.alt)
     if self.alt > 0.5:
         current_alt = self.alt

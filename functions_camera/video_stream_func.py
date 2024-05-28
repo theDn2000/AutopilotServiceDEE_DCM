@@ -18,7 +18,6 @@ def send_video_stream(self, callback): # Parecido a telemetry_info (hay que pasa
             time.sleep(0.016666666666666666)  # 6 frames per second
             #print ("envio frame") # A MODIFICAR
 
-
 def start_video_stream(self, callback):
     print("start video stream")
     self.sending_video_stream = True
