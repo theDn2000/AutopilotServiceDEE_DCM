@@ -1,5 +1,3 @@
-from dronekit import connect
-import json
 import threading
 import time
 from pymavlink import mavutil
@@ -7,19 +5,19 @@ import sys
 import itertools
 
 
-# Connect main function
-def connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string):
-    # print("The current state is: " + self.state + " , trying to connect...")
+
+def connect(self, connection_string):
+    # Connect main function, connects 
     if self.state == 'disconnected':
-        print("- Autopilot Service: Connection request by " + origin)
+        print('- DroneLink: Connecting to the vehicle...')
         # para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
         # hay que ejecutar el siguiente comando desde PowerShell desde  C:\Users\USER>
         # mavproxy - -master =COM12 - -out = udp:127.0.0.1: 14550 - -out = udp:127.0.0.1: 14551
         # ahora el servicio puede conectarse por udp a cualquira de los dos puertos 14550 o 14551 y Mission Planner
-        # al otro
+        # al otro A MODIFICAR
 
         done = False
-        #here is the animation
+        # Animation while connecting
         def animate():
             for c in itertools.cycle(['|', '/', '-', '\\']):
                 if done:
@@ -34,34 +32,25 @@ def connect_v0(self, origin, op_mode, external_client, internal_client, sending_
 
         self.vehicle = mavutil.mavlink_connection(connection_string)
         self.vehicle.wait_heartbeat()
-        # self.vehicle = connect(connection_string, wait_ready=False, baud=57600)
-        # self.vehicle.wait_ready(True, timeout=5000)
 
         time.sleep(1)
         done = True
         time.sleep(1)
-        # time.sleep(5)
-        # print('Connected to flight controller')
 
         self.sending_telemetry_info = True
         self.state = 'connected'
 
-        # external_client.publish(sending_topic + "/connected", json.dumps(get_telemetry_info()))
-
     else:
-        print('- Autopilot Service: '+origin+' already connected')
+        print('- DroneLink: Already connected to the vehicle')
 
-# Connect trigger function (for blocking or non-blocking)
-def connect(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string, blocking):
+def connect_trigger(self, connection_string, blocking):
+    # Connect trigger function (blocking or non-blocking)
     if blocking:
-        connect_v0(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string)
+        connect(self, connection_string)
     else:
-        t = threading.Thread(target=connect_v0, args=(self, origin, op_mode, external_client, internal_client, sending_topic, connection_string))
+        t = threading.Thread(target=connect, args=(self, connection_string))
         t.start()
 
-
-
-# Disconnect function
 def disconnect(self):
     # Close the connection
     if self.state != 'disconnected':

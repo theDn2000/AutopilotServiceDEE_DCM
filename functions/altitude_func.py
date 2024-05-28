@@ -3,10 +3,10 @@ from pymavlink import mavutil
 import threading
 
 
-# Arm main function
+
 def change_altitude(self, altitude, climb_rate):
-    self.reaching_waypoint = True
     # Change the altitude of the vehicle while flying
+    self.reaching_waypoint = True
     self.vehicle.mav.send(
         mavutil.mavlink.MAVLink_set_position_target_global_int_message(1, self.vehicle.target_system,
                                                                        self.vehicle.target_component,
@@ -24,11 +24,8 @@ def change_altitude(self, altitude, climb_rate):
     self.state = "flying"
     self.flying_trigger()
     
-
-
-
-# Arm trigger function (for blocking and non-blocking)
 def change_altitude_trigger(self, altitude, climb_rate, blocking):
+    # Trigger the change of altitude of the vehicle (blocking or non-blocking)
     if blocking:
         change_altitude(self)
     else:

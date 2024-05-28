@@ -3,11 +3,14 @@ import time
 from pymavlink import mavutil
 
 
+
 def flying_trigger(self):
-    w = threading.Thread(target=self.flying_v0)
+    # Enable flying trigger function in a new thread (only non-blocking)
+    w = threading.Thread(target=self.flying)
     w.start()
 
-def flying_v0(self):
+def flying(self):
+    # Main flying function
     speed = 1
     end = False
     cmd = self.prepare_command(0, 0, 0)  # stop
@@ -41,12 +44,8 @@ def flying_v0(self):
             print("Doing action: ", self.direction)
             end = True
 
-
-
 def prepare_command(self, velocity_x, velocity_y, velocity_z):
-    """
-    Move vehicle in direction based on specified velocity vectors.
-    """
+    # Move vehicle in direction based on specified velocity vectors.
     msg = mavutil.mavlink.MAVLink_set_position_target_global_int_message(
         0,  # time_boot_ms (not used)
         self.vehicle.target_system,
@@ -68,15 +67,14 @@ def prepare_command(self, velocity_x, velocity_y, velocity_z):
 
     return msg
 
-
-
 def go_order(self, direction):
+    # Set the direction of the vehicle
     self.direction = direction
     print("- Autopilot Service: Going ", self.direction)
     self.going = True
 
-
 def check_flying_trigger(self):
+    # Enable the check_flying function in a new thread
     w = threading.Thread(target=self.check_flying)
     w.start()
 

@@ -60,7 +60,7 @@ def process_message(message, client):
         else:
             print('Operation mode not recognized')
         # Connect the drone
-        dron.connect(origin, op_mode, external_client, internal_client, sending_topic, connection_string, True)
+        dron.connect_trigger(connection_string, True)
         print (str(dron.state))
 
         # If connect is OK, initialize the telemetry data
@@ -91,7 +91,7 @@ def process_message(message, client):
         if service_id == drone_id:
             # Arm the drone
             if dron.state == 'connected' or 'onHearth' or 'disarmed':
-                dron.arm(False)
+                dron.arm_trigger(False)
                 print("- Autopilot Service: Vehicle armed")
             else:
                 print('- Autopilot Service: The vehicle is not armable as it is not connected')
@@ -109,7 +109,6 @@ def process_message(message, client):
                 atargetAltitude = int(message.payload.decode("utf-8"))
                 print("- Autopilot Service: Vehicle taking off")
                 dron.take_off(atargetAltitude, False)
-                # The script will wait until the drone reaches the target altitude
                 print("- Autopilot Service: Vehicle reached target altitude")
 
         if dron.state == 'flying':

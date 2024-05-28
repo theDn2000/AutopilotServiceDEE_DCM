@@ -444,7 +444,7 @@ class App(ctk.CTk):
             print('Simulation mode selected')
             # Connect every drone to the autopilot
             for dron in self.drones:
-                dron.connect("DashboardDirect", "simulation", None, None, None, "tcp:127.0.0.1:" + str(self.ports[dron.ID - 1]), True)
+                dron.connect_tigger( "tcp:127.0.0.1:" + str(self.ports[dron.ID - 1]), True)
                 # Wait 1 second and check if the drone is connected
                 time.sleep(1)
                 if dron.state == "connected":
@@ -452,7 +452,7 @@ class App(ctk.CTk):
                 else:
                     print("Error: Drone " + str(dron.ID) + " couldn't connect.")
         else:
-            # A HACER
+            # A MODIFICAR (CUANDO SEPA COMO SE HACE DESDE EL AUTOPILOT SERVICE)
             print ('Real mode selected')
             # connection_string = "/dev/ttyS0"
             connection_string = "com7"
@@ -536,7 +536,7 @@ class App(ctk.CTk):
         # Change the arm button color to orange
         self.control_button_arm.configure(fg_color="orange", hover_color="darkorange")
         # Arm the drone
-        self.dron.arm(False)
+        self.dron.arm_trigger(False)
 
     def arm_all(self):
         # Arm all the drones

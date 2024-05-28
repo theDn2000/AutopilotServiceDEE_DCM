@@ -498,14 +498,14 @@ class App(ctk.CTk):
             else:
                 connection_string = "tcp:127.0.0.1:5763" # Default connection string
         
-        else:
+        else: # A MODIFICAR (CUANDO SEPA COMO SE HACE A PARTIR DEL AUTOPILOT SERVICE)
             print ('Real mode selected')
             # connection_string = "/dev/ttyS0"
             connection_string = "com7"
             # connection_string = "udp:127.0.0.1:14550"
 
         # Connect to the autopilot
-        self.dron.connect("DashboardDirect", "simulation", None, None, None, connection_string, True)
+        self.dron.connect_trigger(connection_string, True)
 
         if self.dron.state == "connected":
             # Delete every element and start the main page view
@@ -567,7 +567,7 @@ class App(ctk.CTk):
         # Change the arm button color to orange
         self.control_button_arm.configure(fg_color="orange", hover_color="darkorange")
         # Arm the drone
-        self.dron.arm(False)
+        self.dron.arm_trigger(False)
 
     def take_off(self):
         # Change the take off button color to orange

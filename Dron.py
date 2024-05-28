@@ -34,7 +34,7 @@ class Dron(object):
 
     from functions.connect_func import connect, disconnect
     from functions.telemetry_info_func import send_telemetry_info_trigger, get_telemetry_info, send_telemetry_info_MAVLINK
-    from functions.arm_func import armed_change, disarm, arm, check_armed, check_armed_on_loop
+    from functions.arm_func import arm, arm_trigger, check_armed, check_armed_on_loop
     from functions.take_off_func import take_off, takeOff_MAVLINK
     from functions.altitude_func import change_altitude, change_altitude_trigger
     from functions.land_func import land, land_trigger

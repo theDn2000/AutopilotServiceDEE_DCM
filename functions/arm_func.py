@@ -1,12 +1,11 @@
-import dronekit
 import time
 from pymavlink import mavutil
 import threading
 
 
-# Arm main function
-def arm_MAVLINK(self):
 
+def arm(self):
+    # Arm main function
     self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component,
                                          mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0)
     self.vehicle.motors_armed_wait()
@@ -17,14 +16,12 @@ def arm_MAVLINK(self):
     t = threading.Thread(target=self.check_armed_on_loop)
     t.start()
 
-
-
-# Arm trigger function (for blocking and non-blocking)
-def arm(self, blocking):
+def arm_trigger(self, blocking):
+    # Arm trigger function (blocking and non-blocking)
     if blocking:
-        arm_MAVLINK(self)
+        arm(self)
     else:
-        t = threading.Thread(target=arm_MAVLINK, args=(self,))
+        t = threading.Thread(target=arm, args=(self,))
         t.start()
 
 def check_armed(self):
@@ -38,7 +35,7 @@ def check_armed(self):
         return False
 
 def check_armed_on_loop(self):
-    
+    # Check if the vehicle is armed in a loop
     while True:
         if not self.check_armed():
             self.state = 'connected'
@@ -61,34 +58,3 @@ def check_armed_on_loop(self):
             break
         time.sleep(1)
 
-
-        
-# Dev:
-def armed_change(self):
-    print('cambio a ', )
-    if self.vehicle.armed:
-        self.state = 'armed'
-    else:
-        self.state = 'disarmed'
-
-    print('cambio a ', self.state)
-
-def disarm(self):
-    self.vehicle.armed = False
-    while self.vehicle.armed:
-        time.sleep(1)
-    self.state = 'disarmed'
-
-    '''
-    msg = self.vehicle.recv_match(type='HEARTBEAT', blocking=False)
-    if msg:
-        if msg.base_mode:
-            self.state = 'armed'
-            print('armed')
-        else:
-            self.state = 'connected'
-            print('disarmed')
-    else:
-        self.state = 'connected'
-        print('disarmed')
-    '''
