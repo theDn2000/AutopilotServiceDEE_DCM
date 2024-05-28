@@ -4,9 +4,8 @@ from pymavlink import mavutil
 
 
 
-# Take off main function
-def takeOff_MAVLINK(self, aTargetAltitude):
-
+def take_off(self, aTargetAltitude):
+    # Take off the vehicle to a target altitude
         
     mode = 'GUIDED'
 
@@ -40,12 +39,12 @@ def takeOff_MAVLINK(self, aTargetAltitude):
     self.flying_trigger()
     print("Vehicle flying")
 
-# Take off trigger function (for blocking and non-blocking)
-def take_off(self,aTargetAltitude, blocking):
+def take_off_trigger(self,aTargetAltitude, blocking):
+    # Take off trigger function (for blocking and non-blocking)
     if blocking:
-        takeOff_MAVLINK(self, aTargetAltitude, True)
+        take_off(self, aTargetAltitude, True)
     else:
-        t = threading.Thread(target=self.takeOff_MAVLINK, args=[aTargetAltitude])
+        t = threading.Thread(target=self.take_off, args=[aTargetAltitude])
         t.start()
 
 

@@ -173,15 +173,6 @@ class App(ctk.CTk):
         self.main_tabview.add("Geofence")
 
         # Parameters tab
-        # Add a table to see the parameters using treeview
-        ####
-        # Add a TEST button to get all the parameters
-        #self.get_parameters_button = ctk.CTkButton(self.main_tabview.tab("Parameters"), text="Get parameters", command=self.get_all_parameters, fg_color="#3117ea", hover_color="#190b95")
-        #self.get_parameters_button.grid(row=0, column=0, padx=10, pady=10, sticky="we", ipady=10)
-        
-        # Create a frame for the table
-        #self.table_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), width=265, height=80)
-        #self.table_frame.grid(row=1, column=0, padx=10, pady=10, sticky="we")
 
         # Create a frame for get a parameter, with grey background
         self.get_parameter_frame = ctk.CTkFrame(self.main_tabview.tab("Parameters"), height=80, width=265)
@@ -514,7 +505,7 @@ class App(ctk.CTk):
             t.start()
 
             # Start the telemetry info
-            self.dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
+            self.dron.send_telemetry_info_trigger(self.telemetry)
 
         else:
             # Make the label invisible and show the button again
@@ -566,7 +557,7 @@ class App(ctk.CTk):
         # Change the take off button color to orange
         self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
 
-        self.dron.take_off(10, False)
+        self.dron.take_off_trigger(10, False)
 
 
     def go(self, direction):
@@ -579,7 +570,7 @@ class App(ctk.CTk):
     def rtl(self):
         # Return to launch
         if self.dron.state == "flying":
-            self.dron.return_to_launch(False)
+            self.dron.return_to_launch_trigger(False)
 
     def wait_take_off(self):
         # Wait until the vehicle reaches the target altitude
@@ -602,7 +593,7 @@ class App(ctk.CTk):
         # Get a parameter and show it in the label
         parameter_id = self.parameter_id_input.get()
         if parameter_id != "":
-            parameter_value = self.dron.get_parameter(parameter_id, True)
+            parameter_value = self.dron.get_parameter_trigger(parameter_id, True)
             self.parameter_value_label.configure(text="Value: " + str(parameter_value))
         else:
             self.parameter_value_label.configure(text="Value: ")
@@ -614,7 +605,7 @@ class App(ctk.CTk):
         if parameter_id != "" and parameter_value != "":
             # Try to set the parameter, if it is not possible, show an error message
             try:
-                self.dron.modify_parameter(parameter_id, parameter_value, True)
+                self.dron.modify_parameter_trigger(parameter_id, parameter_value, True)
                 print("Parameter set.")
             except:
                 print("Error setting the parameter.")

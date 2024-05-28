@@ -473,7 +473,7 @@ class App(ctk.CTk):
 
             # Start the telemetry info for every drone
             for dron in self.drones:
-                dron.send_telemetry_info_trigger(None, None, None, self.telemetry)
+                dron.send_telemetry_info_trigger(self.telemetry)
 
         else:
             # Make the label invisible and show the button again
@@ -532,18 +532,18 @@ class App(ctk.CTk):
     def arm_all(self):
         # Arm all the drones
         for dron in self.drones:
-            dron.arm(False)
+            dron.arm_trigger(False)
 
     def take_off(self):
         # Change the take off button color to orange
         self.control_button_take_off.configure(fg_color="orange", hover_color="darkorange")
         # Take off the drone
-        self.dron.take_off(10, False)
+        self.dron.take_off_trigger(10, False)
 
     def take_off_all(self):
         # Take off all the drones
         for dron in self.drones:
-            dron.take_off(10, False)
+            dron.take_off_trigger(10, False)
 
     def go(self, direction):
         # Go to a direction
@@ -555,7 +555,7 @@ class App(ctk.CTk):
     def rtl(self):
         # Return to launch
         if self.dron.state == "flying":
-            self.dron.return_to_launch(False)
+            self.dron.return_to_launch_trigger(False)
 
     def wait_take_off(self):
         # Wait until the vehicle reaches the target altitude
@@ -578,7 +578,7 @@ class App(ctk.CTk):
         # Get a parameter and show it in the label
         parameter_id = self.parameter_id_input.get()
         if parameter_id != "":
-            parameter_value = self.dron.get_parameter(parameter_id, True)
+            parameter_value = self.dron.get_parameter_trigger(parameter_id, True)
             self.parameter_value_label.configure(text="Value: " + str(parameter_value))
         else:
             self.parameter_value_label.configure(text="Value: ")
@@ -590,7 +590,7 @@ class App(ctk.CTk):
         if parameter_id != "" and parameter_value != "":
             # Try to set the parameter, if it is not possible, show an error message
             try:
-                self.dron.modify_parameter(parameter_id, parameter_value, True)
+                self.dron.modify_parameter_trigger(parameter_id, parameter_value, True)
                 print("Parameter set.")
             except:
                 print("Error setting the parameter.")

@@ -1,11 +1,11 @@
 import threading
-import dronekit
 import time
 from pymavlink import mavutil
 
 
-# Return to launch main function
-def returnToLaunch_MAVLINK(self):
+
+def return_to_launch(self):
+    # Return to launch main function
     mode = 'RTL'
     self.state = 'returningHome'
     self.going = True
@@ -49,11 +49,10 @@ def returnToLaunch_MAVLINK(self):
     self.reaching_waypoint = False
     self.direction = "init"
 
-
-# Return to launch trigger function (for blocking and non-blocking)
-def return_to_launch(self, blocking):
+def return_to_launch_trigger(self, blocking=False):
+    # Return to launch trigger function (blocking and non-blocking)
     if blocking:
-        returnToLaunch_MAVLINK(self)
+        return_to_launch(self)
     else:
-        t = threading.Thread(target=self.returnToLaunch_MAVLINK)
+        t = threading.Thread(target=self.return_to_launch)
         t.start()

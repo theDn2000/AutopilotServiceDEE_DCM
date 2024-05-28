@@ -3,14 +3,14 @@ from pymavlink import mavutil
 import threading
 
 
-def modify_parameter(self, param_name, param_value, blocking=False):
+def modify_parameter_trigger(self, param_name, param_value, blocking=False):
     if blocking:
-        modify_parameter_MAVLINK(self, param_name, param_value)
+        modify_parameter(self, param_name, param_value)
     else:
-        w = threading.Thread(target=modify_parameter_MAVLINK, args=[self, param_name, param_value])
+        w = threading.Thread(target=modify_parameter, args=[self, param_name, param_value])
         w.start()
 
-def modify_parameter_MAVLINK(self, param_name, param_value):
+def modify_parameter(self, param_name, param_value):
     # Change the parameter value
     msg = self.vehicle.mav.param_set_encode(
         self.vehicle.target_system, self.vehicle.target_component,
@@ -20,14 +20,14 @@ def modify_parameter_MAVLINK(self, param_name, param_value):
 
 
 
-def get_parameter(self, param_name, blocking=False):
+def get_parameter_trigger(self, param_name, blocking=False):
     if blocking:
-        return get_parameter_MAVLINK(self, param_name)
+        return get_parameter(self, param_name)
     else:
-        w = threading.Thread(target=get_parameter_MAVLINK, args=[self, param_name])
+        w = threading.Thread(target=get_parameter, args=[self, param_name])
         w.start()
 
-def get_parameter_MAVLINK(self, param_name):
+def get_parameter(self, param_name):
     # Print the value of the THR_MIN parameter.
     msg = self.vehicle.mav.param_request_read_encode(
         self.vehicle.target_system, self.vehicle.target_component,
@@ -42,14 +42,14 @@ def get_parameter_MAVLINK(self, param_name):
     
 
 
-def  get_all_parameters(self, blocking=False):
+def  get_all_parameters_trigger(self, blocking=False):
     if blocking:
-        return get_all_parameters_MAVLINK(self)
+        return get_all_parameters(self)
     else:
-        w = threading.Thread(target=get_all_parameters_MAVLINK, args=[self])
+        w = threading.Thread(target=get_all_parameters, args=[self])
         w.start()
 
-def get_all_parameters_MAVLINK(self):
+def get_all_parameters(self):
     # Print all parameters
     msg = self.vehicle.mav.param_request_list_encode(
         self.vehicle.target_system, mavutil.mavlink.MAV_COMP_ID_ALL)

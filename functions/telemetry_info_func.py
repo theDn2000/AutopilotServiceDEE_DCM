@@ -5,6 +5,7 @@ from pymavlink import mavutil
 
 
 def get_telemetry_info(self):
+    # Get telemetry information
     telemetry_info = {
         'lat': self.vehicle.location.global_frame.lat,
         'lon': self.vehicle.location.global_frame.lon,
@@ -16,15 +17,15 @@ def get_telemetry_info(self):
     }
     return telemetry_info
 
-
-
-def send_telemetry_info_trigger(self, external_client, internal_client, sending_topic, callback):
+def send_telemetry_info_trigger(self, callback):
+    # Send telemetry information trigger function (alqays non-blocking)
     self.sending_telemetry_info = True
-    y = threading.Thread(target=self.send_telemetry_info_MAVLINK, args=[sending_topic, callback])
+    y = threading.Thread(target=self.send_telemetry_info, args=[callback])
     y.start()
 
-def send_telemetry_info_MAVLINK(self, sending_topic, callback):
-    print('- Autopilot Service: Telemetry info sending started')
+def send_telemetry_info(self, callback):
+    # Send telemetry information
+    print('- DroneLink: Telemetry info sending started')
     frequency_hz = 2
     self.vehicle.mav.command_long_send(
         self.vehicle.target_system,  self.vehicle.target_component,
@@ -68,17 +69,21 @@ def send_telemetry_info_MAVLINK(self, sending_topic, callback):
             }
             # Send telemetry info using the apropiate method
             self.lock.acquire()
+            # Callback function is provided by the service
             callback(telemetry_info, self.ID)
-            #self.external_client.publish(sending_topic + '/telemetryInfo', json.dumps(telemetry_info))
             self.lock.release()
         time.sleep(0.25)
 
+def get_position(self):
+    # Get the drone position, latitude, longitude and altitude (additional function)
+    self.vehicle.mav.mission_request_send(self.vehicle.target_system, self.vehicle.target_component, 0)
 
-'''
-def send_output(self, data, callback):
-    # This function gets the output data, process it and sends it using the callback function
-    if data is not None:
-        callback(data)
-    else:
-        print ('No output data received')
-'''
+    # Wait for a response (blocking)
+    msg = self.vehicle.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+    # Return the value of the parameter
+    msg = msg.to_dict()
+    latitude = msg['lat']*1e-7
+    longitude = msg['lon']*1e-7
+    altitude = msg['alt']*1e-3
+
+    return latitude, longitude, altitude

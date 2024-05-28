@@ -108,7 +108,7 @@ def process_message(message, client):
             if dron.state == 'armed' or 'onHearth':
                 atargetAltitude = int(message.payload.decode("utf-8"))
                 print("- Autopilot Service: Vehicle taking off")
-                dron.take_off(atargetAltitude, False)
+                dron.take_off_trigger(atargetAltitude, False)
                 print("- Autopilot Service: Vehicle reached target altitude")
 
         if dron.state == 'flying':
@@ -130,8 +130,9 @@ def process_message(message, client):
         # Check if the drone is the requested one
         drone_id = int(splited[3])
         if service_id == drone_id:
-            # stop the process of getting positions # A MODIFICAR
-            dron.return_to_launch(False)
+            if dron.state == 'flying':
+                # Return to launch
+                dron.return_to_launch_trigger(False)
 
     if command == "disarmDrone":
         # Check if the drone is the requested one
@@ -147,7 +148,7 @@ def process_message(message, client):
         if service_id == drone_id:
             # Get the parameter value
             if dron.state != 'disconnected':
-                parameter_value = dron.get_parameter(message.payload.decode("utf-8"), True)
+                parameter_value = dron.get_parameter_trigger(message.payload.decode("utf-8"), True)
                 # Publish the parameter value to return it to the client
                 client.publish(sending_topic + '/getParameterResponse/' + str(drone_id), parameter_value)
                 print('Message sent')
@@ -163,7 +164,7 @@ def process_message(message, client):
                 message_splited = message.payload.decode("utf-8").split("/")
                 parameter_id = message_splited[0]
                 parameter_value = float(message_splited[1])
-                dron.modify_parameter(parameter_id, parameter_value, True)
+                dron.modify_parameter_trigger(parameter_id, parameter_value, True)
                 print("Parameter " + parameter_id + " set to " + str(parameter_value))
             else:
                 print('Vehicle not connected')
