@@ -175,9 +175,13 @@ def process_message(message, client):
             if dron.state != 'disconnected':
                 message_splited = message.payload.decode("utf-8").split("/")
                 parameter_id = message_splited[0]
-                parameter_value = float(message_splited[1])
-                dron.modify_parameter_trigger(parameter_id, parameter_value, True)
-                print("- Autopilot Service: Parameter " + parameter_id + " set to " + str(parameter_value))
+                try:
+                    parameter_value = float(message_splited[1])
+                    dron.modify_parameter_trigger(parameter_id, parameter_value, True)
+                    print("- Autopilot Service: Parameter " + parameter_id + " set to " + str(parameter_value))
+                except ValueError:
+                    print("- Autopilot Service: The parameter value must be a number")
+
             else:
                 print('- Autopilot Service: Vehicle not connected')
     
