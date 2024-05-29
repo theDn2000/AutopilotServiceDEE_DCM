@@ -4,7 +4,7 @@ import threading
 
 
 
-def change_altitude(self, altitude, climb_rate):
+def change_altitude(self, altitude):
     # Change the altitude of the vehicle while flying
     self.reaching_waypoint = True
     self.vehicle.mav.send(
@@ -24,10 +24,10 @@ def change_altitude(self, altitude, climb_rate):
     self.state = "flying"
     self.flying_trigger()
     
-def change_altitude_trigger(self, altitude, climb_rate, blocking):
+def change_altitude_trigger(self, altitude, blocking):
     # Trigger the change of altitude of the vehicle (blocking or non-blocking)
     if blocking:
         change_altitude(self)
     else:
-        t = threading.Thread(target=change_altitude, args=(self, altitude, climb_rate))
+        t = threading.Thread(target=change_altitude, args=(self, altitude))
         t.start()
