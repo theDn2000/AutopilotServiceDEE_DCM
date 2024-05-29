@@ -4,17 +4,14 @@ class Camera(object):
     def __init__(self, ID):
         self.ID = ID # ID of the camera
         self.cap = cv.VideoCapture(0) # video capture source camera (Here webcam of lap>
-
-        # Camera state
-        self.state = "disconnected"
-
-        
-        self.sending_video_stream = False
+        self.sending_video_stream = False # Flag to send video stream 
 
 
-    # aqui se importan los métodos de la clase "Camera", que están organizados en ficheros.
-    # Así podría orgenizarse la aportación de futuros alumnos que necesitasen incorporar nuevos servicios
-    # para sus aplicaciones. Crearían un fichero con sus nuevos métodos y lo importarían aquí
+    '''
+    Here the methods of the Camera class are imported, which are organized into files.
+    This way, future students who need to incorporate new services for their applications could organize their contributions.
+    They would create a file with their new methods and import it here.
+    '''
 
     from functions_camera.take_picture_func import take_picture
     from functions_camera.video_stream_func import send_video_stream, start_video_stream, stop_video_stream

@@ -31,13 +31,11 @@ class Dron(object):
         self.reaching_waypoint = False # Flag to indicate that the drone is reaching a waypoint (Mission and Goto)
 
 
-    # A MODIFICAR
-    # aqui se importan los métodos de la clase Dron, que están organizados en ficheros.
-    # Así podría orgenizarse la aportación de futuros alumnos que necesitasen incorporar nuevos servicios
-    # para sus aplicaciones. Crearían un fichero con sus nuevos métodos y lo importarían aquí
-    # Lo que no me gusta mucho es que si esa contribución nueva requiere de algún nuevo atributo de clase
-    # ese atributo hay que declararlo aqui y no en el fichero con los métodos nuevos.
-    # Ese es el caso del atributo going, que lo tengo que declarar aqui y preferiría poder declararlo en el fichero dron_goto
+    '''
+    Here the methods of the Dron class are imported, which are organized into files.
+    This way, future students who need to incorporate new services for their applications could organize their contributions.
+    They would create a file with their new methods and import it here.
+    '''
 
     from functions.connect_func import connect, connect_trigger, disconnect
     from functions.telemetry_info_func import send_telemetry_info, send_telemetry_info_trigger, get_telemetry_info, get_position
