@@ -14,9 +14,15 @@ def modify_parameter_trigger(self, param_name, param_value, blocking=False):
 
 def modify_parameter(self, param_name, param_value):
     # Change the parameter value
-    msg = self.vehicle.mav.param_set_encode(
+    try:
+        # If the parameter value cannot be converted to a float, return an error
+        param_value = float(param_value)
+        msg = self.vehicle.mav.param_set_encode(
         self.vehicle.target_system, self.vehicle.target_component,
         param_name.encode(encoding="utf-8"), param_value, mavutil.mavlink.MAV_PARAM_TYPE_REAL32)
+    except ValueError:
+        print('- DroneLink: The parameter value must be a number')
+
     
     self.vehicle.mav.send(msg)
 

@@ -10,12 +10,6 @@ def connect(self, connection_string):
     # Connect main function, connects 
     if self.state == 'disconnected':
         print('- DroneLink: Connecting to the vehicle...')
-        # para conectar este autopilotService al dron al mismo tiempo que conectamos el Mission Planner
-        # hay que ejecutar el siguiente comando desde PowerShell desde  C:\Users\USER>
-        # mavproxy - -master =COM12 - -out = udp:127.0.0.1: 14550 - -out = udp:127.0.0.1: 14551
-        # ahora el servicio puede conectarse por udp a cualquira de los dos puertos 14550 o 14551 y Mission Planner
-        # al otro A MODIFICAR
-
         done = False
         # Animation while connecting
         def animate():
