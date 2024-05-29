@@ -353,7 +353,7 @@ class App(ctk.CTk):
 
         # Create label for photo (no text, just the photo)
         self.label_photo = ctk.CTkLabel(self.frame_stream, text="", font=("TkDefaultFont", 11))
-        self.label_photo.grid(row=0, column=0, padx=15, pady=3, sticky="w")
+        self.label_photo.place(relx=0.5, rely=0.5, anchor="center")
 
         # Create the main_frame_control_pad (for control pad)
         self.main_frame_control_pad = ctk.CTkFrame(self.main_frame, height=150)
