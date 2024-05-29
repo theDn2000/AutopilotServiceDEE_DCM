@@ -11,8 +11,8 @@ def take_off(self, aTargetAltitude):
 
     # Check if mode is available
     if mode not in self.vehicle.mode_mapping():
-        print('Unknown mode : {}'.format(mode))
-        print('Try:', list(self.vehicle.mode_mapping().keys()))
+        print('- DroneLink: Unknown mode : {}'.format(mode))
+        print('- DroneLink: Try:', list(self.vehicle.mode_mapping().keys()))
 
     # Get mode ID
     
@@ -22,7 +22,7 @@ def take_off(self, aTargetAltitude):
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
     arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=True, timeout=3)
-    print('- Autopilot Service: Mode changed to GUIDED')
+    print('- DroneLink: Mode changed to GUIDED')
     
     
     self.state = 'takingOff'
@@ -37,7 +37,7 @@ def take_off(self, aTargetAltitude):
 
     # Enable flying trigger
     self.flying_trigger()
-    print("Vehicle flying")
+    print("- DroneLink: Vehicle flying")
 
 def take_off_trigger(self,aTargetAltitude, blocking):
     # Take off trigger function (for blocking and non-blocking)

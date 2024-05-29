@@ -12,8 +12,8 @@ def return_to_launch(self):
     self.direction = "RTL"
     # Check if mode is available
     if mode not in self.vehicle.mode_mapping():
-        print('Unknown mode : {}'.format(mode))
-        print('Try:', list(self.vehicle.mode_mapping().keys()))
+        print('- DroneLink: Unknown mode : {}'.format(mode))
+        print('- DroneLink: Try:', list(self.vehicle.mode_mapping().keys()))
 
     # Get mode ID
     mode_id = self.vehicle.mode_mapping()[mode]
@@ -22,7 +22,7 @@ def return_to_launch(self):
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
     arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=False, timeout=3)
-    print('- Autopilot Service: Returning to launch')
+    print('- DroneLink: Returning to launch')
     # Check if the vehicle is disarmed, if it is, set the state to connected
     while self.check_armed():
         time.sleep(1)
@@ -31,8 +31,8 @@ def return_to_launch(self):
     mode = 'STABILIZE'
     # Check if mode is available
     if mode not in self.vehicle.mode_mapping():
-        print('Unknown mode : {}'.format(mode))
-        print('Try:', list(self.vehicle.mode_mapping().keys()))
+        print('- DroneLink: Unknown mode : {}'.format(mode))
+        print('- DroneLink: Try:', list(self.vehicle.mode_mapping().keys()))
 
     # Get mode ID
     mode_id = self.vehicle.mode_mapping()[mode]
@@ -41,7 +41,7 @@ def return_to_launch(self):
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
     arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=False, timeout=3)
-    print('- Autopilot Service: Mode changed to STABILIZE')
+    print('- DroneLink: Mode changed to STABILIZE')
 
     self.vehicle.motors_disarmed_wait()
     self.going = False

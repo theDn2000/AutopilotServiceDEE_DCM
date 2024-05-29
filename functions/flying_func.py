@@ -21,7 +21,7 @@ def flying(self):
                 self.vehicle.mav.send(cmd)
                 time.sleep(1)
         # a new go command has been received. Check direction
-        print('Voy ', self.direction)
+        print('- DroneLink: Going ', self.direction)
         if self.direction == "North":
             cmd = self.prepare_command(speed, 0, 0)  # NORTH
         if self.direction == "South":
@@ -41,7 +41,6 @@ def flying(self):
         if self.direction == "Stop":
             cmd = self.prepare_command(0, 0, 0)  # STOP
         if self.direction == "RTL" or self.direction == "Land" or self.direction == "changingAltitude":
-            print("Doing action: ", self.direction)
             end = True
 
 def prepare_command(self, velocity_x, velocity_y, velocity_z):
@@ -70,7 +69,6 @@ def prepare_command(self, velocity_x, velocity_y, velocity_z):
 def go_order(self, direction):
     # Set the direction of the vehicle
     self.direction = direction
-    print("- Autopilot Service: Going ", self.direction)
     self.going = True
 
 def check_flying_trigger(self):
@@ -81,13 +79,11 @@ def check_flying_trigger(self):
 def check_flying(self):
     # Check if the vehicle is flying
     time.sleep(1) # Wait for telemetry info
-    print ('Altitud: ', self.alt)
     if self.alt > 0.5:
         current_alt = self.alt
         while True:
             # Then, check if the vehicle is not taking off
             if self.alt > current_alt + 0.0125*current_alt:
-                print('Altitud actual: ', self.alt, 'Altitud anterior: ', current_alt, 'Diferencia: ', self.alt - current_alt)
                 # The vehicle is taking off
                 if self.state == 'armed' or self.state == 'connected':
                     self.state = 'takingOff'
@@ -101,8 +97,8 @@ def check_flying(self):
         mode = 'GUIDED'
         # Check if mode is available
         if mode not in self.vehicle.mode_mapping():
-            print('Unknown mode : {}'.format(mode))
-            print('Try:', list(self.vehicle.mode_mapping().keys()))
+            print('- DroneLink: Unknown mode : {}'.format(mode))
+            print('- DroneLink: Try:', list(self.vehicle.mode_mapping().keys()))
         # Get mode ID
         mode_id = self.vehicle.mode_mapping()[mode]
         self.vehicle.mav.set_mode_send(
@@ -110,7 +106,7 @@ def check_flying(self):
             mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
             mode_id)
         arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=False, timeout=3)
-        print('- Autopilot Service: Mode changed to GUIDED')
+        print('- DroneLink: Mode changed to GUIDED')
         return True
     else:
         return False

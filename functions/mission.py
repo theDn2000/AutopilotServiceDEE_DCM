@@ -37,7 +37,7 @@ def uploadFlightPlan(self, waypoints_json):
     latitude_home = msg['latitude']
     longitude_home = msg['longitude']
     altitude_home = 0 # The drone will take off from the ground
-    print (f'Home position: {latitude_home}, {longitude_home}, {altitude_home}')
+    print (f'- Mission Controller: Home position: {latitude_home}, {longitude_home}, {altitude_home}')
 
     # Add the home waypoint to the mission
     waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(self.vehicle.target_system,                           # Target system
@@ -54,7 +54,7 @@ def uploadFlightPlan(self, waypoints_json):
                                        latitude_home,                                                    # Param 5 (Latitude)
                                        longitude_home,                                                   # Param 6 (Longitude)
                                        altitude_home))                                                   # Param 7 (Altitude)
-    print("Home waypoint added to the waypoint loader")
+    print("- Mission Controller: Home waypoint added to the waypoint loader")
 
     # Add the takeoff waypoint to the mission
     waypoint_loader.append(utility.mavlink.MAVLink_mission_item_int_message(self.vehicle.target_system,   # Target system
@@ -71,7 +71,7 @@ def uploadFlightPlan(self, waypoints_json):
                                         latitude_home,                                                    # Param 5 (Latitude)
                                         longitude_home,                                                   # Param 6 (Longitude)
                                         waypoints_json['coordinates'][0]['alt']))                        # Param 7 (Altitude)
-    print("Takeoff waypoint added to the waypoint loader")
+    print("- Mission Controller: Takeoff waypoint added to the waypoint loader")
 
     # Add the route waypoints to the mission
     sequence = 2
@@ -112,7 +112,7 @@ def uploadFlightPlan(self, waypoints_json):
                                         0,                                                                # Param 5 (Latitude)
                                         0,                                                                # Param 6 (Longitude)
                                         0))                                                               # Param 7 (Altitude)
-    print ("RTL command added to the waypoint loader")
+    print ("- Mission Controller: RTL command added to the waypoint loader")
 
     # Delete all previous missions and waypoints
     #self.vehicle.mav.mission_clear_all_send(self.vehicle.target_system, self.vehicle.target_component)
@@ -120,22 +120,21 @@ def uploadFlightPlan(self, waypoints_json):
     
     # Recieve the ACK
     ack = self.vehicle.recv_match(type='MISSION_ACK', blocking=True)
-    print("Previous mission cleared")
+    print("- Mission Controller: Previous mission cleared")
 
     # Send the number of waypoints
     self.vehicle.waypoint_count_send(len(waypoint_loader))
 
     # Send all the items
     for i in range(0, len(waypoint_loader)):
-        print("Waiting for response...")
         # Wait for the ACK [MISSION_REQUEST_INT]
         ack = self.vehicle.recv_match(type=['MISSION_REQUEST_INT', 'MISSION_REQUEST'], blocking=True)
-        print ("Requesting waypoint" + str(ack.seq)) 
+        print ("- Mission Controller: Requesting waypoint" + str(ack.seq)) 
         try:
-            print(f'Sending waypoint {ack.seq}/{len(waypoint_loader) - 1}: {waypoint_loader[ack.seq]}')
+            print(f'- Mission Controller: Sending waypoint {ack.seq}/{len(waypoint_loader) - 1}: {waypoint_loader[ack.seq]}')
             self.vehicle.mav.send(waypoint_loader[ack.seq])
         except Exception as e: 
-            print("Error sending waypoint")
+            print("- Mission Controller: Error sending waypoint")
         # Wait 2 seconds before sending the next waypoint
         #time.sleep(2)
 
@@ -149,7 +148,7 @@ def uploadFlightPlan(self, waypoints_json):
     ack = self.vehicle.recv_match(type='MISSION_ACK', blocking=True)
 
     # Send feedback to the user
-    print('Flight plan uploaded!')
+    print('- Mission Controller: Flight plan uploaded!')
     
 def uploadFlightPlan_trigger(self, waypoints_json, blocking=False):
     # Upload flight plan trigger function (blocking or non-blocking)
@@ -180,7 +179,7 @@ def executeFlightPlan(self):
 
     # Start the mission
     self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, mavutil.mavlink.MAV_CMD_MISSION_START, 0, 0, 0, 0, 0, 0, 0, 0)
-    print('Mission started')
+    print('- Mission Controller: Mission started')
 
 def executeFlightPlan_trigger(self, blocking=False):
     # Execute flight plan trigger function (blocking or non-blocking)

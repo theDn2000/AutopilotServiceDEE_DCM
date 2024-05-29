@@ -44,8 +44,8 @@ def check_armed_on_loop(self):
             mode = 'STABILIZE'
             # Check if mode is available
             if mode not in self.vehicle.mode_mapping():
-                print('Unknown mode : {}'.format(mode))
-                print('Try:', list(self.vehicle.mode_mapping().keys()))
+                print('- DroneLink: Unknown mode : {}'.format(mode))
+                print('- DroneLink: Try:', list(self.vehicle.mode_mapping().keys()))
 
             # Get mode ID
             mode_id = self.vehicle.mode_mapping()[mode]
@@ -54,7 +54,7 @@ def check_armed_on_loop(self):
                 mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
                 mode_id)
             arm_msg = self.vehicle.recv_match(type='COMMAND_ACK', blocking=False, timeout=3)
-            print('- Autopilot Service: Mode changed to STABILIZE')
+            print('- DroneLink: Mode changed to STABILIZE')
             break
         time.sleep(1)
 

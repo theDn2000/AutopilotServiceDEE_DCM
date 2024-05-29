@@ -7,7 +7,7 @@ from pymavlink import mavutil
 
 def goto_trigger(self, lat, lon, alt, blocking=False):
     # Go to a waypoint trigger function (blocking or non-blocking)
-    print('- Autopilot Service: Going to the waypoint')
+    print('- DroneLink: Going to the waypoint')
     if blocking:
         goto(self, lat, lon, alt)
     else:
@@ -31,7 +31,7 @@ def goto(self, lat, lon, alt):
     while dist > distanceThreshold:
         time.sleep(0.25)
         dist = self.distanceInMeters(self.lat, self.lon, lat ,lon)
-    print('- Autopilot Service: Arrived to the waypoint')
+    print('- DroneLink: Waypoint reached')
     self.reaching_waypoint = False
     
 def distanceInMeters(self, lat1, lon1, lat2, lon2):
