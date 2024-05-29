@@ -113,14 +113,14 @@ class App(ctk.CTk):
         self.info_textbox.configure(state="disabled")
 
         # Create the logo frame
-        self.logo_frame = ctk.CTkFrame(self.main_frame, height=250)
+        self.logo_frame = ctk.CTkFrame(self.main_frame, height=250, width=400)
         self.logo_frame.grid(row=0, column=0, padx=10, pady=10, rowspan=8, columnspan=5, sticky="nswe")
         # Color the frame
         self.logo_frame.configure(fg_color="#fdf0d5")
         # Create label for photo (no text, just the photo)
         self.label_logo = ctk.CTkLabel(self.logo_frame, text="", font=("TkDefaultFont", 11))
         # Center the label in the frame
-        self.label_logo.grid(row=0, column=0, padx=60, pady=75, sticky="nswe")
+        self.label_logo.place(relx=0.5, rely=0.5, anchor="center")
         # Insert image
         self.label_logo.configure(image=self.logo)
 
@@ -887,7 +887,7 @@ class App(ctk.CTk):
         # Create image PIL with the bytes
         image_pil = Image.open(io.BytesIO(image_bytes))
         # Resize the image
-        image_pil = image_pil.resize((240, 130), Image.ANTIALIAS)
+        image_pil = image_pil.resize((240, 130), Image.LANCZOS)
 
         # Convert to custom tkinter image
         image_tk = ImageTk.PhotoImage(image_pil)
