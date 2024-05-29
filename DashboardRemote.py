@@ -887,7 +887,7 @@ class App(ctk.CTk):
         # Create image PIL with the bytes
         image_pil = Image.open(io.BytesIO(image_bytes))
         # Resize the image
-        image_pil = image_pil.resize((240, 130), Image.LANCZOS)
+        image_pil = image_pil.resize((432, 234), Image.LANCZOS) # AR 1,85:1
 
         # Convert to custom tkinter image
         image_tk = ImageTk.PhotoImage(image_pil)
