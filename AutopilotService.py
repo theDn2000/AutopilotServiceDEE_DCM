@@ -304,9 +304,9 @@ def on_external_message(client, userdata, message):
 
 def on_connect(external_client, userdata, flags, rc):
     if rc == 0:
-        print("Connection OK")
+        print("- Autopilot Service: Connection OK")
     else:
-        print("Bad connection")
+        print("- Autopilot Service: Bad connection")
 
 def process_output(telemetry_info, drone_id):
     # Callback function to send the telemetry_info packet
@@ -316,26 +316,26 @@ def AutopilotService(connection_mode, operation_mode, external_broker, username,
     global op_mode
     global state
 
-    print('Connection mode: ', connection_mode)
-    print('Operation mode: ', operation_mode)
+    print('- Autopilot Service: Connection mode: ', connection_mode)
+    print('- Autopilot Service: Operation mode: ', operation_mode)
     op_mode = operation_mode
 
     if connection_mode == "global":
         if external_broker == "hivemq":
             external_client.connect("broker.hivemq.com", 8000)
-            print('Connected to broker.hivemq.com:8000')
+            print('- Autopilot Service: Connected to broker.hivemq.com:8000')
 
         elif external_broker == "hivemq_cert":
             external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
             external_client.connect("broker.hivemq.com", 8884)
-            print('Connected to broker.hivemq.com:8884')
+            print('- Autopilot Service: Connected to broker.hivemq.com:8884')
 
         elif external_broker == "classpip_cred":
             external_client.username_pw_set(
                 username, password
             )
             external_client.connect("classpip.upc.edu", 8000)
-            print('Connected to classpip.upc.edu:8000')
+            print('- Autopilot Service: Connected to classpip.upc.edu:8000')
 
         elif external_broker == "classpip_cert":
             external_client.username_pw_set(
@@ -344,22 +344,22 @@ def AutopilotService(connection_mode, operation_mode, external_broker, username,
             external_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
                                     tls_version=ssl.PROTOCOL_TLS, ciphers=None)
             external_client.connect("classpip.upc.edu", 8883)
-            print('Connected to classpip.upc.edu:8883')
+            print('- Autopilot Service: Connected to classpip.upc.edu:8883')
         elif external_broker == "localhost":
             external_client.connect("localhost", 8000)
-            print('Connected to localhost:8000')
+            print('- Autopilot Service: Connected to localhost:8000')
         elif external_broker == "localhost_cert":
-            print('Not implemented yet')
+            print('- Autopilot Service: Not implemented yet')
 
     elif connection_mode == "local":
         if operation_mode == "simulation":
             external_client.connect("localhost", 8000)
-            print('Connected to localhost:8000')
+            print('- Autopilot Service: Connected to localhost:8000')
         else:
             external_client.connect("10.10.10.1", 8000)
-            print('Connected to 10.10.10.1:8000')
+            print('- Autopilot Service: Connected to 10.10.10.1:8000')
 
-    print("Waiting....")
+    print("- Autopilot Service: Waiting....")
     external_client.subscribe("+/AutopilotService/#", 2)
     external_client.subscribe("cameraService/+/#", 2)
     internal_client.subscribe("+/AutopilotService/#")

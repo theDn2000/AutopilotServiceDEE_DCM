@@ -1,16 +1,11 @@
 import ssl
-
 import cv2 as cv # OpenCV 
 from Camera import Camera
 import paho.mqtt.client as mqtt
-import base64
 import threading
-import time
 import websockets
 import asyncio
 import queue
-
-import json
 
 
 def process_message(message,   client):
@@ -25,11 +20,11 @@ def process_message(message,   client):
     origin = splited[0]
     command = splited[2]
     camera_id = splited[3]
-    print("recibo ", command, "de ", origin)
 
     if command == "takePicture":
         # Check if the camera is the requested one
         if service_id == camera_id:
+            print('- Camera Service: Received "' + command +'".')
             # Take a picture
             jpg_as_text = camera.take_picture()
             # Publish the image to the broker
@@ -38,12 +33,14 @@ def process_message(message,   client):
     if command == "startVideoStream":
         # Check if the camera is the requested one
         if service_id == camera_id:
+            print('- Camera Service: Received "' + command +'".')
             # Start the video stream
             camera.start_video_stream(callback_broker)
 
     if command == "stopVideoStream":
         # Check if the camera is the requested one
         if service_id == camera_id:
+            print('- Camera Service: Received "' + command +'".')
             # Stop the video stream
             camera.stop_video_stream()
 
@@ -54,48 +51,40 @@ def callback_broker(jpg_as_text):
     # Publish the image to the broker (for video streaming)
     external_client.publish("CameraService/" + origin + "/picture/" + str(service_id), jpg_as_text)
 
-
 def on_internal_message(client, userdata, message):
-    print("recibo internal ", message.topic)
+    print("- Camera Service: Received internal ", message.topic)
     global internal_client
     process_message(message, internal_client)
 
 def on_external_message(client, userdata, message):
-    print("recibo external ", message.topic)
+    print("- Camera Service: Received external ", message.topic)
 
     global external_client
     process_message(message, external_client)
 
 def on_connect(external_client, userdata, flags, rc):
     if rc == 0:
-        print("Connection OK")
+        print("- Camera Service: Connection OK")
     else:
-        print("Bad connection")
-
-
+        print("- Camera Service: Bad connection")
 
 def CameraService(connection_mode, operation_mode, external_broker, username, password):
     global op_mode
     global external_client
     global internal_client
-    global state
     global cap
     global colorDetector
 
-    sending_video_stream = False
-
     cap = cv.VideoCapture(0)  # video capture source camera (Here webcam of lap>
 
-    print("Camera ready")
+    print("- Camera Service: Camera ready")
 
-    print("Connection mode: ", connection_mode)
-    print("Operation mode: ", operation_mode)
+    print("- Camera Service: Connection mode: ", connection_mode)
+    print("- Camera Service: Operation mode: ", operation_mode)
     op_mode = operation_mode
 
-    state = "disconnected"
-
-    print("Connection mode: ", connection_mode)
-    print("Operation mode: ", operation_mode)
+    print("- Camera Service: Connection mode: ", connection_mode)
+    print("- Camera Service: Operation mode: ", operation_mode)
     op_mode = operation_mode
 
 
@@ -103,7 +92,7 @@ def CameraService(connection_mode, operation_mode, external_broker, username, pa
     if connection_mode == "global":
         if external_broker == "hivemq":
             external_client.connect("broker.hivemq.com", 8000)
-            print("Connected to broker.hivemq.com:8000")
+            print("- Camera Service: Connected to broker.hivemq.com:8000")
 
         elif external_broker == "hivemq_cert":
             external_client.tls_set(
@@ -115,12 +104,12 @@ def CameraService(connection_mode, operation_mode, external_broker, username, pa
                 ciphers=None,
             )
             external_client.connect("broker.hivemq.com", 8884)
-            print("Connected to broker.hivemq.com:8884")
+            print("- Camera Service: Connected to broker.hivemq.com:8884")
 
         elif external_broker == "classpip_cred":
             external_client.username_pw_set(username, password)
             external_client.connect("classpip.upc.edu", 8000)
-            print("Connected to classpip.upc.edu:8000")
+            print("- Camera Service: Connected to classpip.upc.edu:8000")
 
         elif external_broker == "classpip_cert":
             external_client.username_pw_set(username, password)
@@ -133,22 +122,22 @@ def CameraService(connection_mode, operation_mode, external_broker, username, pa
                 ciphers=None,
             )
             external_client.connect("classpip.upc.edu", 8883)
-            print("Connected to classpip.upc.edu:8883")
+            print("- Camera Service: Connected to classpip.upc.edu:8883")
         elif external_broker == "localhost":
             external_client.connect("localhost", 8000)
-            print("Connected to localhost:8000")
+            print("- Camera Service: Connected to localhost:8000")
         elif external_broker == "localhost_cert":
-            print("Not implemented yet")
+            print("- Camera Service: Not implemented yet")
 
     elif connection_mode == "local":
         if operation_mode == "simulation":
             external_client.connect("localhost", 8000)
-            print("Connected to localhost:8000")
+            print("- Camera Service: Connected to localhost:8000")
         else:
             external_client.connect("10.10.10.1", 8000)
-            print("Connected to 10.10.10.1:8000")
+            print("- Camera Service: Connected to 10.10.10.1:8000")
 
-    print("Waiting....")
+    print("- Camera Service: Waiting....")
     external_client.subscribe("+/CameraService/#", 2)
     internal_client.subscribe("+/CameraService/#")
     internal_client.loop_start()
@@ -165,7 +154,7 @@ async def send_video_stream(websocket, path):
         frames_queue.put(jpg_as_text)
     
     # Function that recieves the client message and processes it to start or stop sending video stream
-    print("Starting video stream via Websocket")
+    print("- Camera Service: Starting video stream via Websocket")
     async for message in websocket:
         # Split the message
         splited = message.split("/")
@@ -182,7 +171,7 @@ async def send_video_stream(websocket, path):
                 while camera.sending_video_stream == True:
                     jpg_as_text = frames_queue.get()
                     if jpg_as_text is None:
-                        print("No frame to send")
+                        print("- Camera Service: No frame to send")
                         #await asyncio.sleep(0.03333333333333333)  # 30 frames per second
                         await asyncio.sleep(0.01666666666666667)  # 60 frames per second
                     else:
@@ -191,15 +180,14 @@ async def send_video_stream(websocket, path):
                             #await asyncio.sleep(0.03333333333333333)  # 30 frames per second
                             await asyncio.sleep(0.01666666666666667)  # 60 frames per second
                         except Exception as e:
-                            print("Error sending frame: ", e)
+                            print("- Camera Service: Error sending frame: ", e)
 
 
                 
             elif command == "stopVideoStream":
                 # Stop the video stream
-                print("Stopping video stream via Websocket")
+                print("- Camera Service: Stopping video stream via Websocket")
                 camera.stop_video_stream()
-
 
 async def start_websocket_server():
     # Start the websocket server
@@ -207,7 +195,6 @@ async def start_websocket_server():
     print("- CameraService: Websocket server listening on port:", port)
     websocket = websockets.serve(send_video_stream, "localhost", port)
     await websocket
-
 
 def start_websocket_server_in_thread():
     # Function to call when starting the thread
