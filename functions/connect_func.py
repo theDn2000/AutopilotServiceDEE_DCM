@@ -24,7 +24,7 @@ def connect(self, connection_string):
         t = threading.Thread(target=animate)
         t.start()
 
-        self.vehicle = mavutil.mavlink_connection(connection_string)
+        self.vehicle = mavutil.mavlink_connection(connection_string, baud=57600)
         self.vehicle.wait_heartbeat()
 
         time.sleep(1)

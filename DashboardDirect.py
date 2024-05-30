@@ -471,7 +471,7 @@ class App(ctk.CTk):
 
         # Depending if real time or simulation mode is selected, the connection string will be different
         mode_selector = self.mode_selector.get()
-        mode_selector = "simulation" # This variable will change depending on the user's selection when connecting
+        # mode_selector = "simulation" # This variable will change depending on the user's selection when connecting
 
         if mode_selector == "simulation":
             print('Simulation mode selected')
@@ -482,10 +482,10 @@ class App(ctk.CTk):
             else:
                 connection_string = "tcp:127.0.0.1:5763" # Default connection string
         
-        else: # A MODIFICAR (CUANDO SEPA COMO SE HACE A PARTIR DEL AUTOPILOT SERVICE)
+        else: # A MODIFICAR
             print ('Real mode selected')
             # connection_string = "/dev/ttyS0"
-            connection_string = "com7"
+            connection_string = "com5"
             # connection_string = "udp:127.0.0.1:14550"
 
         # Connect to the autopilot
