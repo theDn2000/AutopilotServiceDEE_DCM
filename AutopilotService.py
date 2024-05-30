@@ -55,7 +55,7 @@ def process_message(message, client):
             if operation_mode == 'simulation':
                 connection_string = "tcp:127.0.0.1:" + str(ports[int(drone_id) - 1])
             elif operation_mode == 'production':
-                connection_string = "/dev/ttyS0"
+                connection_string = "/dev/ttyS0" # The program is being executed in a Raspberry Pi
             else:
                 print('Operation mode not recognized')
             # Connect the drone

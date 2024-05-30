@@ -534,7 +534,7 @@ class App(ctk.CTk):
 
         elif mode_selector == "Production (MAVProxy)":
             print ('Production mode selected (MAVProxy Connection)')
-            connection_string = "udp:127.0.0.1:14550" # Default connection string for MAVProxy
+            connection_string = "udp:127.0.0.1:14551" # Default connection string for MAVProxy
             baudrate = 57600 # Default baudrate for MAVProxy
 
         else:
