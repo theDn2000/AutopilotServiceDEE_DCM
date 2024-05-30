@@ -870,7 +870,7 @@ class App(ctk.CTk):
     def take_picture_(self):
         # Take a picture
         print("Taking picture...")
-        jpg_as_text = self.camera.take_picture()
+        jpg_as_text = self.camera.take_pictureS()
 
         # Process the frame
         self.process_frame(jpg_as_text)
@@ -878,12 +878,12 @@ class App(ctk.CTk):
     def start_stream_(self):
         # Start the video stream
         if self.streaming == False:
-            self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="#c1121f", hover_color="#a00f1c")
+            self.button_stream.configure(text="Stop Stream", command=self.start_stream_, fg_color="#c1121f", hover_color="#a00f1c")
             print("Starting stream...")
             self.camera.start_video_stream(self.process_frame)
             self.streaming = True
         else:
-            self.button_stream.configure(text="Stream", command=self.start_stream, fg_color="#457b9d", hover_color="#3a5f7d")
+            self.button_stream.configure(text="Stream", command=self.start_stream_, fg_color="#457b9d", hover_color="#3a5f7d")
             print("Stopping stream...")
             self.camera.stop_video_stream()
             self.streaming = False
