@@ -994,7 +994,7 @@ class App(ctk.CTk):
 
 
     # WEB SOCKET 
-
+    
     def start_websocket(self):
         # Function to start the loop
         def start_loop(loop):
@@ -1026,7 +1026,7 @@ class App(ctk.CTk):
     def trigger_send_message(self, websocket, message):
         # Trigger the send message function
         asyncio.run_coroutine_threadsafe(self.send_message(message), self.loop)
-
+    
 
 
 # Run the app

@@ -79,7 +79,7 @@ def check_flying_trigger(self):
 def check_flying(self):
     # Check if the vehicle is flying
     time.sleep(1) # Wait for telemetry info
-    if self.alt > 0.5:
+    if self.alt > 2: # May be necessary to change if the drone takes off from a high ground
         current_alt = self.alt
         while True:
             # Then, check if the vehicle is not taking off
