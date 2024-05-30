@@ -181,7 +181,6 @@ class App(ctk.CTk):
         z = 15
         self.map_widget.set_tile_server("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", max_zoom=22)
         self.map_widget.set_position(x, y)
-        #self.map_widget.place(relx=0.5, rely=0.5, anchor="center")
         # Add a right click menu to add mission waypoints
         self.map_widget.add_right_click_menu_command(label="Add Mission Waypoint", command=self.add_mission_waypoint_event, pass_coords=True)
         # Add a right click menu to add geofence points
@@ -360,15 +359,15 @@ class App(ctk.CTk):
         self.main_frame_control_pad.grid(row=5, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="nswe")
         # Color the frame
         self.main_frame_control_pad.configure(fg_color="#1f1f1f")
-        # frame_telemetry can't be resized
+        # frame can't be resized
         self.main_frame_control_pad.grid_propagate(False)
 
-        # Separate the frame_telemetry into 3 vertical sections
+        # Separate the frame into 3 vertical sections
         self.main_frame_control_pad.columnconfigure(0, weight=1)
         self.main_frame_control_pad.columnconfigure(1, weight=1)
         self.main_frame_control_pad.columnconfigure(2, weight=1)
 
-        # Separate the frame_telemetry into 3 horizontal section
+        # Separate the frame into 3 horizontal section
         self.main_frame_control_pad.rowconfigure(0, weight=1)
         self.main_frame_control_pad.rowconfigure(1, weight=1)
         self.main_frame_control_pad.rowconfigure(2, weight=1)
@@ -408,15 +407,15 @@ class App(ctk.CTk):
         self.main_frame_control_buttons.grid(row=6, column=6, padx=10, pady=10, rowspan=1, columnspan=2, sticky="we")
         # Color the frame
         self.main_frame_control_buttons.configure(fg_color="#1f1f1f")
-        # frame_telemetry can't be resized
+        # frame can't be resized
         self.main_frame_control_buttons.grid_propagate(False)
 
-        # Separate the frame_telemetry into 3 vertical sections
+        # Separate the frame into 3 vertical sections
         self.main_frame_control_buttons.columnconfigure(0, weight=1)
         self.main_frame_control_buttons.columnconfigure(1, weight=1)
         self.main_frame_control_buttons.columnconfigure(2, weight=1)
 
-        # Separate the frame_telemetry into 2 horizontal section
+        # Separate the frame into 2 horizontal section
         self.main_frame_control_buttons.rowconfigure(0, weight=1)
         self.main_frame_control_buttons.rowconfigure(1, weight=1)
         self.main_frame_control_buttons.rowconfigure(2, weight=1)
@@ -469,7 +468,6 @@ class App(ctk.CTk):
     def update_control_buttons(self):
         # Update the control buttons according to the state of the drone
         while True:
-            print(str(self.state))
             if self.state == "connected":
                 # connected: All buttons are disabled except for the arm button
                 self.control_button_arm.configure(fg_color="#457b9d", hover_color="#3a5f7d", state="normal")
@@ -530,6 +528,8 @@ class App(ctk.CTk):
         marker = self.map_widget.set_marker(telemetry_info['lat'], telemetry_info['lon'], text="Drone ", icon=self.plane_circle_1_image, marker_color_circle="green", marker_color_outside="black", text_color="black")
         # Update the marker
         self.dron_marker = marker
+
+
 
     # FUNCTIONS (BACKEND)
 
