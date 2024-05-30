@@ -55,7 +55,7 @@ def process_message(message, client):
             if operation_mode == 'simulation':
                 connection_string = "tcp:127.0.0.1:" + str(ports[int(drone_id) - 1])
             elif operation_mode == 'production':
-                connection_string = "tcp:127.0.0.1:" + str(ports[int(drone_id) - 1]) # A MODIFICAR (IP del dron real)
+                connection_string = "/dev/ttyS0"
             else:
                 print('Operation mode not recognized')
             # Connect the drone
