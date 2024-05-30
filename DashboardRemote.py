@@ -66,7 +66,7 @@ class App(ctk.CTk):
 
         # WebSocket client parameters
         self.websocket = None
-        self.url = "ws://localhost:8765"
+        self.url = "ws://localhost:8765" # Replace localhost with the IP of the server
         self.ws_connected = False
         self.loop = None
 
@@ -125,7 +125,7 @@ class App(ctk.CTk):
         self.label_logo.configure(image=self.logo)
 
         # Create a option selector for the broker selection
-        self.broker_selector = ctk.CTkOptionMenu(self.main_frame, values=["Select External Broker...", "hivemq","hivemq (certificate)", "classpip (certificate)"],  width=130, fg_color="#457b9d", dropdown_fg_color="#457b9d", button_color="#457b9d")
+        self.broker_selector = ctk.CTkOptionMenu(self.main_frame, values=["Select External Broker...", "hivemq","hivemq (certificate)", "classpip (credentials)"],  width=130, fg_color="#457b9d", dropdown_fg_color="#457b9d", button_color="#457b9d")
         self.broker_selector.grid(row=6, column=6, padx=10, pady=0, ipady=0, columnspan=1, sticky="we")
 
         # Create a option selector for the id of the drone
@@ -919,11 +919,12 @@ class App(ctk.CTk):
             self.client.connect("broker.hivemq.com", 8884)
             print("Connected to broker.hivemq.com:8884")
 
-        elif self.broker_selector.get() == "classpip (certificate)":
-            self.client.username_pw_set("classpip", "mimara") # Input? not the real credentials
-            self.client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
-            self.client.connect("classpip.upc.edu", 8883)
-            print("Connected to classpip.upc.edu:8883")
+        elif self.broker_selector.get() == "classpip (credentials)":
+            self.client.username_pw_set(
+                "classpip", "mimara00" # A CONFIRMAR
+            )
+            self.client.connect("classpip.upc.edu", 8000)
+            print('- Autopilot Service: Connected to classpip.upc.edu:8000')
 
         else:
             print("Please, select a broker.")

@@ -6,7 +6,7 @@ import itertools
 
 
 
-def connect(self, connection_string):
+def connect(self, connection_string, baud=115200):
     # Connect main function, connects 
     if self.state == 'disconnected':
         print('- DroneLink: Connecting to the vehicle...')
@@ -24,7 +24,7 @@ def connect(self, connection_string):
         t = threading.Thread(target=animate)
         t.start()
 
-        self.vehicle = mavutil.mavlink_connection(connection_string, baud=57600)
+        self.vehicle = mavutil.mavlink_connection(connection_string, baud)
         self.vehicle.wait_heartbeat()
 
         time.sleep(1)
@@ -37,12 +37,12 @@ def connect(self, connection_string):
     else:
         print('- DroneLink: Already connected to the vehicle')
 
-def connect_trigger(self, connection_string, blocking):
+def connect_trigger(self, connection_string, blocking, baud=115200):
     # Connect trigger function (blocking or non-blocking)
     if blocking:
         connect(self, connection_string)
     else:
-        t = threading.Thread(target=connect, args=(self, connection_string))
+        t = threading.Thread(target=connect, args=(self, connection_string, baud))
         t.start()
 
 def disconnect(self):

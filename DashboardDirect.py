@@ -524,22 +524,26 @@ class App(ctk.CTk):
             ports = [5763, 5773, 5783, 5793, 5803, 5813, 5823, 5833, 5843, 5853]
             # Select the port depending on the drone ID
             connection_string = "tcp:127.0.0.1:" + str(ports[self.drone_id - 1])
+            baudrate = 115200 # Default baudrate for the simulation mode
 
         # For the production mode, the connection string will depend on the way that we want to connect to the drone
         elif mode_selector == "Production (T.Radio)":
             print ('Production mode selected (Telemetry Radio Connection)')
             connection_string = "com5" # Default connection string for the telemetry radio
+            baudrate = 57600 # Default baudrate for the telemetry radio
 
         elif mode_selector == "Production (MAVProxy)":
             print ('Production mode selected (MAVProxy Connection)')
             connection_string = "udp:127.0.0.1:14550" # Default connection string for MAVProxy
+            baudrate = 57600 # Default baudrate for MAVProxy
 
         else:
             print ('Production mode selected (Raspberry Pi Connection)')
             connection_string = "/dev/ttyS0" # As the code is running in the Raspberry Pi, the connection string will be "/dev/ttyS0"
+            baudrate = 57600 # Default baudrate for the Raspberry Pi
 
         # Connect to the vehicle
-        self.dron.connect_trigger(connection_string, True)
+        self.dron.connect_trigger(connection_string, baudrate, True)
 
         if self.dron.state == "connected":
             # Delete every element and start the main page view

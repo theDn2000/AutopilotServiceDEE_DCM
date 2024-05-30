@@ -193,7 +193,7 @@ async def start_websocket_server():
     # Start the websocket server
     port = 8765
     print("- CameraService: Websocket server listening on port:", port)
-    websocket = websockets.serve(send_video_stream, "localhost", port)
+    websocket = websockets.serve(send_video_stream, "0.0.0.0", port)
     await websocket
 
 def start_websocket_server_in_thread():
