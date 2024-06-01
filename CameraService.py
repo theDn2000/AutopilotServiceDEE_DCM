@@ -224,9 +224,11 @@ if __name__ == "__main__":
     else:
         external_broker = None
 
+    '''
     internal_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Autopilot_internal")
     internal_client.on_message = on_internal_message
     internal_client.connect("localhost", 1884)
+    '''
     
     internal_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Camera_internal")
     internal_client.on_message = on_internal_message
