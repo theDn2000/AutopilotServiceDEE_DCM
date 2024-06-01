@@ -109,7 +109,7 @@ class App(ctk.CTk):
         self.info_textbox.insert("1.0", "Welcome to DashboardRemote. This tool allows you to\ninteract with the autopilot functions using a broker.\n\nPlease, click the 'Connect' button to start.")
         # Add a version number to the textbox
         self.info_textbox.insert("end", "\n\nPATCH NOTES:\n\n- Version: 0.1.0: Initial release\n\n- Version: 0.1.1: Connect and telemetry info added.\n\n- Version: 0.1.2: Control and pad buttons added.\n\n- Version: 1.0.0: All basic functions operative.\n\n- Version: 1.0.1: Map with basic functions added.\n\n- Version: 1.0.2: Geofence functions added.\n\n- Version: 1.0.3: Mission functions added.\n\n- Version: 1.0.4: Parameters functions added.\n\n- Version: 2.0.0: Video stream added (via broker).\n\n- Version: 2.0.1: Video stream added (via websocket).\n\n- Version: 2.0.1: Bug fixes.\n\n- Version: 3.0.0: Visual update.\n\n- Version: 3.0.1: Bug fixes.\n\n- Version: 3.1.0: Final release.")
-
+        # Disable the textbox
         self.info_textbox.configure(state="disabled")
 
         # Create the logo frame
