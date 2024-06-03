@@ -1,5 +1,4 @@
 import customtkinter as ctk
-import tkinter as ttk
 import tkintermapview as tkmap
 import os
 import sys
