@@ -459,7 +459,13 @@ class App(ctk.CTk):
 
     def arm(self):
         # Arm the drone
-        self.dron.arm_trigger(False)
+        if self.dron.state == "connected":
+            self.dron.arm_trigger(False)
+            print("Vehicle armed.")
+        else:
+            print("The vehicle is not connected.")
+
+        # the vehicle will disarm automatically is takeOff does not come soon, the arm function does this automatically
 
     def arm_all(self):
         # Arm all the drones
@@ -468,15 +474,18 @@ class App(ctk.CTk):
 
     def take_off(self):
         # Take off the drone
-        # Make the border of the entry white
-        self.control_input_altitude.configure(border_color="white")
-        altitude = self.control_input_altitude.get()
-        if altitude != "" and int(altitude) > 0:
-            self.dron.take_off_trigger(int(self.control_input_altitude.get()), False)
+        if self.dron.state == "armed":
+            # Make the border of the entry white
+            self.control_input_altitude.configure(border_color="white")
+            altitude = self.control_input_altitude.get()
+            if altitude != "" and int(altitude) > 0:
+                self.dron.take_off_trigger(int(self.control_input_altitude.get()), False)
+            else:
+                # Make the border of the entry red
+                self.control_input_altitude.configure(border_color="red")
+                print("Error: The altitude must be a positive number.")
         else:
-            # Make the border of the entry red
-            self.control_input_altitude.configure(border_color="red")
-            print("Error: The altitude must be a positive number.")
+            print("The vehicle is not armed.")
 
     def take_off_all(self):
         # Take off all the drones
