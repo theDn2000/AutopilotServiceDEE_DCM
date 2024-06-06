@@ -65,7 +65,7 @@ class App(ctk.CTk):
 
         # WebSocket client parameters
         self.websocket = None
-        self.url = "ws://192.168.1.241:8765" # Replace localhost with the IP of the server
+        self.url = "ws://192.168.1.242:8765" # Replace localhost with the IP of the server
         self.ws_connected = False
         self.loop = None
 

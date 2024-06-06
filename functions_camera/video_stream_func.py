@@ -15,7 +15,7 @@ def send_video_stream(self, callback):
             _, image_buffer = cv.imencode(".jpg", frame)
             jpg_as_text = base64.b64encode(image_buffer)
             callback(jpg_as_text)
-            time.sleep(0.016666666666666666)  # 60 fps
+            time.sleep(0.1)  # 60 fps
 
 def start_video_stream(self, callback):
     # Start video stream main function
