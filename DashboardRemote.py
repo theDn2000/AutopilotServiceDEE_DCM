@@ -65,10 +65,13 @@ class App(ctk.CTk):
 
         # WebSocket client parameters
         self.websocket = None
-        self.url = "ws://192.168.0.180:8765" # Replace localhost with the IP of the server
-        #self.url = "ws://localhost:8765" # Replace localhost with the IP of the server
+        #self.url = "ws://192.168.0.180:8765" # Replace localhost with the IP of the server
+        self.url = "ws://localhost:8765" # Replace localhost with the IP of the server
         self.ws_connected = False
         self.loop = None
+
+        # Map variables
+        self.map_centered = False
 
         # MAIN FRAME
         # Create the main frame
@@ -176,7 +179,7 @@ class App(ctk.CTk):
         self.map_widget = tkmap.TkinterMapView(self.main_frame)
         self.map_widget.grid(row=0, column=0, padx=10, pady=10, rowspan=6, columnspan=6, sticky="nswe")
         # Change the map style to satellite
-        x = -35.3633515
+        x = -40.3633515
         y = 149.1652412
         z = 15
         self.map_widget.set_tile_server("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", max_zoom=22)
@@ -526,8 +529,17 @@ class App(ctk.CTk):
 
         # Create a marker for the drone
         marker = self.map_widget.set_marker(telemetry_info['lat'], telemetry_info['lon'], text="Drone ", icon=self.plane_circle_1_image, marker_color_circle="green", marker_color_outside="black", text_color="black")
+        # Center the map if is the first time
+        if self.map_centered == False:
+            self.centermap(telemetry_info['lat'], telemetry_info['lon'])
+            self.map_centered = True
         # Update the marker
         self.dron_marker = marker
+
+    def centermap(self, lat, lon):
+        # Center the map in a specific location
+        self.map_widget.set_position(lat, lon)
+        print("Map centered.")
 
 
 
@@ -563,6 +575,7 @@ class App(ctk.CTk):
             self.info_textbox.configure(state="disabled")
             # The message should be in red
             self.info_textbox.configure(text_color="red")
+
     
     def disconnect(self):
         # Disconnect every drone

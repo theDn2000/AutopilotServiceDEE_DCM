@@ -54,6 +54,9 @@ class App(ctk.CTk):
         # Go to point
         self.go_to_point_coords = None
 
+        # Map variables
+        self.map_centered = False
+
         # MAIN FRAME
         # Create the main frame
         self.main_frame = ctk.CTkFrame(self)
@@ -502,10 +505,20 @@ class App(ctk.CTk):
             # Delete the marker
             self.dron_marker.delete()
 
+        # Center the map if it is the first time that the telemetry info is received
+        if self.map_centered == False:
+            self.centermap(telemetry_info['lat'], telemetry_info['lon'])
+            self.map_centered = True
+
         # Create a marker for the drone
         marker = self.map_widget.set_marker(telemetry_info['lat'], telemetry_info['lon'], text="Drone ", icon=self.plane_circle_1_image, marker_color_circle="green", marker_color_outside="black", text_color="black")
         # Update the marker
         self.dron_marker = marker
+
+    def centermap(self, lat, lon):
+        # Center the map in a specific location
+        self.map_widget.set_position(lat, lon)
+        print("Map centered.")
 
 
 
