@@ -1,5 +1,5 @@
-paho-mqtt==2.1.0
-pymavlink==2.4.41
+paho-mqtt
+pymavlink
 customtkinter
 tkintermapview
 websockets
