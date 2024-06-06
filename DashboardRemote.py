@@ -65,8 +65,7 @@ class App(ctk.CTk):
 
         # WebSocket client parameters
         self.websocket = None
-        #self.url = "ws://192.168.0.180:8765" # Replace localhost with the IP of the server
-        self.url = "ws://localhost:8765" # Replace localhost with the IP of the server
+        self.url = "ws://localhosting:8765" # Url to stablish the connection (it is replaced automatically by the IP of the server when the connection is stablished)
         self.ws_connected = False
         self.loop = None
 
@@ -166,11 +165,11 @@ class App(ctk.CTk):
             self.connect_label = ctk.CTkLabel(self.main_frame, text="Connecting...")
             self.connect_label.grid(row=7, column=6, padx=10, pady=0, sticky="nswe", columnspan=2)
 
+            # Get the ip of the websocket server
+            self.get_ip()
+
             # Connect to the autopilot 1000ms later
             self.after(1000, self.connect)
-
-            # Start the websocket
-            self.start_websocket()
 
     def set_main_page(self):
         # Create the main page view
@@ -862,6 +861,7 @@ class App(ctk.CTk):
 
             # Start the video stream [via socket]
             if self.streaming == False:
+
                 self.trigger_send_message(self.websocket, "DashboardRemote/CameraService/startVideoStream/" + str(self.camera_id))
                 self.button_stream.configure(text="Stop Stream", command=self.start_stream, fg_color="#c1121f", hover_color="#a00f1c")
                 print("Starting stream...")
@@ -987,6 +987,18 @@ class App(ctk.CTk):
                     cv.imshow('Stream', img)
                     cv.waitKey(1)
 
+                if command == "getCameraIP":
+                    # Extract the camera ip
+                    camera_ip = str(message.payload.decode("utf-8"))
+                    # Change the ip of the websocket
+                    print ("Cambio de ip: ", camera_ip)
+                    self.ip = camera_ip
+                    self.url = "ws://" + camera_ip + ":8765"
+
+                    # Then, start the websocket
+                    self.start_websocket()
+                    
+
         # If origin is AutopilotService:
         if origin == "AutopilotService":
             # Check the drone id
@@ -1017,6 +1029,7 @@ class App(ctk.CTk):
 
         # Create the loop
         self.loop = asyncio.new_event_loop()
+        print ("Inicio con url: ", self.url)
         self.loop.create_task(self.listen(self.url))
 
         # Start the loop in a new thread
@@ -1041,7 +1054,9 @@ class App(ctk.CTk):
         # Trigger the send message function
         asyncio.run_coroutine_threadsafe(self.send_message(message), self.loop)
     
-
+    def get_ip(self):
+        # Get the ip of the websocket server
+        self.client.publish("DashboardRemote/CameraService/getCameraIP/" + str(self.camera_id))
 
 # Run the app
 app = App()

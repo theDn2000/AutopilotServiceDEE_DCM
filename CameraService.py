@@ -6,6 +6,7 @@ import threading
 import websockets
 import asyncio
 import queue
+import socket
 
 
 def process_message(message,   client):
@@ -43,6 +44,16 @@ def process_message(message,   client):
             print('- Camera Service: Received "' + command +'".')
             # Stop the video stream
             camera.stop_video_stream()
+
+    if command == "getCameraIP":
+        # Check if the camera is the requested one
+        if service_id == camera_id:
+            print('- Camera Service: Received "' + command +'".')
+            # Get the IP of the camera
+            ip = get_ip()
+            print("- Camera Service: IP: ", ip)
+            # Publish the IP to the broker
+            client.publish("CameraService/" + origin + "/getCameraIP/" + str(camera_id), str(ip))
 
 
 
@@ -202,7 +213,12 @@ def start_websocket_server_in_thread():
     asyncio.get_event_loop().run_until_complete(start_websocket_server())
     asyncio.get_event_loop().run_forever()
 
-
+def get_ip():
+    # Get the IP of the device
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    return IPAddr
+    
 
 import cv2 as cv
 
@@ -223,12 +239,6 @@ if __name__ == "__main__":
             password = sys.argv[6]
     else:
         external_broker = None
-
-    '''
-    internal_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Autopilot_internal")
-    internal_client.on_message = on_internal_message
-    internal_client.connect("localhost", 1884)
-    '''
     
     internal_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "Camera_internal")
     internal_client.on_message = on_internal_message
