@@ -970,7 +970,7 @@ class App(ctk.CTk):
             # Check the camera id
             camera_id = splitted[3]
             if camera_id == str(self.camera_id):
-                # Process the message from the camera [LA FORMA DE QUE ESTE MESSAGE LLEGUE AQUÍ SE DEBE REALIZAR POR BROKER Y POR SOCKET]
+                # Process the message from the camera
                 if command == "picture":
                     # Process the frame
                     self.process_frame(message.payload)
