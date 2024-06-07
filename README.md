@@ -9,7 +9,7 @@ DroneLink EETAC es una librería basada en el protocolo MAVLink que proporciona 
 The autopilot service is an on-board module that controls the operation of the flight controller, as required by the rest of modules in the Drone Engineering Ecosystem.   
 Dashboard or mobile applications will requiere the autopilot service to connect to the flight controller, to arm the drone, take-off, go to a certain position or move in a given direction, land, stop, etc. See the table bellow for a complete list of commands that can be accepted by the autopilot service in its current version.
 
-## Installations
+## Installation
 
 Para ejecutar y contribuir en este repositorio, se debe disponer de la versión más actualizada de Python, en este caso Python 3.12, aunque sirve para cualquier versión superior a la 3.5.
 
