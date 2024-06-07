@@ -6,7 +6,7 @@
 - [Introduction](#Introduction)
 - [Installation](#Installation)
 - [Contributions](#Contributions)
-- [Use](Use)
+- [Use](#Use)
 
 <a name="Introduction"></a>
 ## Introduction
