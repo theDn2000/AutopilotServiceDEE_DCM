@@ -18,11 +18,14 @@ def get_telemetry_info(self):
     }
     return telemetry_info
 
-def send_telemetry_info_trigger(self, callback):
-    # Send telemetry information trigger function (alqays non-blocking)
+def send_telemetry_info_trigger(self, callback, blocking=False):
+    # Send telemetry information trigger function
     self.sending_telemetry_info = True
-    y = threading.Thread(target=self.send_telemetry_info, args=[callback])
-    y.start()
+    if blocking:
+        self.send_telemetry_info(callback)
+    else:
+        y = threading.Thread(target=self.send_telemetry_info, args=[callback])
+        y.start()
 
 def send_telemetry_info(self, callback):
     # Send telemetry information

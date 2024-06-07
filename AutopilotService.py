@@ -74,7 +74,7 @@ def process_message(message, client):
                 dron.check_armed()
                 # Check if the vehicle is flying (only if it is not connected nor disarmed)
                 if dron.state != "connected" and dron.state != "disconnected":
-                    dron.check_flying_trigger()
+                    dron.check_flying_trigger(False)
 
     if command == "disconnect":
         # Check if the drone is the requested one

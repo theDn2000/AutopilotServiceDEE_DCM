@@ -71,10 +71,13 @@ def go_order(self, direction):
     self.direction = direction
     self.going = True
 
-def check_flying_trigger(self):
+def check_flying_trigger(self, blocking=False):
     # Enable the check_flying function in a new thread
-    w = threading.Thread(target=self.check_flying)
-    w.start()
+    if blocking:
+        self.check_flying()
+    else:
+        w = threading.Thread(target=self.check_flying)
+        w.start()
 
 def check_flying(self):
     # Check if the vehicle is flying

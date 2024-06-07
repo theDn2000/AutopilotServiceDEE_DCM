@@ -49,6 +49,11 @@ def disable_geofence(self):
 
 def set_fence_geofence(self, fence_list):
     # Set the geofence
+    '''
+    The fence_list must start and end with the same point to close the geofence, and the first point of the list must be the reference point.
+    An example of a geofence list:
+    fence_list = [(reference_lat, reference_lon), (lat1, lon1), (lat2, lon2), (lat3, lon3), (lat1, lon1)]
+    '''
     # SET FENCE_TOTAL PARAMETER TO LENGTH OF FENCE LIST
     while True:
 
