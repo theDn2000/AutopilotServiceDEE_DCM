@@ -2,14 +2,9 @@
 
 ## Introduction
 
-DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo una solución robusta y escalable para el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación
+DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo una solución robusta y escalable para el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación. DroneLink EETAC es un módulo complementario de Drone Engineering Ecosystem, repositorio de la escuela de Ingeniería de Telecomunicación y Aeroespacial de Castelldefels. [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-MainRepo-brightgreen.svg)](https://github.com/dronsEETAC/DroneEngineeringEcosystemDEE)
 
-DroneLink EETAC es una librería basada en el protocolo MAVLink que proporciona al usuario una lista de funciones para interactuar con el piloto automático ArduPilot del dron. Contiene la librería DroneLink EETAC como tal, una librería complementaria para el control de cámara llamada CameraLink EETAC y tres ejemplos diferentes para ver sus posibles usos. La librería es completamente escalable y abierta a contribuciones. DroneLink EETAC se ha creado con la intención de sustituir a la librería Dronekit debido a su discontinuidad.
-
-The autopilot service is an on-board module that controls the operation of the flight controller, as required by the rest of modules in the Drone Engineering Ecosystem.   
-Dashboard or mobile applications will requiere the autopilot service to connect to the flight controller, to arm the drone, take-off, go to a certain position or move in a given direction, land, stop, etc. See the table bellow for a complete list of commands that can be accepted by the autopilot service in its current version.
-
-## Installation
+## Installation and Requirements
 
 Para ejecutar y contribuir en este repositorio, se debe disponer de la versión más actualizada de Python, en este caso Python 3.12, aunque sirve para cualquier versión superior a la 3.5.
 
@@ -25,9 +20,9 @@ Contributions must follow the contribution protocol that you will find in the ma
 ## Documentation
 
 
-### AAA
+### DroneLink EETAC
 
-### BBB
+### CameraLink EETAC
 
 
 
