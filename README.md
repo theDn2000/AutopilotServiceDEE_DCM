@@ -76,27 +76,75 @@ Ahora puedes hacer pull requests desde tu fork y un administrador puede hacer me
 >\
 >[![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-contributions-pink.svg)](https://www.youtube.com/watch?v=dv-k5MKjq8g) 
    
-## Use
+## Usage
 
 
 
 ### DroneLink EETAC
 
-Para hacer uso de la librería DroneLink EETAC primero debes importar la clase Dron a tu proyecto. La clase Dron está definida en el fichero Dron.py.
+Para hacer uso de la librería DroneLink EETAC primero debes importar la clase Drone a tu proyecto. La clase Drone está definida en el fichero Drone.py.
 
 ```
-# Import the Dron class
-from Dron import Dron
+from Drone import Drone
 ```
 
-Una vez importada la librería, puedes crear un objeto tipo Dron para usarla. Para ello, deberás de pasarle el int ***id***, que se trata del identificador de ese dron en específico.
+Una vez importada la librería, puedes crear un objeto tipo Drone para usarla. Para ello, deberás de pasarle el int ***id***, que se trata del identificador de ese dron en específico.
 
 ```
-dron = Dron(id)
+drone = Drone(id)
 ```
 
-Con el objeto de tipo Dron creado, puedes llamar a las funciones del objeto Dron 
+Con el objeto de tipo Dron creado, puedes llamar a las funciones del objeto Drone de la siguiente forma:
 
+```
+drone.function_name(parameter_1, parameter_2, etc)
+```
+A continuación se muestra una tabla con todas las funciones de las que dispone DroneLink EETAC:
+
+Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
+--- | --- | --- | --- | --- | ---
+*connect* | Stablishes the MAVLink connection with the autopilot of the drone | connection string [str] | baud rate (115200 by default) [int] | No | No
+*get_position* | Get the position of the drone | No | No | No | latitude, longitude, altitude
+*disconnect* | Closes the MAVLink connection with the autopilot of the drone | No | No | No | No
+*send_telemetry_info* | Sends the telemetry info of the drone | callback (callback function to interpret the information) | No | No | No
+*arm* | Arms the drone | No | No | No | No
+*check_armed* | Checks if the vehicle is armed or not | No | No | No | True or False
+*take_off* | Get the drone take off to reach the desired altitude | target altitude (in meters) [int] | No | No | No
+*change_altitude* | Get the drone reach the desired altitude during flight | target altitude (in meters) [int] | No | No | No
+*go_order* | Makes the drone go in a specific direction | direction ("North", "South", "East", "West", "NorthWest", "NorthEast", "SouthWest", "SouthEast", "Stop" [str]) | No | No | No
+*check_flying* | Checks if the drone is flying | No | No | No | True or False
+*goto* | Make the drone go to a specific waypoint | latitude [float] | longitude [float] | altitude [int] | No
+*land* | Land the drone | No | No | No | No
+*return_to_launch* | Go to the launch position and land | No | No | No | No
+*uploadFlightPlan* | Upload a flight plan to the vehicle | waypoints_json (JSON string with the coordinates of the waypoints, check the function for more information about the format) | No | No | No
+*executeFlightPlan* | Execute the flight plan previously uploaded | No | No | No | No
+*set_fence_geofence* | Upload a geofence to the vehicle | fence_list (tuple list with the geofence points, check the function for more information about the format) | No | No | No
+*enable_geofence* | Enable the geofence | No | No | No | No
+*disable_geofence* | Disable the geofence | No | No | No | No
+*action_geofence* | Set the action of the drone when trespassing the geofence | action (0: Report, 1: RTL or Land, 2: Always Land, 3: Smart RTL or RTL or Land, 4: Brake or Land, 5: Smart RTL or Land) [int]| No | No | No
+*get_parameter* | Get the value of a parameter of the autopilot | param_name (name of the parameter) [str] | No | No | value of the parameter
+*get_all_parameters* | Get all the parameters of the autopilot | No | No | No | list of parameters names, list of parameters values
+*modify_parameter* | Modify a parameter of the autopilot | param_name (name of the parameter) [str] | param_value (value of the parameter) [float] | No | No
+
+>[!IMPORTANT]
+>Además, las funciones que lo permiten, disponen de una versión alternativa donde podemos ejecutarlas escogiendo si queremos que sean bloqueantes o no bloqueantes:
+
+Function | Description | Parameter 1 | Parameter 2 |  Parameter 3 | Parameter 4 | Response
+--- | --- | --- | --- | --- | --- | ---
+*connect_trigger* | Stablishes the MAVLink connection with the autopilot of the drone | connection string [str] | blocking (True or False) [bool] | baud rate (115200 by default) [int] | No | No
+*send_telemetry_info_trigger* | Sends the telemetry info of the drone | callback (callback function to interpret the information) | blocking (True or False) [bool] | No | No | No
+*arm_trigger* | Arms the drone | blocking (True or False) [bool] | No | No | No | No
+*take_off_trigger* | Get the drone take off to reach the desired altitude | target altitude (in meters) [int] | blocking (True or False) [bool] | No | No | No
+*change_altitude_trigger* | Get the drone reach the desired altitude during flight | target altitude (in meters) [int] | blocking (True or False) [bool] | No | No | No
+*check_flying_trigger* | Checks if the drone is flying | blocking (True or False) [bool] | No | No | No | True or False
+*goto_trigger* | Make the drone go to a specific waypoint | latitude [float] | longitude [float] | altitude [int] | blocking (True or False) [bool] | No
+*land_trigger* | Land the drone | blocking (True or False) [bool] | No | No | No | No
+*return_to_launch_trigger* | Go to the launch position and land | blocking (True or False) [bool] | No | No | No | No
+*uploadFlightPlan_trigger* | Upload a flight plan to the vehicle | waypoints_json (JSON string with the coordinates of the waypoints, check the function for more information about the format) | blocking (True or False) [bool] | No | No | No
+*executeFlightPlan_trigger* | Execute the flight plan previously uploaded | blocking (True or False) [bool] | No | No | No | No
+*get_parameter_trigger* | Get the value of a parameter of the autopilot | param_name (name of the parameter) [str] | blocking (True or False) [bool] | No | No | value of the parameter
+*get_all_parameters_trigger* | Get all the parameters of the autopilot | blocking (True or False) [bool] | No | No | No | list of parameters names, list of parameters values
+*modify_parameter_trigger* | Modify a parameter of the autopilot | param_name (name of the parameter) [str] | param_value (value of the parameter) [float] | blocking (True or False) [bool] | No | No
 
 ### CameraLink EETAC
 
