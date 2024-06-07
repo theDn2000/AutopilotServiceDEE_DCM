@@ -72,16 +72,31 @@ Este proyecto está destinado a crecer a partir de las contribucciones tanto de 
 Ahora puedes hacer pull requests desde tu fork y un administrador puede hacer merge de tus contribuciones al repositorio principal. 
    
 >[!NOTE]
->This video show an example of how you can contribute to the project>\
+>This video show an example of how you can contribute to the project\
 >\
 >[![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-contributions-pink.svg)](https://www.youtube.com/watch?v=dv-k5MKjq8g) 
-
-
    
-## Documentation
+## Use
+
 
 
 ### DroneLink EETAC
+
+Para hacer uso de la librería DroneLink EETAC primero debes importar la clase Dron a tu proyecto. La clase Dron está definida en el fichero Dron.py.
+
+```
+# Import the Dron class
+from Dron import Dron
+```
+
+Una vez importada la librería, puedes crear un objeto tipo Dron para usarla. Para ello, deberás de pasarle el int ***id***, que se trata del identificador de ese dron en específico.
+
+```
+dron = Dron(id)
+```
+
+Con el objeto de tipo Dron creado, puedes llamar a las funciones del objeto Dron 
+
 
 ### CameraLink EETAC
 
