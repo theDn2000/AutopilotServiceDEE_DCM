@@ -3,11 +3,12 @@
 ![logo](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/18cc8967-327c-48f8-9cfc-2be24e8043ab)
 
 ## Content table
-- [Introduction](#introduction)
-- [Instalación](https://github.com/theDn2000/AutopilotServiceDEE_DCM/edit/dev_v4.0-DroneLink/README.md#-installation-and-requirements)
-- [Contributions](https://github.com/theDn2000/AutopilotServiceDEE_DCM/edit/dev_v4.0-DroneLink/README.md#-contributions)
-- [Use](https://github.com/theDn2000/AutopilotServiceDEE_DCM/edit/dev_v4.0-DroneLink/README.md#-use)
+- [Introduction](#Introduction)
+- [Installation](#Installation)
+- [Contributions](#Contributions)
+- [Use](Use)
 
+<a name="Introduction"></a>
 ## Introduction
 
 DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo robustez y escalabilidad en el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación. 
@@ -19,6 +20,7 @@ DroneLink EETAC es un proyecto diseñado para facilitar la interacción con dron
 
 In this file usted encontrará tanto las instrucciones de instalación como una guía para el uso de las librerías, además de información sobre el funcionamiento de los ejemplos y sus características.
 
+<a name="Installation"></a>
 ## 📦 Installation and Requirements
 
 >[!CAUTION]
@@ -43,6 +45,7 @@ Con esto estarás listo para usar tanto la librería DroneLink EETAC como Camera
 >- **Mission Planner**: Esencial para ejecutar las aplicaciones incluidas en modo simulación. Puedes descargarlo desde [MissionPlanner](https://ardupilot.org/planner/docs/mission-planner-installation.html).
 >- **Eclipse Mosquitto**: Broker necesario para el ejemplo remoto en modo simulación. Puedes descargarlo desde [Mosquitto](https://mosquitto.org/download/)
 
+<a name="Contributions"></a>
 ## 🤝 Contributions
 
 Este proyecto está destinado a crecer a partir de las contribucciones tanto de la escuela como externas. Si deseas conntribuir, sigue las siguientes indicaciones:
@@ -83,7 +86,8 @@ Ahora puedes hacer pull requests desde tu fork y un administrador puede hacer me
 >This video show an example of how you can contribute to the project\
 >\
 >[![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-contributions-pink.svg)](https://www.youtube.com/watch?v=dv-k5MKjq8g) 
-   
+
+<a name="Use"></a>
 ## 🚀 Use
 
 ### DroneLink EETAC
