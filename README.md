@@ -5,21 +5,79 @@
 DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo robustez y escalabilidad en el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación. 
 
 >[!NOTE]
->DroneLink EETAC es un módulo complementario de Drone Engineering Ecosystem, repositorio de la escuela de Ingeniería de Telecomunicación y Aeroespacial de Castelldefels. [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-MainRepo-brightgreen.svg)](https://github.com/dronsEETAC/DroneEngineeringEcosystemDEE)
+>DroneLink EETAC es un módulo complementario de Drone Engineering Ecosystem, repositorio de la escuela de Ingeniería de Telecomunicación y Aeroespacial de Castelldefels.\
+>\
+> [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-MainRepo-brightgreen.svg)](https://github.com/dronsEETAC/DroneEngineeringEcosystemDEE)
 
-## Installation and Requirements
+In this file usted encontrará tanto las instrucciones de instalación como una guía para el uso de las librerías, además de información sobre el funcionamiento de los ejemplos y sus características.
 
-Para ejecutar y contribuir en este repositorio, se debe disponer de la versión más actualizada de Python, en este caso Python 3.12, aunque sirve para cualquier versión superior a la 3.5.
+## 📦 Installation and Requirements
 
+>[!CAUTION]
+>Antes de instalar el proyecto, asegúrate de tener una versión de **Python 3.7 o superior**, es esencial para la ejecución de las librerías. Puedes descargarlo desde [python.org](https://www.python.org/downloads/)
+
+Clona el repositorio en tu máquina local utilizando git:
+
+```
+git clone https://github.com/tu-usuario/tu-proyecto.git A MODIFICAR
+cd DroneLink-EETAC
+```
+
+Una vez dispongas del repositorio, descarga las dependencias del archivo *requirements.txt*
+
+```
+pip install -r requirements.txt
+```
+Con esto estarás listo para usar tanto la librería DroneLink EETAC como CameraLink EETAC.
+
+>[!WARNING]
+>Si adicionalmente quieres usar los ejemplos incluidos en este repositorio, deberás disponer de última versión de las siguientes herramientas:
+>- **Mission Planner**: Esencial para ejecutar las aplicaciones incluidas en modo simulación. Puedes descargarlo desde [MissionPlanner](https://ardupilot.org/planner/docs/mission-planner-installation.html).
+>- **Eclipse Mosquitto**: Broker necesario para el ejemplo remoto en modo simulación. Puedes descargarlo desde [Mosquitto](https://mosquitto.org/download/)
+
+## 🤝 Contributions
+
+Este proyecto está destinado a crecer a partir de las contribucciones tanto de la escuela como externas. Si deseas conntribuir, sigue las siguientes indicaciones:
+
+1. **Fork** el repositorio original:
+
+   - Navega a la [página principal del proyecto en GitHub](https://github.com/tu-usuario/tu-proyecto). A MODIFICAR
+   - Haz clic en el botón "Fork" en la esquina superior derecha de la página.
+   - Esto creará una copia del repositorio en tu cuenta de GitHub.
+  
+2. **Clona** tu fork a tu máquina local:
+
+   ```
+   git clone https://github.com/tu-usuario-fork/tu-proyecto.git A MODIFICAR
+   cd tu-proyecto
+   ```
+
+3. **Descarga** las dependencias del archivo *requirements.txt:
+   ```
+    pip install -r requirements.txt
+    ```
+
+4. Configura el repositorio original como un remoto adicional llamado **upstream**:
+
+   ```
+   git remote add upstream https://github.com/tu-usuario/tu-proyecto.git A MODIFICAR
+   ```
+
+5. Crea una nueva **rama** para trabajar en tus versión:
+
+   ```
+    git checkout -b nombre-de-tu-rama
+   ```
+
+Ahora puedes hacer pull requests desde tu fork y un administrador puede hacer merge de tus contribuciones al repositorio principal. 
+   
 >[!NOTE]
->Hola que tal me llamo paco.
-
-In order to run and contribute you must install Python 3.7. We recommend PyCharm as IDE for development.    
-Contributions must follow the contribution protocol that you will find in the main repo of the Drone Engineering Ecosystem.
-[![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-MainRepo-brightgreen.svg)](https://github.com/dronsEETAC/DroneEngineeringEcosystemDEE)
+>This video show an example of how you can contribute to the project>\
+>\
+>[![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-contributions-pink.svg)](https://www.youtube.com/watch?v=dv-k5MKjq8g) 
 
 
-
+   
 ## Documentation
 
 
