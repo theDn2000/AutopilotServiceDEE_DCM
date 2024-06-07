@@ -149,7 +149,7 @@ Function | Description | Parameter 1 | Parameter 2 |  Parameter 3 | Parameter 4 
 *modify_parameter_trigger* | Modify a parameter of the autopilot | param_name (name of the parameter) [str] | param_value (value of the parameter) [float] | blocking (True or False) [bool] | No | No
 
 
-The drone object has a parameter called state, which is modified depending on which functions are executed. The possible values of drone.state are the following:
+The drone object has a parameter called **state**, which is modified depending on which functions are executed. The possible values of drone.state are the following:
 
 - connected
 - armed
