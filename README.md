@@ -1,5 +1,7 @@
 # DroneLink EETAC 
 
+![logo](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/18cc8967-327c-48f8-9cfc-2be24e8043ab)
+
 ## Introduction
 
 DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo robustez y escalabilidad en el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación. 
@@ -145,6 +147,18 @@ Function | Description | Parameter 1 | Parameter 2 |  Parameter 3 | Parameter 4 
 *get_parameter_trigger* | Get the value of a parameter of the autopilot | param_name (name of the parameter) [str] | blocking (True or False) [bool] | No | No | value of the parameter
 *get_all_parameters_trigger* | Get all the parameters of the autopilot | blocking (True or False) [bool] | No | No | No | list of parameters names, list of parameters values
 *modify_parameter_trigger* | Modify a parameter of the autopilot | param_name (name of the parameter) [str] | param_value (value of the parameter) [float] | blocking (True or False) [bool] | No | No
+
+
+The drone object has a parameter called state, which is modified depending on which functions are executed. The possible values of drone.state are the following:
+
+- connected
+- armed
+- takingOff
+- changingAltitude
+- flying
+- returningHome
+- landing
+- onMission
 
 ### CameraLink EETAC
 
