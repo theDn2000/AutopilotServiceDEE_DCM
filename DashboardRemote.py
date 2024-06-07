@@ -16,7 +16,7 @@ import numpy as np
 from PIL import Image, ImageTk
 
 # Import the Dron class
-from Dron import Dron
+from Drone import Drone as Dron
 
 # Import the Camera class
 from Camera import Camera

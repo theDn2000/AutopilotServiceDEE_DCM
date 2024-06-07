@@ -6,7 +6,7 @@ import sys
 
 sys.path.append(os.path.abspath('../../..'))
 
-from Dron import Dron
+from Drone import Drone as Dron
 
 '''
 These are the different values for the state of the autopilot:

@@ -4,7 +4,7 @@ from pymavlink.mavutil import default_native
 import pymavlink.dialects.v20.all as dialect
 
 
-class Dron(object):
+class Drone(object):
     def __init__(self, ID):
         self.ID = ID # ID of the drone
         self.vehicle = None # MAVLink connection to the drone
