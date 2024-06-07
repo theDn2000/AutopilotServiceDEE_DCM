@@ -2,6 +2,8 @@
 
 ## Introduction
 
+DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo una solución robusta y escalable para el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación
+
 DroneLink EETAC es una librería basada en el protocolo MAVLink que proporciona al usuario una lista de funciones para interactuar con el piloto automático ArduPilot del dron. Contiene la librería DroneLink EETAC como tal, una librería complementaria para el control de cámara llamada CameraLink EETAC y tres ejemplos diferentes para ver sus posibles usos. La librería es completamente escalable y abierta a contribuciones. DroneLink EETAC se ha creado con la intención de sustituir a la librería Dronekit debido a su discontinuidad.
 
 The autopilot service is an on-board module that controls the operation of the flight controller, as required by the rest of modules in the Drone Engineering Ecosystem.   
