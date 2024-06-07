@@ -4,7 +4,7 @@
 
 DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo robustez y escalabilidad en el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación. 
 
->[!IMPORTANT]
+>[!NOTE]
 >DroneLink EETAC es un módulo complementario de Drone Engineering Ecosystem, repositorio de la escuela de Ingeniería de Telecomunicación y Aeroespacial de Castelldefels. [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-MainRepo-brightgreen.svg)](https://github.com/dronsEETAC/DroneEngineeringEcosystemDEE)
 
 ## Installation and Requirements
