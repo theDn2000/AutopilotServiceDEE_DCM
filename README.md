@@ -13,8 +13,8 @@ Dashboard or mobile applications will requiere the autopilot service to connect 
 
 Para ejecutar y contribuir en este repositorio, se debe disponer de la versión más actualizada de Python, en este caso Python 3.12, aunque sirve para cualquier versión superior a la 3.5.
 
-[!NOTE]
-Hola que tal me llamo paco.
+>[!NOTE]
+>Hola que tal me llamo paco.
 
 In order to run and contribute you must install Python 3.7. We recommend PyCharm as IDE for development.    
 Contributions must follow the contribution protocol that you will find in the main repo of the Drone Engineering Ecosystem.
