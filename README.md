@@ -2,6 +2,12 @@
 
 ![logo](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/18cc8967-327c-48f8-9cfc-2be24e8043ab)
 
+## Content table
+- [Introduction](https://github.com/theDn2000/AutopilotServiceDEE_DCM/edit/dev_v4.0-DroneLink/README.md#introduction)
+- [Instalación](https://github.com/theDn2000/AutopilotServiceDEE_DCM/edit/dev_v4.0-DroneLink/README.md#-installation-and-requirements)
+- [Contributions](https://github.com/theDn2000/AutopilotServiceDEE_DCM/edit/dev_v4.0-DroneLink/README.md#-contributions)
+- [Use](https://github.com/theDn2000/AutopilotServiceDEE_DCM/edit/dev_v4.0-DroneLink/README.md#-use)
+
 ## Introduction
 
 DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo robustez y escalabilidad en el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación. 
@@ -78,9 +84,7 @@ Ahora puedes hacer pull requests desde tu fork y un administrador puede hacer me
 >\
 >[![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-contributions-pink.svg)](https://www.youtube.com/watch?v=dv-k5MKjq8g) 
    
-## Usage
-
-
+## 🚀 Use
 
 ### DroneLink EETAC
 
@@ -161,6 +165,36 @@ The drone object has a parameter called **state**, which is modified depending o
 - onMission
 
 ### CameraLink EETAC
+
+Para hacer uso de la librería CameraLink EETAC primero debes importar la clase Camera a tu proyecto. La clase Camera está definida en el fichero Camera.py.
+
+```
+from Camera import Camera
+```
+
+Una vez importada la librería, puedes crear un objeto tipo Camera para usarla. Para ello, deberás de pasarle el int ***id***, que se trata del identificador de esa cámara en específico.
+
+```
+camera = Camera(id)
+```
+
+Con el objeto de tipo Camera creado, puedes llamar a las funciones del objeto Camera de la siguiente forma:
+
+```
+camera.function_name(parameter_1, parameter_2, etc)
+```
+A continuación se muestra una tabla con todas las funciones de las que dispone DroneLink EETAC:
+
+Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
+--- | --- | --- | --- | --- | ---
+*take_picture* | Take a picture using the camera | No | No | No | jpg_as_text (image encoded in base64)
+*start_video_stream* | Start video stream using the camera | callback (callback function to interpret every frame) | No | No | No
+*stop_video_stream* | Stop video stream  | No | No | No | No
+
+
+
+
+
 
 
 
