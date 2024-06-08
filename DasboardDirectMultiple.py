@@ -8,7 +8,7 @@ import json
 from PIL import Image, ImageTk
 
 # Import the Dron class
-from Dron import Dron
+from Drone import Drone as Dron
 
 # Night mode
 ctk.set_appearance_mode("dark")
@@ -411,7 +411,7 @@ class App(ctk.CTk):
 
             # Start the telemetry info for every drone
             for dron in self.drones:
-                dron.send_telemetry_info_trigger(self.telemetry)
+                dron.send_telemetry_info_trigger(self.telemetry, False)
 
         else:
             # Make the label invisible and show the button again

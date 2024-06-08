@@ -573,7 +573,7 @@ class App(ctk.CTk):
             t.start()
 
             # Start the telemetry info
-            self.dron.send_telemetry_info_trigger(self.telemetry)
+            self.dron.send_telemetry_info_trigger(self.telemetry, False)
 
             # Disable the geofence by default
             self.dron.disable_geofence()
@@ -883,7 +883,7 @@ class App(ctk.CTk):
     def take_picture_(self):
         # Take a picture
         print("Taking picture...")
-        jpg_as_text = self.camera.take_pictureS()
+        jpg_as_text = self.camera.take_picture()
 
         # Process the frame
         self.process_frame(jpg_as_text)
@@ -902,7 +902,7 @@ class App(ctk.CTk):
             self.streaming = False
 
 
-    def process_frame_(self, jpg_as_text):
+    def process_frame(self, jpg_as_text):
         
         # Convert to bytes
         image_bytes = base64.b64decode(jpg_as_text)

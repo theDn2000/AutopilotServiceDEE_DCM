@@ -15,12 +15,6 @@ import cv2 as cv
 import numpy as np
 from PIL import Image, ImageTk
 
-# Import the Dron class
-from Drone import Drone as Dron
-
-# Import the Camera class
-from Camera import Camera
-
 # Night mode
 ctk.set_appearance_mode("dark")
 
