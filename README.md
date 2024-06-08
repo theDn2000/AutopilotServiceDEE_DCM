@@ -249,6 +249,9 @@ Dashboard Direct Multiple offer the following functionalities:
 
 ### Dashboard Remote + Autopilot Service + Camera Service
 
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/e2756b0a-a054-4c13-8484-05266ea38d9c)
+
+
 This set of files enables remote communication with the drone from any device that can run the Dashboard Remote application and has an internet connection. For this, the scripts *AutopilotService.py* and *CameraService.py* are executed on the onboard computer of the vehicle (in this case, the Raspberry Pi), while Dashboard Remote is run from an external device. All three files subscribe to an external broker chosen by the user once they are started, allowing the sending and receiving of messages from a distance.
 
 To run any of the services on the drone’s Raspberry Pi, you should execute the following commands:
