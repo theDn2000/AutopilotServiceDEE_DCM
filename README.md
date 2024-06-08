@@ -53,35 +53,35 @@ This project is intended to grow from contributions both from the school and ext
 
 1. **Fork** the original repository:
 
-   - Navega a la [página principal del proyecto en GitHub](https://github.com/tu-usuario/tu-proyecto). A MODIFICAR
-   - Haz clic en el botón "Fork" en la esquina superior derecha de la página.
-   - Esto creará una copia del repositorio en tu cuenta de GitHub.
+   - Navigate to the [project's main page on GitHub](https://github.com/tu-usuario/tu-proyecto). A MODIFICAR
+   - Click on the "Fork" button in the top right corner of the page.
+   - This will create a copy of the repository in your GitHub account.
   
-2. **Clona** tu fork a tu máquina local:
+2. **Clone** your fork to your local machine.:
 
    ```
    git clone https://github.com/tu-usuario-fork/tu-proyecto.git A MODIFICAR
    cd tu-proyecto
    ```
 
-3. **Descarga** las dependencias del archivo *requirements.txt:
+3. **Download** the dependencies from the *requirements.txt* file:
    ```
     pip install -r requirements.txt
     ```
 
-4. Configura el repositorio original como un remoto adicional llamado **upstream**:
+4. Set up the original repository as an additional remote called **upstream**:
 
    ```
    git remote add upstream https://github.com/tu-usuario/tu-proyecto.git A MODIFICAR
    ```
 
-5. Crea una nueva **rama** para trabajar en tus versión:
+5. Create a new **branch** to work on your version:
 
    ```
     git checkout -b nombre-de-tu-rama
    ```
 
-Ahora puedes hacer pull requests desde tu fork y un administrador puede hacer merge de tus contribuciones al repositorio principal. 
+Now you can make pull requests from your fork, and an administrator can merge your contributions into the main repository.
    
 >[!NOTE]
 >This video show an example of how you can contribute to the project\
@@ -93,17 +93,22 @@ Ahora puedes hacer pull requests desde tu fork y un administrador puede hacer me
 
 ### DroneLink EETAC
 
-Para hacer uso de la librería DroneLink EETAC primero debes importar la clase Drone a tu proyecto. La clase Drone está definida en el fichero Drone.py.
+To make use of the DroneLink EETAC library, you must first import the Drone class into your project. The Drone class is defined in the file Drone.py.
 
 ```
 from Drone import Drone
 ```
 
-Una vez importada la librería, puedes crear un objeto tipo Drone para usarla. Para ello, deberás de pasarle el int ***id***, que se trata del identificador de ese dron en específico.
+Once the library is imported, you can create a Drone object to use it. To do this, you should pass it the int ***id***, which is the identificator of that specific drone.
 
 ```
 drone = Drone(id)
 ```
+
+>[!TIP]
+>The parameter drone.id allows you to differentiate drone-type objects, which leads you to interact with multiple vehicles at the same time. See [Dashboard Direct Multiple](#Introduction) for more information.
+
+
 
 Con el objeto de tipo Dron creado, puedes llamar a las funciones del objeto Drone de la siguiente forma:
 
