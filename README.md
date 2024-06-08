@@ -206,6 +206,23 @@ Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
 ## 🛠️ Examples
 
 ### Dashboard Direct
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/60ae827a-ad67-4943-9d87-3bba951b0288)
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/15f7517a-1417-4039-bca9-9259f4c49416)
+
+Dashboard Direct is a tool that allows you to interact with the autopilot directly. You can connect to the Mission Planner simulator or directly to the drone through three connection methods: Telemetry Radio, MAVProxy, or Raspberry Pi integrated into the vehicle.
+>[!NOTE]
+>Dashboard Direct creates a Drone object with the id that you select before connecting. This application combines the frontend for the user with the backend, calling directly the functions of DroneLink EETAC and CameraLink EETAC.
+
+Dashboard Direct offer the following functionalities:
+- **Basic drone controls**: Arm the drone, take off, change altitude, move, land and RTL.
+- **Position and telemetry information**: Displayed drone position in map, altitude, heading, ground speed and battery.
+- **Parameters tab**: Display the value of a parameter of the Autopilot, or modify it.
+- **Mission tab**: Create waypoints by right-clicking on the map, upload the flight plan, execute the flight plan or clear the waypoints.
+- **Geofence tab**: Create vertex points by right-clicking on the map to define a polygon, upload the polygon to the autopilot geofence, enable the geofence, disable the geofence, change the geofence action or clear the vertex points.
+- **Camera display**: Take pictures or stream video using the local camera.
+- **Eclipse Mosquitto**: Broker required for the remote example in simulation mode. You can download it from [Mosquitto](https://mosquitto.org/download/)
+
+
 
 ### Dashboard Direct Multiple
 
