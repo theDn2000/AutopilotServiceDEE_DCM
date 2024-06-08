@@ -2,7 +2,7 @@
 
 ![logo](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/18cc8967-327c-48f8-9cfc-2be24e8043ab)
 
-## Content table
+## 📋 Content table
 - [Introduction](#Introduction)
 - [Installation](#Installation)
 - [Contributions](#Contributions)
@@ -10,7 +10,7 @@
 - [Examples](#Examples)
 
 <a name="Introduction"></a>
-## Introduction
+## 📄 Introduction
 
 **DroneLink EETAC** is a project designed to facilitate interaction with drones via the MAVLink protocol, providing robustness and scalability in controlling the autopilot and its cameras. This repository includes the main library **DroneLink EETAC**, an additional library for camera control called **CameraLink EETAC**, and three practical examples that demonstrate its versatility and application potential.
 
