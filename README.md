@@ -235,7 +235,60 @@ Dashboard Direct Multiple offer the following functionalities:
 
 ### Dashboard Remote + Autopilot Service + Camera Service
 
+This set of files enables remote communication with the drone from any device that can run the Dashboard Remote application and has an internet connection. For this, the scripts *AutopilotService.py* and *CameraService.py* are executed on the onboard computer of the vehicle (in this case, the Raspberry Pi), while Dashboard Remote is run from an external device. All three files subscribe to an external broker chosen by the user once they are started, allowing the sending and receiving of messages from a distance.
 
+To run any of the services on the drone’s Raspberry Pi, you should execute the following commands:
+
+- **For AutopilotService**:
+
+```
+python3 AutopilotService.py id global/local simulation/production broker
+
+# Where "id" is the identificator number of the drone and broker can be "hivemq", "hivemq_cert" (requires certificate) and "classpip_cred" (requires credentials) 
+```
+
+- **For CameraService**:
+
+```
+python3 CameraService.py id global/local simulation/production broker
+
+# Where "id" is the identificator number of the camera and broker can be "hivemq", "hivemq_cert" (requires certificate) and "classpip_cred" (requires credentials) 
+```
+
+When a button is pressed in the Dashboard Remote application, a message is published to the broker in the following format:
+
+- **Sending messages to AutopilotService**: 
+
+```
+message = "DashboardRemote/AutopilotService/command/drone_id"
+self.client.publish(message, body)
+# Where the body variable depends on the message (some messages don't use the body field)
+```
+
+Depending on the command sent to the service, it triggers the corresponding function of the DroneLink EETAC library. The possible commands are the following: 
+
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/7123fb35-b93d-4157-9283-8abef393a649)
+
+>[!NOTE]
+>For more information about the service, it is recommended to check the AutopilotService.py file.
+
+- **Sending messages to CameraService**: 
+
+```
+message = "DashboardRemote/CameraService/command/camera_id"
+self.client.publish(message, body)
+# Where the body variable depends on the message (some messages don't use the body field)
+```
+Depending on the command sent to the service, it triggers the corresponding function of the CameraLink EETAC library. The possible commands are the following: 
+
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/883b3c35-aa68-47f1-8a9f-ee5f07b7f0f9)
+
+
+
+
+
+
+a través de un broker externo. 
 
 
 
