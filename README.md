@@ -57,7 +57,7 @@ This project is intended to grow from contributions both from the school and ext
    - Click on the "Fork" button in the top right corner of the page.
    - This will create a copy of the repository in your GitHub account.
   
-2. **Clone** your fork to your local machine.:
+2. **Clone** your fork to your local machine:
 
    ```
    git clone https://github.com/tu-usuario-fork/tu-proyecto.git A MODIFICAR
@@ -110,12 +110,12 @@ drone = Drone(id)
 
 
 
-Con el objeto de tipo Dron creado, puedes llamar a las funciones del objeto Drone de la siguiente forma:
+With the Drone object created, you can call the functions of the Drone object as follows:
 
 ```
 drone.function_name(parameter_1, parameter_2, etc)
 ```
-A continuación se muestra una tabla con todas las funciones de las que dispone DroneLink EETAC:
+Below is a table with all the functions available in DroneLink EETAC:
 
 Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
 --- | --- | --- | --- | --- | ---
@@ -143,7 +143,7 @@ Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
 *modify_parameter* | Modify a parameter of the autopilot | param_name (name of the parameter) [str] | param_value (value of the parameter) [float] | No | No
 
 >[!IMPORTANT]
->Además, las funciones que lo permiten, disponen de una versión alternativa donde podemos ejecutarlas escogiendo si queremos que sean bloqueantes o no bloqueantes:
+>In addition, the functions that allow it have an alternative version where we can choose whether we want them to be blocking or non-blocking:
 
 Function | Description | Parameter 1 | Parameter 2 |  Parameter 3 | Parameter 4 | Response
 --- | --- | --- | --- | --- | --- | ---
@@ -176,24 +176,24 @@ The drone object has a parameter called **state**, which is modified depending o
 
 ### CameraLink EETAC
 
-Para hacer uso de la librería CameraLink EETAC primero debes importar la clase Camera a tu proyecto. La clase Camera está definida en el fichero Camera.py.
+To use the CameraLink EETAC library, you first need to import the Camera class into your project. The Camera class is defined in the file Camera.py.
 
 ```
 from Camera import Camera
 ```
 
-Una vez importada la librería, puedes crear un objeto tipo Camera para usarla. Para ello, deberás de pasarle el int ***id***, que se trata del identificador de esa cámara en específico.
+Once the library is imported, you can create a Camera object to use it. To do this, you should pass it the int ***id***, which is the identifier of that specific camera.
 
 ```
 camera = Camera(id)
 ```
 
-Con el objeto de tipo Camera creado, puedes llamar a las funciones del objeto Camera de la siguiente forma:
+With the Camera object created, you can call the functions of the Camera object as follows:
 
 ```
 camera.function_name(parameter_1, parameter_2, etc)
 ```
-A continuación se muestra una tabla con todas las funciones de las que dispone DroneLink EETAC:
+Below is a table with all the functions available in CameraLink EETAC:
 
 Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
 --- | --- | --- | --- | --- | ---
