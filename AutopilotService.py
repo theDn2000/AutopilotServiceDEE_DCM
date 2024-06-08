@@ -65,7 +65,7 @@ def process_message(message, client):
             if dron.state == 'connected':
                 print('- Autopilot Service: Starting to send telemetry info')
                 print ('- Autopilot Service: Vehicle connected' + origin)
-                dron.send_telemetry_info_trigger(process_output)
+                dron.send_telemetry_info_trigger(process_output, False)
 
                 # Disable geofence by default
                 dron.disable_geofence()
