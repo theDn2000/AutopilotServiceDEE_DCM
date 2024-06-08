@@ -11,46 +11,47 @@
 <a name="Introduction"></a>
 ## Introduction
 
-DroneLink EETAC es un proyecto diseñado para facilitar la interacción con drones a través del protocolo MAVLink, ofreciendo robustez y escalabilidad en el control del piloto automático y de sus cámaras. Este repositorio incluye la librería principal DroneLink EETAC, una librería adicional para el control de cámaras denominada CameraLink EETAC, y tres ejemplos prácticos que demuestran su versatilidad y potencial de aplicación. 
+**DroneLink EETAC** is a project designed to facilitate interaction with drones via the MAVLink protocol, providing robustness and scalability in controlling the autopilot and its cameras. This repository includes the main library **DroneLink EETAC**, an additional library for camera control called **CameraLink EETAC**, and three practical examples that demonstrate its versatility and application potential.
 
 >[!NOTE]
->DroneLink EETAC es un módulo complementario de Drone Engineering Ecosystem, repositorio de la escuela de Ingeniería de Telecomunicación y Aeroespacial de Castelldefels.\
+>DroneLink EETAC is a complementary module of the Drone Engineering Ecosystem, a repository from the Castelldefels School of Telecommunications and Aerospace Engineering (EETAC).\
 >\
 > [![DroneEngineeringEcosystem Badge](https://img.shields.io/badge/DEE-MainRepo-brightgreen.svg)](https://github.com/dronsEETAC/DroneEngineeringEcosystemDEE)
 
-In this file usted encontrará tanto las instrucciones de instalación como una guía para el uso de las librerías, además de información sobre el funcionamiento de los ejemplos y sus características.
+In this file, you will find both installation instructions and a guide for using the libraries, as well as information on the operation and features of the examples.
 
 <a name="Installation"></a>
 ## 📦 Installation and Requirements
 
 >[!CAUTION]
->Antes de instalar el proyecto, asegúrate de tener una versión de **Python 3.7 o superior**, es esencial para la ejecución de las librerías. Puedes descargarlo desde [python.org](https://www.python.org/downloads/)
+>Before installing the project, make sure you have **Python 3.7 or higher**, which is essential for running the libraries. You can download it from [here](https://www.python.org/downloads/)
 
-Clona el repositorio en tu máquina local utilizando git:
+Clone the repository to your local machine using Git:
 
 ```
 git clone https://github.com/tu-usuario/tu-proyecto.git A MODIFICAR
 cd DroneLink-EETAC
 ```
 
-Una vez dispongas del repositorio, descarga las dependencias del archivo *requirements.txt*
+Once you have the repository, download the dependencies from the *requirements.txt* file.
 
 ```
 pip install -r requirements.txt
 ```
-Con esto estarás listo para usar tanto la librería DroneLink EETAC como CameraLink EETAC.
+
+With this, you will be ready to use both the DroneLink EETAC library and the CameraLink EETAC library.
 
 >[!WARNING]
->Si adicionalmente quieres usar los ejemplos incluidos en este repositorio, deberás disponer de última versión de las siguientes herramientas:
->- **Mission Planner**: Esencial para ejecutar las aplicaciones incluidas en modo simulación. Puedes descargarlo desde [MissionPlanner](https://ardupilot.org/planner/docs/mission-planner-installation.html).
->- **Eclipse Mosquitto**: Broker necesario para el ejemplo remoto en modo simulación. Puedes descargarlo desde [Mosquitto](https://mosquitto.org/download/)
+>If you also want to use the examples included in this repository, you will need to have the latest version of the following tools:
+>- **Mission Planner**: Essential for running the applications included in simulation mode. You can download it from [MissionPlanner](https://ardupilot.org/planner/docs/mission-planner-installation.html).
+>- **Eclipse Mosquitto**: Broker required for the remote example in simulation mode. You can download it from [Mosquitto](https://mosquitto.org/download/)
 
 <a name="Contributions"></a>
 ## 🤝 Contributions
 
-Este proyecto está destinado a crecer a partir de las contribucciones tanto de la escuela como externas. Si deseas conntribuir, sigue las siguientes indicaciones:
+This project is intended to grow from contributions both from the school and external sources. If you wish to contribute, follow the instructions below:
 
-1. **Fork** el repositorio original:
+1. **Fork** the original repository:
 
    - Navega a la [página principal del proyecto en GitHub](https://github.com/tu-usuario/tu-proyecto). A MODIFICAR
    - Haz clic en el botón "Fork" en la esquina superior derecha de la página.
