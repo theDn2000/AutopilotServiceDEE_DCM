@@ -143,6 +143,20 @@ Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
 *get_all_parameters* | Get all the parameters of the autopilot | No | No | No | list of parameters names, list of parameters values
 *modify_parameter* | Modify a parameter of the autopilot | param_name (name of the parameter) [str] | param_value (value of the parameter) [float] | No | No
 
+>[!NOTE]
+>When send_telemetry_info is executed, the drone starts sending packets every 250 miliseconds. The service will stop sending telemetry_info packets as soon as the *disconnect* function is executed. This is an example of telemetry_info packet:
+```
+{
+    'lat': 41.124567,
+    'lon': 1.9889145,
+    'heading': 270,
+    'groundSpeed': 4.27,
+    'altitude': 6.78,
+    'battery': 80,
+    'state': state
+}
+```
+
 >[!IMPORTANT]
 >In addition, the functions that allow it have an alternative version where we can choose whether we want them to be blocking or non-blocking:
 
@@ -308,66 +322,6 @@ Dashboard Remote offer the following functionalities:
 - **Camera display**: Take pictures or stream video using the camera of the drone and display it in the dashboard (via websockets or broker).
 
 >[!IMPORTANT]
->The last update of the repository adds the posibility to send the video stream from the CameraService script to Dashboard Remote via **websockets** in addition to via broker. To make this connection possible, CameraService,py and DashboardRemote.py must run on devices connected to the same network.
-
-
-
-
-
-Note 1    
-When the autopilot is connected the service will start sending telemetry_info packets every 250 miliseconds. The service will stop sending 
-telemetry_info packets as soon as a *disconnect* command is received. This is an example of telemetry_info packet:
-
-```
-{
-    'lat': 41.124567,
-    'lon': 1.9889145,
-    'heading': 270,
-    'groundSpeed': 4.27,
-    'altitude': 6.78,
-    'battery': 80,
-    'state': state
-}
-```
- 
-
-Note 2    
-The state will change to *arming* and then to *armed* as soon as the autopilot is armed.    
-   
-   
-Note 3    
-The state will change to *takingOff* and then to *flying* as soon as the autopilot reaches 5 meters of altitude.  
-   
-Note 4    
-The state will change to *returningHome* and then to *onHearth* as soon as the autopilot in on hearth.    
-   
-Note 5    
-The state will change to *landing* and then to *onHearth* as soon as the autopilot in on hearth.    
-   
-Note 6    
-The state will change to *disarmed*.   
-
-Note 7     
-The service must receive a json object specifying the flight plan with indications whether a picture must be taken when reaching a waypoint. This is an example of such json object:    
-
-
-```
-[
-  {
-    'lat': 41.124567,
-    'lon': 1.9889145,
-    'takePic': True or False
-  },
-  {
-    'lat': 41.124567,
-    'lon': 1.9889145,
-    'takePic': True or False
-  },
-  ....
-]
-```
-The service will execute the flight plan, changing the state accordingly (*'arming'*, *'armed'*, *'takingOff'*, and so on until *'onHearth'*).    
-When arrived to the next waypoint the service will publish this message: *'XXXX/autopilotService/waypointReached'*,, being XXXX the module requesting the service. The topic of the message is a json object containing *'lat'* and *'lon'* of the reached waypoint. If a picture must be taken in this waypoint, the service will publish this message IN THE INTERNAL BROKER: *'XXXX/cameraService/takePicture'*. The autopilot will return to launch after the last waypoint is reached.   
-
+>The last update of the repository adds the posibility to send the video stream from the CameraService script to Dashboard Remote via **websockets** in addition to via broker. To make this connection possible, CameraService,py and DashboardRemote.py must run on devices **connected to the same network**.
 
 
