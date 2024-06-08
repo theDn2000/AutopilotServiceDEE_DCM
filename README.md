@@ -270,7 +270,7 @@ Depending on the command sent to the service, it triggers the corresponding func
 ![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/7123fb35-b93d-4157-9283-8abef393a649)
 
 >[!NOTE]
->For more information about the service, it is recommended to check the AutopilotService.py file.
+>For more information about this service, it is recommended to check the AutopilotService.py file.
 
 - **Sending messages to CameraService**: 
 
@@ -283,44 +283,35 @@ Depending on the command sent to the service, it triggers the corresponding func
 
 ![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/883b3c35-aa68-47f1-8a9f-ee5f07b7f0f9)
 
+>[!NOTE]
+>For more information about this service, it is recommended to check the CameraService.py file.
 
+The onboard services will also publish responses to the broker, but this time directed to the Dashboard Remote application, which will process the information and display it on the screen.
 
+- **Sending messages to Dashboard Remote**: 
 
-
-
-a través de un broker externo. 
-
-
-
-
-
-
-
-
-In order to send a command to the autopilot service, a module must publish a message in the external (or internal) broker. The topic of the message must be in the form:
 ```
-"XXX/autopilotService/YYY"
+message = "origin/DashboardRemote/command/service_id"
+self.client.publish(message, body)
+# Where the body variable depends on the message (some messages don't use the body field)
 ```
-where XXX is the name of the module requiring the service and YYY is the name of the service that is required. Oviously, some of the commands may require additional data that must be included in the payload of the message to be published. 
-In some cases, after completing the service requiered the autopilot service publish a message as an answer. The topic of the answer has the format:
-```
-"autopilotService/XXX/ZZZ"
-```
-where XXX is the name of the module requiring the service and ZZZ is the answer. The message can include data in the message payload.
+Depending on the command sent to the dashboard, the visual updates of the application are different. The possible commands are the following:
 
-The table bellow indicates all the commands that are accepted by the autopilot service in the current version.   
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/44edef4b-276f-4cbd-bc13-cde5863c0b2e)
 
-Command | Description | Payload | Answer | Answer payload
---- | --- | --- | --- |--- 
-*connect* | connect with the simulator or the flight controller depending on the operation mode | No | No (see Note 1) | No
-*armDrone* | arms the drone (either simulated or real) | No | NO (see Note 2) | No 
-*takeOff* | get the drone take off to reach and altitude of 5 meters | No | No (see Note 3)  | No 
-*returnToLaunch* | go to launch position |No  | No (see Note 4) | No    
-*land* | the dron will land |No  | No (see Note 5) | No     
-*disarmDrone* | disarm the drone |No  |  No (see Note 6) | No 
-*go* | move in certain direction |"North", "South", "East", "West", "NorthWest", "NorthEast", "SouthWest", "SouthEast" , "Stop"  | No | No 
-*disconnect* | disconnect from the simulator or the flight controller depending on the operation mode | No | NO (see Note 1) | No
-*executeFlightPlan* | execute the flight plan received | See Note 7 | see Note 7 | see Note 7
+Dashboard Remote offer the following functionalities:
+- **Basic drone controls**: Arm the drone, take off, change altitude, move, land and RTL.
+- **Position and telemetry information**: Displayed drone position in map, altitude, heading, ground speed and battery.
+- **Parameters tab**: Display the value of a parameter of the Autopilot, or modify it.
+- **Mission tab**: Create waypoints by right-clicking on the map, upload the flight plan, execute the flight plan or clear the waypoints.
+- **Geofence tab**: Create vertex points by right-clicking on the map to define a polygon, upload the polygon to the autopilot geofence, enable the geofence, disable the geofence, change the geofence action or clear the vertex points.
+- **Camera display**: Take pictures or stream video using the camera of the drone and display it in the dashboard (via websockets or broker).
+
+>[!IMPORTANT]
+>The last update of the repository adds the posibility to send the video stream from the CameraService script to Dashboard Remote via **websockets** in addition to via broker. To make this connection possible, CameraService,py and DashboardRemote.py must run on devices connected to the same network.
+
+
+
 
 
 Note 1    
@@ -338,18 +329,7 @@ telemetry_info packets as soon as a *disconnect* command is received. This is an
     'state': state
 }
 ```
-The packet includes the state of the autopilot so that the module that receives the packet can take decisions (for instance, change color of the buttons).   
-
-These are the different values for the state:
-*'connected'*  
-*'arming'*  
-*'armed'*   
-*'disarmed'*    
-*'takingOff'*      
-*'flying'*   
-*'returningHome'*     
-*'landing'*    
-*'onHearth'*    
+ 
 
 Note 2    
 The state will change to *arming* and then to *armed* as soon as the autopilot is armed.    
