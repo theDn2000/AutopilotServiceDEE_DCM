@@ -7,6 +7,7 @@
 - [Installation](#Installation)
 - [Contributions](#Contributions)
 - [Use](#Use)
+- [Examples](#Examples)
 
 <a name="Introduction"></a>
 ## Introduction
@@ -200,6 +201,15 @@ Function | Description | Parameter 1 | Parameter 2 | Parameter 3 | Response
 *take_picture* | Take a picture using the camera | No | No | No | jpg_as_text (image encoded in base64)
 *start_video_stream* | Start video stream using the camera | callback (callback function to interpret every frame) | No | No | No
 *stop_video_stream* | Stop video stream  | No | No | No | No
+
+<a name="Examples"></a>
+## 🛠️ Examples
+
+### Dashboard Direct
+
+### Dashboard Direct Multiple
+
+### Dashboard Remote + Autopilot Service + Camera Service
 
 
 
