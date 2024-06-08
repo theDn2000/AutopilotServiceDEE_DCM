@@ -220,11 +220,18 @@ Dashboard Direct offer the following functionalities:
 - **Mission tab**: Create waypoints by right-clicking on the map, upload the flight plan, execute the flight plan or clear the waypoints.
 - **Geofence tab**: Create vertex points by right-clicking on the map to define a polygon, upload the polygon to the autopilot geofence, enable the geofence, disable the geofence, change the geofence action or clear the vertex points.
 - **Camera display**: Take pictures or stream video using the local camera.
-- **Eclipse Mosquitto**: Broker required for the remote example in simulation mode. You can download it from [Mosquitto](https://mosquitto.org/download/)
-
-
 
 ### Dashboard Direct Multiple
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/d1c607d3-5af2-4ff9-b4f1-36e5c6408193)
+![image](https://github.com/theDn2000/AutopilotServiceDEE_DCM/assets/109517814/59034b5f-b7f8-4551-a110-de80d8b63ffe)
+
+Dashboard Direct Multiple is a test tool that allows you to control several drones simultaneously (10 maximum). Before connecting, you have to select the swarm size and the connection type (simulation or real). 
+
+Dashboard Direct Multiple offer the following functionalities:
+- **Drone Selector**: A selection bar to determine the drone that you want to control when pressing every button.
+- **Basic drone controls**: Arm the drone, take off, change altitude, move, land and RTL.
+- **Multiple drone control**: Arm all the drones at the same time, take off all the drones at the same time.
+- **Position and telemetry information**: Displayed drones position on map, altitude, heading, ground speed and battery.
 
 ### Dashboard Remote + Autopilot Service + Camera Service
 
